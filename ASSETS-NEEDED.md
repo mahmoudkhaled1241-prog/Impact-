@@ -1,215 +1,184 @@
-# Impact for Learning & Development — Asset Checklist
+# Missing Image Assets
 
-All 29 pages of the site are built and functional: header nav (with Solutions
-and International Partners mega-menus on hub pages, a lightweight flat nav on
-partner and Impact GO detail pages), EN/AR language toggle with RTL support,
-coverflow carousels, crossfade slideshows, tabbed content sections, and
-footers all work with no external dependencies (no Three.js, no proprietary
-Claude Design runtime — plain HTML/CSS/vanilla JS throughout). Every internal
-page link (`href="*.dc.html"`) has been verified to resolve to an actual file
-in this folder.
+This file lists every image asset referenced in the site's HTML that does not yet exist in `assets/`.
 
-The site currently runs on 27 real image files in `assets/`. The remaining
-image references below point to filenames that don't exist yet — the pages
-render correctly around them (broken-image icon in place of the graphic;
-layout, text, and interactivity are unaffected), but a developer needs to
-drop in the real files before shipping.
+**129 unique missing filenames** across **22 of 29 pages**.
 
-## `Impact L&D Parallax.dc.html` (homepage) — fully asset-complete
+Drop the real image files into `assets/` using the exact filenames below.
 
-- `aim-logo-gradient.png` has a white matte background baked in (not
-  transparent). It's shown at 55% width on a dark tile in the numbered
-  services panel (service #3, AIM), so a transparent-background re-export
-  would look cleaner there.
-- `contact-photo.png` is the same office photo used for
-  `brand-meeting-ripple.jpeg` elsewhere on the page (reused intentionally,
-  per the source material provided) — swap in a dedicated photo for the
-  Contact section if a distinct one becomes available later.
+## About Impact.dc.html
+- [ ] `assets/ceo-mahmoud-embaby.png`
+- [ ] `assets/cfo-kareem-abdullah.jpeg`
 
-## `Partner KnolSkape.dc.html` — fully asset-complete
+## Assessments & Coaching.dc.html
+- [ ] `assets/gallup-cliftonstrengths-only.png`
+- [ ] `assets/partner-bcon-mark.png`
 
-All 5 carousel images (`cp-coaching-sim.png`, `cp-comm-sim.png`,
-`cp-ei-at-work.png`, `cp-gp.png`, `cp-ilead.png`) and the logo variants
-(`partner-knolskape-color.png`, `partner-knolskape-dark.png`) are in place.
+## Balance & Wellbeing.dc.html
+- [ ] `assets/logo-bounceback.png`
+- [ ] `assets/logo-relax.png`
 
-## Missing assets by page
+## Business Professionalism.dc.html
+- [ ] `assets/logo-gentlemens-agreement.png`
+- [ ] `assets/logo-proffwrite.png`
 
-Every filename below is referenced by its page's `<img src="assets/...">`
-exactly as listed — drop the real file in at that path and no code changes
-are needed.
+## Gamified Themes.dc.html
+- [ ] `assets/theme-formula1.png`
+- [ ] `assets/theme-quantum-break.png`
+- [ ] `assets/theme-superhero-rivals.png`
+- [ ] `assets/theme-survival-island.png`
+- [ ] `assets/theme-treasure-hunt.png`
 
-### About Impact.dc.html
-- `ceo-mahmoud-embaby.png` — CEO headshot, square crop
-- `cfo-kareem-abdullah.jpeg` — CFO headshot, square crop
+## Impact GO Fun.dc.html
+- [ ] `assets/gallery-laylaelkabira1.png`
+- [ ] `assets/gallery-laylaelkabira2.png`
+- [ ] `assets/gallery-laylaelkabira3.png`
+- [ ] `assets/gallery-pirate1.png`
+- [ ] `assets/gallery-pirate2.png`
+- [ ] `assets/gallery-pirate3.png`
+- [ ] `assets/gallery-squad1.png`
+- [ ] `assets/gallery-squad2.png`
+- [ ] `assets/gallery-squad3.png`
+- [ ] `assets/gallery-squad4.png`
+- [ ] `assets/gallery-squad5.png`
+- [ ] `assets/gallery-squad6.png`
+- [ ] `assets/gallery-team1.png`
+- [ ] `assets/gallery-tribes1.png`
+- [ ] `assets/gallery-tribes2.png`
+- [ ] `assets/gallery-tribes3.png`
+- [ ] `assets/gallery-tribes4.png`
+- [ ] `assets/gallery-tribes5.png`
 
-### Assessments & Coaching.dc.html
-- `gallup-cliftonstrengths-only.png`
-- `partner-bcon-mark.png`
+## Impact GO Learn.dc.html
+- [ ] `assets/logo-fivebehaviors.png`
+- [ ] `assets/logo-goodtogreat.png`
+- [ ] `assets/logo-strengthsfinder.png`
 
-### Balance & Wellbeing.dc.html
-- `logo-bounceback.png`
-- `logo-relax.png`
+## Impact GO Theme.dc.html
+- [ ] `assets/theme-funfactory.png`
+- [ ] `assets/theme-laylaelkabira.png`
+- [ ] `assets/theme-neonbuzz.png`
+- [ ] `assets/theme-olympics.png`
+- [ ] `assets/theme-squad.png`
+- [ ] `assets/theme-survivors.png`
+- [ ] `assets/theme-tribes.png`
 
-### Business Professionalism.dc.html
-- `logo-gentlemens-agreement.png`
-- `logo-proffwrite.png`
+## Impact GO.dc.html
+- [ ] `assets/brand-building-ripple.png`
 
-### Gamified Themes.dc.html
-- `theme-formula1.png`
-- `theme-quantum-break.png`
-- `theme-superhero-rivals.png`
-- `theme-survival-island.png`
-- `theme-treasure-hunt.png`
+## In-House Games.dc.html
+- [ ] `assets/logo-context.png`
+- [ ] `assets/logo-drowning.png`
+- [ ] `assets/logo-elementalquest.png`
+- [ ] `assets/logo-mta.png`
+- [ ] `assets/logo-rescue.png`
+- [ ] `assets/logo-shadowsignal.png`
+- [ ] `assets/logo-smartworkers.png`
 
-### Impact GO.dc.html
-- `brand-building-ripple.png`
+## International Partners.dc.html
+- [ ] `assets/partner-bcon-mark.png`
 
-### Impact GO Theme.dc.html
-- `theme-funfactory.png`
-- `theme-laylaelkabira.png`
-- `theme-neonbuzz.png`
-- `theme-olympics.png`
-- `theme-squad.png`
-- `theme-survivors.png`
-- `theme-tribes.png`
-- (`theme-pirates.png` already exists)
+## Interpersonal Skills.dc.html
+- [ ] `assets/logo-insync.png`
+- [ ] `assets/logo-intelligence-matters.png`
+- [ ] `assets/logo-thirdway.png`
+- [ ] `assets/program-fivebehaviors.png`
+- [ ] `assets/program-gameofpersuasion.png`
+- [ ] `assets/program-interlink.png`
+- [ ] `assets/program-leapupwards.png`
+- [ ] `assets/program-powerwithoutposition.png`
+- [ ] `assets/program-smarttalk.png`
 
-### Impact GO Fun.dc.html
-- `gallery-team1.png`
-- `gallery-pirate1.png`
-- `gallery-pirate2.png`
-- `gallery-pirate3.png`
-- `gallery-squad1.png` through `gallery-squad6.png` (6 files)
-- `gallery-tribes1.png` through `gallery-tribes5.png` (5 files)
-- `gallery-laylaelkabira1.png` through `gallery-laylaelkabira3.png` (3 files)
+## L&D Solutions.dc.html
+- [ ] `assets/brand-building-ripple.png`
+- [ ] `assets/brand-handshake-ripple.png`
 
-### Impact GO Learn.dc.html
-- `logo-fivebehaviors.png`
-- `logo-goodtogreat.png`
-- `logo-strengthsfinder.png`
-- (`partner-culture.png` already exists)
+## Leading Business.dc.html
+- [ ] `assets/logo-decisionarchitect.png`
+- [ ] `assets/logo-fastforward.png`
+- [ ] `assets/logo-fromscratch.png`
+- [ ] `assets/logo-livingintoplan.png`
+- [ ] `assets/logo-pmp.png`
+- [ ] `assets/logo-valuearchitect.png`
+- [ ] `assets/program-balancedscorecard.png`
+- [ ] `assets/program-bigpicture.png`
+- [ ] `assets/program-superheroes.png`
+- [ ] `assets/program-talkingnumbers.png`
+- [ ] `assets/program-tempo.png`
 
-### In-House Games.dc.html
-- `logo-context.png`
-- `logo-drowning.png`
-- `logo-elementalquest.png`
-- `logo-mta.png`
-- `logo-rescue.png`
-- `logo-shadowsignal.png`
-- `logo-smartworkers.png`
+## Leading Functions.dc.html
+- [ ] `assets/logo-ageofcx.png`
+- [ ] `assets/logo-beourguest.png`
+- [ ] `assets/logo-beyondcustomersatisfaction.png`
+- [ ] `assets/logo-buildthebond.png`
+- [ ] `assets/logo-contacttocontract.png`
+- [ ] `assets/logo-exsell.png`
+- [ ] `assets/logo-icare.png`
+- [ ] `assets/logo-kamleap.png`
+- [ ] `assets/logo-learningarchitect.png`
+- [ ] `assets/logo-mark.png`
+- [ ] `assets/logo-objectiontoconnection.png`
+- [ ] `assets/logo-protrainer.png`
+- [ ] `assets/logo-readyconvertboost.png`
+- [ ] `assets/logo-sealthedeal.png`
+- [ ] `assets/logo-sellingbynature.png`
+- [ ] `assets/logo-sellingbynature2.png`
 
-### International Partners.dc.html
-- `partner-bcon-mark.png` (same file as referenced by Assessments & Coaching)
+## Leading People.dc.html
+- [ ] `assets/logo-icoach.png`
+- [ ] `assets/logo-jugglemaster.png`
+- [ ] `assets/logo-mbo.png`
+- [ ] `assets/program-bosstocoach.png`
+- [ ] `assets/program-brandnewmanager.png`
+- [ ] `assets/program-firstbreaktherules.png`
+- [ ] `assets/program-watchfulleader.png`
 
-### Interpersonal Skills.dc.html
-- `logo-insync.png`
-- `logo-intelligence-matters.png`
-- `logo-thirdway.png`
-- `program-fivebehaviors.png`
-- `program-gameofpersuasion.png`
-- `program-interlink.png`
-- `program-leapupwards.png`
-- `program-powerwithoutposition.png`
-- `program-smarttalk.png`
+## One Days Program.dc.html
+- [ ] `assets/logo-jobdna.png`
+- [ ] `assets/logo-makinganame.png`
+- [ ] `assets/logo-timemaster.png`
+- [ ] `assets/program-artofdelegation.png`
+- [ ] `assets/program-bounceback2.png`
+- [ ] `assets/program-bridging.png`
+- [ ] `assets/program-connect.png`
+- [ ] `assets/program-designthinking2.png`
+- [ ] `assets/program-feedbackspiral.png`
+- [ ] `assets/program-gentlemensagreement2.png`
+- [ ] `assets/program-leadershipchallenge.png`
+- [ ] `assets/program-masteringchangecurve.png`
+- [ ] `assets/program-problemsolved2.png`
+- [ ] `assets/program-teninnovation.png`
+- [ ] `assets/program-thirdway.png`
 
-### L&D Solutions.dc.html
-- `brand-building-ripple.png`
-- `brand-handshake-ripple.png`
+## Partner BCon.dc.html
+- [ ] `assets/bcon-accountability.png`
+- [ ] `assets/bcon-innovative-thinking.png`
+- [ ] `assets/bcon-lifo.png`
 
-### Leading Business.dc.html
-- `logo-decisionarchitect.png`
-- `logo-fastforward.png`
-- `logo-fromscratch.png`
-- `logo-livingintoplan.png`
-- `logo-pmp.png`
-- `logo-valuearchitect.png`
-- `program-balancedscorecard.png`
-- `program-bigpicture.png`
-- `program-superheroes.png`
-- `program-talkingnumbers.png`
-- `program-tempo.png`
+## Partner Culture Partners.dc.html
+- [ ] `assets/cp-countdown.png`
+- [ ] `assets/cp-impact5.png`
+- [ ] `assets/cp-neonbuzz.png`
+- [ ] `assets/cp-rightturns.png`
+- [ ] `assets/cp-zodiak-sales.png`
+- [ ] `assets/cp-zodiak-strategy.png`
 
-### Leading Functions.dc.html
-- `logo-ageofcx.png`
-- `logo-beourguest.png`
-- `logo-beyondcustomersatisfaction.png`
-- `logo-buildthebond.png`
-- `logo-contacttocontract.png`
-- `logo-exsell.png`
-- `logo-icare.png`
-- `logo-kamleap.png`
-- `logo-learningarchitect.png`
-- `logo-mark.png` — small corner watermark shown on every Sales & HR carousel card
-- `logo-objectiontoconnection.png`
-- `logo-protrainer.png`
-- `logo-readyconvertboost.png`
-- `logo-sealthedeal.png`
-- `logo-sellingbynature.png`
-- `logo-sellingbynature2.png`
+## Partner Gallup.dc.html
+- [ ] `assets/gallup-captivate.png`
+- [ ] `assets/gallup-cliftonstrengths-only.png`
+- [ ] `assets/gallup-power-maximized-group.png`
+- [ ] `assets/gallup-power-maximized-individual.png`
 
-### Leading People.dc.html
-- `logo-icoach.png`
-- `logo-jugglemaster.png`
-- `logo-mbo.png`
-- `program-bosstocoach.png`
-- `program-brandnewmanager.png`
-- `program-firstbreaktherules.png`
-- `program-watchfulleader.png`
+## Personal Effectiveness.dc.html
+- [ ] `assets/program-agileway.png`
+- [ ] `assets/program-designthinking.png`
+- [ ] `assets/program-grow.png`
+- [ ] `assets/program-hardhats.png`
+- [ ] `assets/program-lepenseur.png`
+- [ ] `assets/program-lostoasis.png`
+- [ ] `assets/program-neverland.png`
+- [ ] `assets/program-problemsolved.png`
+- [ ] `assets/program-think2act.png`
 
-### One Days Program.dc.html
-- `logo-jobdna.png`
-- `logo-makinganame.png`
-- `logo-timemaster.png`
-- `program-artofdelegation.png`
-- `program-bounceback2.png`
-- `program-bridging.png`
-- `program-connect.png`
-- `program-designthinking2.png`
-- `program-feedbackspiral.png`
-- `program-gentlemensagreement2.png`
-- `program-leadershipchallenge.png`
-- `program-masteringchangecurve.png`
-- `program-problemsolved2.png`
-- `program-teninnovation.png`
-- `program-thirdway.png`
-
-### Partner BCon.dc.html
-- `bcon-accountability.png`
-- `bcon-innovative-thinking.png`
-- `bcon-lifo.png`
-
-### Partner Culture Partners.dc.html
-- `cp-countdown.png`
-- `cp-impact5.png`
-- `cp-neonbuzz.png`
-- `cp-rightturns.png`
-- `cp-zodiak-sales.png`
-- `cp-zodiak-strategy.png`
-
-### Partner Gallup.dc.html
-- `gallup-captivate.png`
-- `gallup-cliftonstrengths-only.png` (same file as referenced by Assessments & Coaching)
-- `gallup-power-maximized-group.png`
-- `gallup-power-maximized-individual.png`
-
-### Personal Effectiveness.dc.html
-- `program-agileway.png`
-- `program-designthinking.png`
-- `program-grow.png`
-- `program-hardhats.png`
-- `program-lepenseur.png`
-- `program-lostoasis.png`
-- `program-neverland.png`
-- `program-problemsolved.png`
-- `program-think2act.png`
-
-### Solutions.dc.html
-- `brand-handshake-ripple.png` (same file as referenced by L&D Solutions)
-
----
-
-**Total: 108 unique missing filenames** (129 references across pages, several
-files reused — e.g. `partner-bcon-mark.png`, `gallup-cliftonstrengths-only.png`,
-`brand-handshake-ripple.png`, `brand-building-ripple.png`). Once these are
-dropped into `assets/` with the exact filenames above, every page on the site
-is complete with no further code changes required.
+## Solutions.dc.html
+- [ ] `assets/brand-handshake-ripple.png`
