@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Solutions | Impact for Learning &amp; Development</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;600;700&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root { color-scheme: dark; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  html, body { background: #0A141D; }
+  body { font-family: 'Inter', Helvetica, Arial, sans-serif; color: #F4FBFC; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+  a { text-decoration: none; color: #18D4E2; }
+  a:hover { color: #8FEAF0; }
+  button { font-family: inherit; }
+  img { max-width: 100%; display: block; }
+  ::selection { background: #18D4E2; color: #0A141D; }
+
+  #root { position: relative; width: 100%; background: #0A141D; }
+  #root.lang-ar { font-family: 'IBM Plex Sans Arabic', 'Inter', sans-serif; }
+
+  header { position: sticky; top: 0; z-index: 50; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 24px; padding: 14px clamp(20px, 6vw, 120px); background: rgba(10, 20, 29, 0.92); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(140, 205, 214, 0.22); }
+  header .brand img { height: clamp(28px, 3vw, 38px); width: auto; }
+  nav.main-nav { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 10px clamp(12px, 2.2vw, 36px); font-family: 'IBM Plex Mono', monospace; font-size: clamp(10px, 1.05vw, 12px); letter-spacing: 0.12em; text-transform: uppercase; }
+  nav.main-nav a { color: #F4FBFC; text-decoration: none; transition: color 0.2s ease; }
+  nav.main-nav a:hover, nav.main-nav a.active { color: #18D4E2; }
+  nav.main-nav a.contact-cta { color: #18D4E2; border: 1px solid rgba(24, 212, 226, 0.5); padding: 9px 20px; border-radius: 999px; }
+  nav.main-nav a.contact-cta:hover { background: rgba(24, 212, 226, 0.1); }
+  .nav-drop { position: relative; }
+  .nav-drop > a { display: flex; align-items: center; gap: 7px; }
+  .nav-drop .caret { font-size: 9px; opacity: .7; }
+  .nav-drop-panel { position: absolute; top: 100%; left: -12px; padding-top: 14px; opacity: 0; transform: translateY(-8px); pointer-events: none; transition: opacity .22s ease, transform .22s ease; }
+  .nav-drop.partners .nav-drop-panel { left: auto; right: -12px; }
+  .nav-drop:hover .nav-drop-panel, .nav-drop:focus-within .nav-drop-panel { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  .nav-drop-inner { min-width: 280px; background: #0E1B26; border: 1px solid rgba(140,205,214,.22); padding: 8px; display: grid; }
+  .nav-drop-inner a { padding: 12px 16px; color: #F4FBFC; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; text-transform: none; display: flex; align-items: center; gap: 8px; transition: background .2s ease; }
+  .nav-drop-inner a:hover { background: #162835; color: #F4FBFC; }
+  .new-pill { background: #18D4E2; color: #0A141D; font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: .06em; padding: 2px 6px; border-radius: 4px; }
+  .lang-btn { background: transparent; border: 1px solid rgba(140, 205, 214, 0.4); color: #8FEAF0; padding: 8px 16px; border-radius: 999px; cursor: pointer; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; transition: border-color 0.2s ease, color 0.2s ease; }
+  .lang-btn:hover { border-color: #18D4E2; color: #18D4E2; }
+
+  .hero { position: relative; padding: clamp(80px, 14vh, 160px) clamp(24px, 6vw, 120px) clamp(60px, 8vh, 100px); overflow: hidden; display: grid; gap: 24px; max-width: 1200px; margin: 0 auto; }
+  .hero-bg { position: absolute; inset: 0; overflow: hidden; }
+  .hero-bg img { width: 100%; height: 100%; object-fit: cover; opacity: .8; transition: transform 0.25s ease-out; transform: scale(1.08); }
+  .hero-overlay { position: absolute; inset: 0; background: linear-gradient(100deg, rgba(10,20,29,.35), rgba(10,20,29,.55) 55%, rgba(10,20,29,.85)); }
+  .hero-inner { position: relative; z-index: 1; display: grid; gap: 24px; }
+  .eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #7793A0; }
+  h1.page-title { font-weight: 700; font-size: clamp(34px, 4.8vw, 68px); line-height: 1.08; letter-spacing: -0.025em; max-width: 20ch; text-wrap: pretty; }
+  p.page-intro { color: #AFC7CD; font-size: clamp(16px, 1.4vw, 19px); line-height: 1.65; max-width: 68ch; text-wrap: pretty; }
+
+  .group { position: relative; padding: 0 clamp(24px, 6vw, 120px) clamp(100px, 14vh, 180px); max-width: 1400px; margin: 0 auto; display: grid; gap: 32px; border-top: 1px solid rgba(140, 205, 214, 0.22); padding-top: 56px; }
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 32px; }
+  .sol-card { position: relative; background: #122230; padding: 0 0 32px; color: #F4FBFC; overflow: hidden; transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); }
+  .sol-card:hover { transform: scale(1.02); }
+  .sol-card .thumb { position: relative; height: 260px; overflow: hidden; }
+  .sol-card .thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+  .sol-card:hover .thumb img { transform: scale(1.06); }
+  .sol-card .thumb.logo-thumb { background: #0E1B26; display: flex; align-items: center; justify-content: center; }
+  .sol-card .thumb.logo-thumb img { width: 55%; max-width: 220px; height: auto; object-fit: contain; }
+  .sol-card .thumb-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(18,34,48,.85), rgba(18,34,48,0) 55%); }
+  .sol-card .body { padding: 28px 28px 0; display: grid; gap: 12px; }
+  .sol-card .body h3 { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.02em; }
+  .sol-card .body p { margin: 0; color: #AFC7CD; font-size: 15px; line-height: 1.65; }
+
+  .closing { position: relative; min-height: 50vh; overflow: hidden; background: #0E1B26; color: #F4FBFC; display: flex; align-items: center; padding: clamp(80px, 12vh, 140px) clamp(24px, 6vw, 120px); }
+  .closing-bg { position: absolute; inset: 0; filter: blur(6px); }
+  .closing-bg img { width: 100%; height: 100%; object-fit: cover; }
+  .closing-overlay { position: absolute; inset: 0; background: rgba(10, 20, 29, 0.35); }
+  .closing-inner { position: relative; z-index: 2; max-width: 1200px; margin: 0 auto; display: grid; gap: 32px; }
+  .closing h2 { margin: 0; font-weight: 800; font-size: clamp(32px, 5vw, 80px); line-height: 1.02; letter-spacing: -0.03em; max-width: 18ch; }
+  .cta-btn { justify-self: start; color: #0A141D; background: #18D4E2; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; padding: 14px 28px; border-radius: 999px; transition: background 0.2s ease; }
+  .cta-btn:hover { background: #8FEAF0; color: #0A141D; }
+
+  footer { position: relative; background: #0E1B26; border-top: 1px solid rgba(140, 205, 214, 0.22); padding: 24px clamp(24px, 6vw, 120px); display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #567179; }
+</style>
+</head>
+<body>
+<div id="root" dir="ltr">
+  <header>
+    <a class="brand" href="Impact L&amp;D Parallax.dc.html"><img src="assets/logo.png" alt="Impact"></a>
+    <nav class="main-nav">
+      <a data-t="navHome" href="Impact L&amp;D Parallax.dc.html">Home</a>
+      <a data-t="navAbout" href="About Impact.dc.html">About Impact</a>
+      <div class="nav-drop">
+        <a data-t="navSolutions" href="Solutions.dc.html" class="active">Solutions <span class="caret">▼</span></a>
+        <div class="nav-drop-panel">
+          <div class="nav-drop-inner">
+            <a data-t="subLd" href="L&amp;D Solutions.dc.html">L&amp;D Solutions</a>
+            <a data-t="subOd" href="Organizational Development.dc.html">Organizational Development</a>
+            <a href="AIM - AI in Motion.dc.html"><span data-t="subAim">AIM — AI in Motion</span><span class="new-pill">NEW</span></a>
+            <a data-t="subCa" href="Assessments &amp; Coaching.dc.html">Assessments &amp; Coaching</a>
+            <a data-t="subGo" href="Impact GO.dc.html">Impact GO</a>
+            <a data-t="subGames" href="In-House Games.dc.html">In-House Games &amp; Simulations</a>
+            <a data-t="subOneDay" href="One Days Program.dc.html">One Day's Program</a>
+            <a data-t="subGamified" href="Gamified Themes.dc.html">Gamified Themes</a>
+          </div>
+        </div>
+      </div>
+      <div class="nav-drop partners">
+        <a data-t="navPartners" href="International Partners.dc.html">International Partners <span class="caret">▼</span></a>
+        <div class="nav-drop-panel">
+          <div class="nav-drop-inner">
+            <a href="Partner Culture Partners.dc.html">Culture Partners</a>
+            <a href="Partner KnolSkape.dc.html">KNOLSKAPE</a>
+            <a href="Partner BCon.dc.html">BCon</a>
+            <a href="Partner Gallup.dc.html">Gallup</a>
+            <a href="Partner ManagementDrive.dc.html">ManagementDrive</a>
+          </div>
+        </div>
+      </div>
+      <a data-t="navContact" href="Contact.dc.html" class="contact-cta">Contact</a>
+      <button class="lang-btn" id="langToggle" data-t="langBtn" type="button">العربية</button>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div class="hero-bg"><img id="heroImg" src="assets/brand-boardroom-ripple.jpeg" alt=""></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-inner">
+      <div class="eyebrow" data-t="eyebrow">SOLUTIONS</div>
+      <h1 class="page-title" data-t="heading">Solutions</h1>
+      <p class="page-intro" data-t="intro1">Organizations partner with Impact to address specific business challenges, from developing leadership pipelines and strengthening team performance to building organizational capabilities at scale.</p>
+      <p class="page-intro" data-t="intro2">Our solutions are designed as tailored learning journeys that help organizations engage with the right approach based on their priorities, maturity level, and workforce needs. Whether the focus is leadership development, capability building, or cultural transformation, Impact provides customized, business focused learning solutions that drive measurable performance outcomes.</p>
+    </div>
+  </section>
+
+  <section class="group">
+    <div class="cards-grid">
+      <a class="sol-card" href="L&amp;D Solutions.dc.html">
+        <div class="thumb"><img src="assets/brand-handshake-ripple.png" alt=""><div class="thumb-overlay"></div></div>
+        <div class="body"><h3 data-t="subLd">L&amp;D Solutions</h3><p data-t="cardLdBody">Journeys, workshops, competency &amp; duration paths.</p></div>
+      </a>
+      <a class="sol-card" href="Organizational Development.dc.html">
+        <div class="thumb"><img src="assets/brand-boardroom-ripple.jpeg" alt=""><div class="thumb-overlay"></div></div>
+        <div class="body"><h3 data-t="subOd">Organizational Development</h3><p data-t="cardOdBody">Strategy, talent, governance, culture.</p></div>
+      </a>
+      <a class="sol-card" href="AIM - AI in Motion.dc.html">
+        <div class="thumb logo-thumb"><img src="assets/aim-logo-gradient.png" alt="AIM — AI in Motion"><div class="thumb-overlay"></div></div>
+        <div class="body"><h3 data-t="subAim">AIM — AI in Motion</h3><p data-t="cardAimBody">Building real, applied AI capability.</p></div>
+      </a>
+      <a class="sol-card" href="Assessments &amp; Coaching.dc.html">
+        <div class="thumb"><img src="assets/brand-meeting-ripple.jpeg" alt=""><div class="thumb-overlay"></div></div>
+        <div class="body"><h3 data-t="subCa">Assessments &amp; Coaching</h3><p data-t="cardCaBody">1:1 coaching, diagnostics, feedback.</p></div>
+      </a>
+      <a class="sol-card" href="Impact GO.dc.html">
+        <div class="thumb logo-thumb"><img src="assets/impactgo-logo.png" alt="Impact GO"><div class="thumb-overlay"></div></div>
+        <div class="body"><h3 data-t="subGo">Impact GO</h3><p data-t="cardGoBody">On-demand micro-learning, anywhere.</p></div>
+      </a>
+      <a class="sol-card" href="In-House Games.dc.html">
+        <div class="thumb"><img src="assets/brand-boardroom-ripple.jpeg" alt=""><div class="thumb-overlay"></div></div>
+        <div class="body"><h3 data-t="subGames">In-House Games &amp; Simulations</h3><p data-t="cardGamesBody">Business simulations and games run entirely in-house.</p></div>
+      </a>
+      <a class="sol-card" href="One Days Program.dc.html">
+        <div class="thumb"><img src="assets/handshake.png" alt=""><div class="thumb-overlay"></div></div>
+        <div class="body"><h3 data-t="subOneDay">One Day's Program</h3><p data-t="cardOneDayBody">Focused, high-impact learning delivered in a single day.</p></div>
+      </a>
+      <a class="sol-card" href="Gamified Themes.dc.html">
+        <div class="thumb"><img src="assets/theme-pirates.png" alt="" style="object-position: 30% center"><div class="thumb-overlay"></div></div>
+        <div class="body"><h3 data-t="subGamified">Gamified Themes</h3><p data-t="cardGamifiedBody">Game mechanics applied to real learning outcomes.</p></div>
+      </a>
+    </div>
+  </section>
+
+  <section class="closing">
+    <div class="closing-bg"><img src="assets/contact-photo.png" alt=""></div>
+    <div class="closing-overlay"></div>
+    <div class="closing-inner">
+      <h2 data-t="closing">Request a Customized Learning Journey</h2>
+      <a class="cta-btn" data-t="cta" href="Contact.dc.html">Book a Discovery Call</a>
+    </div>
+  </section>
+
+  <footer>
+    <span data-t="copyright">© 2026 Impact for Learning &amp; Development. All rights reserved.</span>
+    <button class="lang-btn" id="langToggleFooter" data-t="langBtn" type="button">العربية</button>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var EN = {
+    navHome: 'Home', navAbout: 'About Impact', navSolutions: 'Solutions', navPartners: 'International Partners', navContact: 'Contact', langBtn: 'العربية',
+    subLd: 'L&D Solutions', subOd: 'Organizational Development', subAim: 'AIM — AI in Motion', subCa: 'Assessments & Coaching', subGo: 'Impact GO', subGames: 'In-House Games & Simulations', subOneDay: "One Day's Program", subGamified: 'Gamified Themes',
+    eyebrow: 'SOLUTIONS', heading: 'Solutions',
+    intro1: 'Organizations partner with Impact to address specific business challenges, from developing leadership pipelines and strengthening team performance to building organizational capabilities at scale.',
+    intro2: 'Our solutions are designed as tailored learning journeys that help organizations engage with the right approach based on their priorities, maturity level, and workforce needs. Whether the focus is leadership development, capability building, or cultural transformation, Impact provides customized, business focused learning solutions that drive measurable performance outcomes.',
+    cardLdBody: 'Journeys, workshops, competency & duration paths.',
+    cardOdBody: 'Strategy, talent, governance, culture.',
+    cardAimBody: 'Building real, applied AI capability.',
+    cardCaBody: '1:1 coaching, diagnostics, feedback.',
+    cardGoBody: 'On-demand micro-learning, anywhere.',
+    cardGamesBody: 'Business simulations and games run entirely in-house.',
+    cardOneDayBody: 'Focused, high-impact learning delivered in a single day.',
+    cardGamifiedBody: 'Game mechanics applied to real learning outcomes.',
+    closing: 'Request a Customized Learning Journey', cta: 'Book a Discovery Call',
+    copyright: '© 2026 Impact for Learning & Development. All rights reserved.'
+  };
+  var AR = {
+    navHome: 'الرئيسية', navAbout: 'عن إمباكت', navSolutions: 'الحلول', navPartners: 'الشركاء الدوليون', navContact: 'تواصل معنا', langBtn: 'English',
+    subLd: 'حلول التعلم والتطوير', subOd: 'التطوير المؤسسي', subAim: 'AIM — الذكاء الاصطناعي في العمل', subCa: 'التقييمات والتدريب', subGo: 'Impact GO', subGames: 'ألعاب ومحاكاة داخلية', subOneDay: 'برنامج يوم واحد', subGamified: 'ثيمات التلعيب',
+    eyebrow: 'الحلول', heading: 'ثماني طرق للعمل معك.',
+    intro1: 'تتعاون المؤسسات مع إمباكت لمعالجة تحديات أعمال محددة، من بناء خطوط القيادة وتعزيز أداء الفرق إلى بناء القدرات المؤسسية على نطاق واسع.',
+    intro2: 'حلولنا مصممة كرحلات تعلم مخصصة تساعد المؤسسات على التفاعل مع النهج المناسب بحسب أولوياتها ومستوى نضجها واحتياجات فريق العمل. سواء كان التركيز على تطوير القيادة أو بناء القدرات أو التحول الثقافي، تقدم إمباكت حلول تعلم مخصصة تحقق نتائج أداء قابلة للقياس.',
+    cardLdBody: 'رحلات، ورش عمل، ومسارات قدرات ومدد مختلفة.',
+    cardOdBody: 'الاستراتيجية، المواهب، الحوكمة، الثقافة.',
+    cardAimBody: 'بناء قدرات ذكاء اصطناعي تطبيقية حقيقية.',
+    cardCaBody: 'تدريب فردي، تشخيصات، وتغذية راجعة.',
+    cardGoBody: 'تعلم مصغر عند الطلب، من أي مكان.',
+    cardGamesBody: 'محاكاة أعمال وألعاب تُنفَّذ بالكامل داخلياً.',
+    cardOneDayBody: 'تعلم مركز وعالي الأثر يُقدَّم في يوم واحد.',
+    cardGamifiedBody: 'آليات الألعاب مطبقة على نتائج تعلم حقيقية.',
+    closing: 'اطلب رحلة تعلم مخصصة', cta: 'حجز مكالمة استكشافية',
+    copyright: '© 2026 إمباكت للتعلم والتطوير. جميع الحقوق محفوظة.'
+  };
+
+  var root = document.getElementById('root');
+  var targets = document.querySelectorAll('[data-t]');
+
+  function applyLang(lang) {
+    var t = lang === 'ar' ? AR : EN;
+    var isAr = lang === 'ar';
+    root.setAttribute('dir', isAr ? 'rtl' : 'ltr');
+    root.classList.toggle('lang-ar', isAr);
+    document.documentElement.setAttribute('lang', isAr ? 'ar' : 'en');
+    document.documentElement.setAttribute('dir', isAr ? 'rtl' : 'ltr');
+    targets.forEach(function (el) {
+      var key = el.getAttribute('data-t');
+      if (t[key] !== undefined) el.textContent = t[key];
+    });
+  }
+
+  var savedLang = localStorage.getItem('impactLang');
+  var currentLang = (savedLang === 'ar' || savedLang === 'en') ? savedLang : 'en';
+  applyLang(currentLang);
+
+  function toggleLang() {
+    currentLang = currentLang === 'ar' ? 'en' : 'ar';
+    localStorage.setItem('impactLang', currentLang);
+    applyLang(currentLang);
+  }
+  document.getElementById('langToggle').addEventListener('click', toggleLang);
+  document.getElementById('langToggleFooter').addEventListener('click', toggleLang);
+
+  var heroImg = document.getElementById('heroImg');
+  if (heroImg) {
+    document.addEventListener('mousemove', function (e) {
+      var x = (e.clientX / innerWidth - 0.5) * 24;
+      var y = (e.clientY / innerHeight - 0.5) * 24;
+      heroImg.style.transform = 'scale(1.08) translate(' + x + 'px, ' + y + 'px)';
+    }, { passive: true });
+  }
+})();
+</script>
+</body>
+</html>
