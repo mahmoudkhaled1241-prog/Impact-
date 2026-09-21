@@ -40,6 +40,8 @@
   .lang-btn:hover { border-color: #18D4E2; color: #18D4E2; }
 
   .hero { position: relative; padding: clamp(80px, 14vh, 160px) clamp(24px, 6vw, 120px) clamp(60px, 8vh, 100px); overflow: hidden; display: grid; gap: 24px; max-width: 900px; margin: 0 auto; }
+  .back-link { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.18em; color: #7793A0; justify-self: start; transition: color 0.2s ease; }
+  .back-link:hover { color: #18D4E2; }
   .eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #7793A0; }
   h1.page-title { font-weight: 700; font-size: clamp(30px, 4vw, 54px); line-height: 1.1; letter-spacing: -0.025em; }
   p.page-intro { color: #AFC7CD; font-size: 17px; line-height: 1.65; }
@@ -100,6 +102,7 @@
   </header>
 
   <section class="hero">
+    <a class="back-link" data-t="back" href="L&amp;D Solutions.dc.html#s-comp">← Competency-Based Solutions</a>
     <div class="eyebrow" data-t="eyebrow">L&amp;D SOLUTIONS — LEADING SELF</div>
     <h1 class="page-title" data-t="heading">Leading Self</h1>
     <p class="page-intro" data-t="intro">Self awareness, accountability, resilience, and personal effectiveness. Four focus areas that build the foundation for how individuals show up, manage themselves, and perform at work.</p>
@@ -138,7 +141,7 @@
   var EN = {
     navHome: 'Home', navAbout: 'About Impact', navSolutions: 'Solutions', navPartners: 'International Partners', navContact: 'Contact', langBtn: 'العربية',
     subLd: 'L&D Solutions', subOd: 'Organizational Development', subAim: 'AIM — AI in Motion', subCa: 'Assessments & Coaching', subGo: 'Impact GO', subGames: 'In-House Games & Simulations', subOneDay: "One Day's Program", subGamified: 'Gamified Themes',
-    eyebrow: 'L&D SOLUTIONS — LEADING SELF', heading: 'Leading Self',
+    back: '← Competency-Based Solutions', eyebrow: 'L&D SOLUTIONS — LEADING SELF', heading: 'Leading Self',
     intro: 'Self awareness, accountability, resilience, and personal effectiveness. Four focus areas that build the foundation for how individuals show up, manage themselves, and perform at work.',
     item1Title: 'Personal Effectiveness', item1Body: 'Time management, prioritization, and habits that help individuals deliver consistently under real workloads.',
     item2Title: 'Interpersonal Skills', item2Body: 'Communication, active listening, and relationship building that improve everyday collaboration.',
@@ -149,7 +152,7 @@
   var AR = {
     navHome: 'الرئيسية', navAbout: 'عن إمباكت', navSolutions: 'الحلول', navPartners: 'الشركاء الدوليون', navContact: 'تواصل معنا', langBtn: 'English',
     subLd: 'حلول التعلم والتطوير', subOd: 'التطوير المؤسسي', subAim: 'AIM — الذكاء الاصطناعي في العمل', subCa: 'التقييمات والتدريب', subGo: 'Impact GO', subGames: 'ألعاب ومحاكاة داخلية', subOneDay: 'برنامج يوم واحد', subGamified: 'ثيمات التلعيب',
-    eyebrow: 'حلول التعلم والتطوير — قيادة الذات', heading: 'قيادة الذات',
+    back: '← حلول قائمة على القدرات', eyebrow: 'حلول التعلم والتطوير — قيادة الذات', heading: 'قيادة الذات',
     intro: 'الوعي الذاتي، والمساءلة، والمرونة، والفعالية الشخصية. أربعة مجالات تركيز تبني الأساس لكيفية ظهور الأفراد وإدارتهم لأنفسهم وأدائهم في العمل.',
     item1Title: 'الفعالية الشخصية', item1Body: 'إدارة الوقت، وترتيب الأولويات، وعادات تساعد الأفراد على الأداء المستمر تحت أعباء عمل حقيقية.',
     item2Title: 'المهارات الشخصية', item2Body: 'التواصل، والاستماع الفعّال، وبناء العلاقات التي تحسّن التعاون اليومي.',
