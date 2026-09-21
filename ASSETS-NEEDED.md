@@ -1,12 +1,13 @@
 # Impact for Learning & Development — Asset Checklist
 
-All 26 pages of the site are built and functional: header nav (with Solutions
-and International Partners mega-menus), EN/AR language toggle with RTL
-support, coverflow carousels, tabbed content sections, and footers all work
-with no external dependencies (no Three.js, no proprietary Claude Design
-runtime — plain HTML/CSS/vanilla JS throughout). Every internal page link
-(`href="*.dc.html"`) has been verified to resolve to an actual file in this
-folder.
+All 29 pages of the site are built and functional: header nav (with Solutions
+and International Partners mega-menus on hub pages, a lightweight flat nav on
+partner and Impact GO detail pages), EN/AR language toggle with RTL support,
+coverflow carousels, crossfade slideshows, tabbed content sections, and
+footers all work with no external dependencies (no Three.js, no proprietary
+Claude Design runtime — plain HTML/CSS/vanilla JS throughout). Every internal
+page link (`href="*.dc.html"`) has been verified to resolve to an actual file
+in this folder.
 
 The site currently runs on 27 real image files in `assets/`. The remaining
 image references below point to filenames that don't exist yet — the pages
@@ -59,6 +60,34 @@ are needed.
 - `theme-superhero-rivals.png`
 - `theme-survival-island.png`
 - `theme-treasure-hunt.png`
+
+### Impact GO.dc.html
+- `brand-building-ripple.png`
+
+### Impact GO Theme.dc.html
+- `theme-funfactory.png`
+- `theme-laylaelkabira.png`
+- `theme-neonbuzz.png`
+- `theme-olympics.png`
+- `theme-squad.png`
+- `theme-survivors.png`
+- `theme-tribes.png`
+- (`theme-pirates.png` already exists)
+
+### Impact GO Fun.dc.html
+- `gallery-team1.png`
+- `gallery-pirate1.png`
+- `gallery-pirate2.png`
+- `gallery-pirate3.png`
+- `gallery-squad1.png` through `gallery-squad6.png` (6 files)
+- `gallery-tribes1.png` through `gallery-tribes5.png` (5 files)
+- `gallery-laylaelkabira1.png` through `gallery-laylaelkabira3.png` (3 files)
+
+### Impact GO Learn.dc.html
+- `logo-fivebehaviors.png`
+- `logo-goodtogreat.png`
+- `logo-strengthsfinder.png`
+- (`partner-culture.png` already exists)
 
 ### In-House Games.dc.html
 - `logo-context.png`
@@ -179,8 +208,8 @@ are needed.
 
 ---
 
-**Total: 96 unique missing filenames** (101 references, several files reused
-across pages — e.g. `partner-bcon-mark.png`, `gallup-cliftonstrengths-only.png`,
-`brand-handshake-ripple.png`). Once these are dropped into `assets/` with the
-exact filenames above, every page on the site is complete with no further
-code changes required.
+**Total: 108 unique missing filenames** (129 references across pages, several
+files reused — e.g. `partner-bcon-mark.png`, `gallup-cliftonstrengths-only.png`,
+`brand-handshake-ripple.png`, `brand-building-ripple.png`). Once these are
+dropped into `assets/` with the exact filenames above, every page on the site
+is complete with no further code changes required.
