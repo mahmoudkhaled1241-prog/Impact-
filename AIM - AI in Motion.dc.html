@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AIM — AI in Motion | Impact for Learning &amp; Development</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;600;700&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root { color-scheme: dark; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  html, body { background: #0A141D; }
+  body { font-family: 'Inter', Helvetica, Arial, sans-serif; color: #F4FBFC; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+  a { text-decoration: none; color: #18D4E2; }
+  a:hover { color: #8FEAF0; }
+  button { font-family: inherit; }
+  img { max-width: 100%; display: block; }
+  ::selection { background: #18D4E2; color: #0A141D; }
+  @keyframes aimFloat { 0%, 100% { transform: translateY(-50%); } 50% { transform: translateY(-54%); } }
+
+  #root { position: relative; width: 100%; background: #0A141D; }
+  #root.lang-ar { font-family: 'IBM Plex Sans Arabic', 'Inter', sans-serif; }
+
+  header { position: sticky; top: 0; z-index: 50; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 24px; padding: 14px clamp(20px, 6vw, 120px); background: rgba(10, 20, 29, 0.92); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(140, 205, 214, 0.22); }
+  header .brand img { height: clamp(28px, 3vw, 38px); width: auto; }
+  nav.main-nav { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 10px clamp(12px, 2.2vw, 36px); font-family: 'IBM Plex Mono', monospace; font-size: clamp(10px, 1.05vw, 12px); letter-spacing: 0.12em; text-transform: uppercase; }
+  nav.main-nav a { color: #F4FBFC; text-decoration: none; transition: color 0.2s ease; }
+  nav.main-nav a:hover, nav.main-nav a.active { color: #18D4E2; }
+  nav.main-nav a.contact-cta { color: #18D4E2; border: 1px solid rgba(24, 212, 226, 0.5); padding: 9px 20px; border-radius: 999px; }
+  nav.main-nav a.contact-cta:hover { background: rgba(24, 212, 226, 0.1); }
+  .nav-drop { position: relative; }
+  .nav-drop > a { display: flex; align-items: center; gap: 7px; }
+  .nav-drop .caret { font-size: 9px; opacity: .7; }
+  .nav-drop-panel { position: absolute; top: 100%; left: -12px; padding-top: 14px; opacity: 0; transform: translateY(-8px); pointer-events: none; transition: opacity .22s ease, transform .22s ease; }
+  .nav-drop.partners .nav-drop-panel { left: auto; right: -12px; }
+  .nav-drop:hover .nav-drop-panel, .nav-drop:focus-within .nav-drop-panel { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  .nav-drop-inner { min-width: 280px; background: #0E1B26; border: 1px solid rgba(140,205,214,.22); padding: 8px; display: grid; }
+  .nav-drop-inner a { padding: 12px 16px; color: #F4FBFC; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; text-transform: none; display: flex; align-items: center; gap: 8px; transition: background .2s ease; }
+  .nav-drop-inner a:hover { background: #162835; color: #F4FBFC; }
+  .new-pill { background: #18D4E2; color: #0A141D; font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: .06em; padding: 2px 6px; border-radius: 4px; }
+  .lang-btn { background: transparent; border: 1px solid rgba(140, 205, 214, 0.4); color: #8FEAF0; padding: 8px 16px; border-radius: 999px; cursor: pointer; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; transition: border-color 0.2s ease, color 0.2s ease; }
+  .lang-btn:hover { border-color: #18D4E2; color: #18D4E2; }
+
+  .hero { position: relative; padding: clamp(80px, 14vh, 160px) clamp(24px, 6vw, 120px) clamp(48px, 6vh, 80px); overflow: hidden; display: grid; gap: 24px; max-width: 1200px; margin: 0 auto; }
+  .hero-bg { position: absolute; inset: 0; overflow: hidden; background: #0A141D; }
+  .hero-bg img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .35; filter: grayscale(.3); }
+  .hero-bg-fade { position: absolute; inset: 0; background: linear-gradient(rgba(10,20,29,.55), rgba(10,20,29,.88)); }
+  .hero-overlay { position: absolute; inset: 0; background: linear-gradient(100deg, rgba(10,20,29,.35), rgba(10,20,29,.55) 55%, rgba(10,20,29,.85)); }
+  .hero-logo { position: absolute; right: 4%; top: 50%; transform: translateY(-50%); width: 34%; max-width: 420px; height: auto; object-fit: contain; z-index: 2; animation: aimFloat 5s ease-in-out infinite; }
+  .hero-inner { position: relative; z-index: 1; display: grid; gap: 24px; }
+  .eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #7793A0; }
+  h1.page-title { font-weight: 700; font-size: clamp(32px, 4.4vw, 60px); line-height: 1.1; letter-spacing: -0.025em; max-width: 22ch; text-wrap: pretty; }
+  p.page-intro { color: #AFC7CD; font-size: clamp(16px, 1.3vw, 18px); line-height: 1.65; max-width: 44ch; text-wrap: pretty; }
+  .tagline { color: #18D4E2; font-size: 15px; font-weight: 600; letter-spacing: 0.02em; }
+  .cta-btn { justify-self: start; color: #0A141D; background: #18D4E2; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; padding: 14px 28px; border-radius: 999px; transition: background 0.2s ease; }
+  .cta-btn:hover { background: #8FEAF0; color: #0A141D; }
+
+  .group { position: relative; padding: 0 clamp(24px, 6vw, 120px) clamp(80px, 10vh, 120px); max-width: 1200px; margin: 0 auto; display: grid; gap: 32px; border-top: 1px solid rgba(140, 205, 214, 0.22); padding-top: 56px; }
+  .group:last-of-type { padding-bottom: clamp(100px, 14vh, 180px); }
+  .label { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; color: #7793A0; }
+
+  .routes-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 28px; }
+  .route-card { background: #122230; display: grid; grid-template-rows: 170px 1fr; transition: transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s ease; position: relative; z-index: 1; }
+  .route-card:hover { transform: scale(1.04); z-index: 2; box-shadow: 0 20px 44px rgba(0,0,0,.45); }
+  .route-card .thumb { overflow: hidden; background: #0E1B26; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .route-card .thumb img { max-width: 60%; max-height: 60%; object-fit: contain; }
+  .route-card .thumb.r1 img { filter: grayscale(1) sepia(1) hue-rotate(230deg) saturate(4) brightness(1.05); }
+  .route-card .thumb.r3 img { filter: hue-rotate(130deg) saturate(1.6) brightness(1.15); }
+  .route-card .body { padding: 24px 26px; display: grid; gap: 12px; align-content: start; }
+  .route-card .body .tag { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.18em; color: #18D4E2; }
+  .route-card .body h3 { margin: 0; font-size: 18px; font-weight: 700; }
+  .route-card .body p { margin: 0; color: #AFC7CD; font-size: 14px; line-height: 1.6; }
+  .route-card.r1-simple { grid-template-rows: 170px 1fr; }
+  .route-card.r1-simple .body { padding: 24px 26px; }
+
+  .stat-slider { position: relative; min-height: 130px; display: flex; align-items: center; }
+  .stat-slide { position: absolute; left: 0; right: 0; display: flex; align-items: center; gap: 24px; flex-wrap: wrap; transition: opacity .5s ease, transform .5s ease; opacity: 0; transform: translateX(16px); pointer-events: none; }
+  .stat-slide.active { opacity: 1; transform: translateX(0); pointer-events: auto; }
+  .stat-slide .num { font-weight: 800; font-size: clamp(48px, 7vw, 96px); letter-spacing: -0.03em; color: #18D4E2; }
+  .stat-slide p { margin: 0; color: #AFC7CD; font-size: 16px; line-height: 1.5; max-width: 40ch; }
+  .stat-dots { display: flex; gap: 8px; }
+  .stat-dots button { width: 10px; height: 10px; border-radius: 5px; border: none; cursor: pointer; background: rgba(140, 205, 214, 0.3); transition: all 0.3s ease; }
+  .stat-dots button.active { width: 26px; background: #18D4E2; }
+  .stat-source { margin: 0; color: #567179; font-size: 12px; line-height: 1.5; }
+
+  .why-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 32px; }
+  .why-item { display: grid; gap: 10px; }
+  .why-item .bar { width: 28px; height: 3px; background: #18D4E2; }
+  .why-item h3 { margin: 0; font-size: 17px; font-weight: 700; }
+  .why-item p { margin: 0; color: #AFC7CD; font-size: 14px; line-height: 1.6; }
+
+  .closing { position: relative; min-height: 50vh; overflow: hidden; background: #0E1B26; color: #F4FBFC; display: flex; align-items: center; padding: clamp(80px, 12vh, 140px) clamp(24px, 6vw, 120px); }
+  .closing-bg { position: absolute; inset: 0; filter: blur(6px); }
+  .closing-bg img { width: 100%; height: 100%; object-fit: cover; }
+  .closing-overlay { position: absolute; inset: 0; background: rgba(10, 20, 29, 0.35); }
+  .closing-inner { position: relative; z-index: 2; max-width: 1200px; margin: 0 auto; display: grid; gap: 32px; }
+  .closing h2 { margin: 0; font-weight: 800; font-size: clamp(32px, 5vw, 80px); line-height: 1.02; letter-spacing: -0.03em; max-width: 18ch; }
+
+  footer { position: relative; background: #0E1B26; border-top: 1px solid rgba(140, 205, 214, 0.22); padding: 24px clamp(24px, 6vw, 120px); display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #567179; }
+</style>
+</head>
+<body>
+<div id="root" dir="ltr">
+  <header>
+    <a class="brand" href="Impact L&amp;D Parallax.dc.html"><img src="assets/logo.png" alt="Impact"></a>
+    <nav class="main-nav">
+      <a data-t="navHome" href="Impact L&amp;D Parallax.dc.html">Home</a>
+      <a data-t="navAbout" href="About Impact.dc.html">About Impact</a>
+      <div class="nav-drop">
+        <a data-t="navSolutions" href="Solutions.dc.html">Solutions <span class="caret">▼</span></a>
+        <div class="nav-drop-panel">
+          <div class="nav-drop-inner">
+            <a data-t="subLd" href="L&amp;D Solutions.dc.html">L&amp;D Solutions</a>
+            <a data-t="subOd" href="Organizational Development.dc.html">Organizational Development</a>
+            <a href="AIM - AI in Motion.dc.html" style="color:#18D4E2"><span data-t="subAim">AIM — AI in Motion</span><span class="new-pill">NEW</span></a>
+            <a data-t="subCa" href="Assessments &amp; Coaching.dc.html">Assessments &amp; Coaching</a>
+            <a data-t="subGo" href="Impact GO.dc.html">Impact GO</a>
+            <a data-t="subGames" href="In-House Games.dc.html">In-House Games &amp; Simulations</a>
+            <a data-t="subOneDay" href="One Days Program.dc.html">One Day's Program</a>
+            <a data-t="subGamified" href="Gamified Themes.dc.html">Gamified Themes</a>
+          </div>
+        </div>
+      </div>
+      <div class="nav-drop partners">
+        <a data-t="navPartners" href="International Partners.dc.html">International Partners <span class="caret">▼</span></a>
+        <div class="nav-drop-panel">
+          <div class="nav-drop-inner">
+            <a href="Partner Culture Partners.dc.html">Culture Partners</a>
+            <a href="Partner KnolSkape.dc.html">KNOLSKAPE</a>
+            <a href="Partner BCon.dc.html">BCon</a>
+            <a href="Partner Gallup.dc.html">Gallup</a>
+            <a href="Partner ManagementDrive.dc.html">ManagementDrive</a>
+          </div>
+        </div>
+      </div>
+      <a data-t="navContact" href="Contact.dc.html" class="contact-cta">Contact</a>
+      <button class="lang-btn" id="langToggle" data-t="langBtn" type="button">العربية</button>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div class="hero-bg"><img src="assets/meeting.png" alt=""><div class="hero-bg-fade"></div></div>
+    <div class="hero-overlay"></div>
+    <img class="hero-logo" src="assets/aim-logo-gradient.png" alt="AIM — AI in Motion">
+    <div class="hero-inner">
+      <div class="eyebrow" data-t="eyebrow">SOLUTIONS — AIM</div>
+      <h1 class="page-title" data-t="heading">AIM — AI in Motion</h1>
+      <p class="page-intro" data-t="intro">AIM moves people, teams, and organizations from AI access to AI capability — from knowing AI exists to knowing how to use it well. Three complementary routes, Learn, Experience, and Create, work together as one capability ecosystem.</p>
+      <p class="tagline" data-t="tagline">Empowering Employees, Not Replacing Them.</p>
+      <a class="cta-btn" data-t="cta" href="Contact.dc.html">Book a Discovery Call</a>
+    </div>
+  </section>
+
+  <section class="group">
+    <div class="label" data-t="routesLabel">ONE ECOSYSTEM, THREE ROUTES</div>
+    <div class="routes-grid">
+      <div class="route-card r1-simple">
+        <div class="thumb r1"><img src="assets/aim-logo-gradient.png" alt="AIM"></div>
+        <div class="body"><h3 data-t="r1Title">IMPACT-Designed AI Programs</h3><p data-t="r1Body">Facilitator-led programs across four levels, Understand &amp; Apply, Specialize, Lead, Transform, customized to your business and grounded in local context.</p></div>
+      </div>
+      <div class="route-card">
+        <div class="thumb"><img src="assets/aim-logo-gradient.png" alt="AIM"></div>
+        <div class="body"><div class="tag" data-t="r2Tag">EXPERIENCE</div><h3 data-t="r2Title">International AI Simulations</h3><p data-t="r2Body">Simulation-powered learning with KNOLSKAPE that turns AI concepts into decisions, practice, and personalized feedback, backed by an international certificate on completion.</p></div>
+      </div>
+      <div class="route-card">
+        <div class="thumb r3"><img src="assets/aim-logo-gradient.png" alt="AIM"></div>
+        <div class="body"><div class="tag" data-t="r3Tag">CREATE</div><h3 data-t="r3Title">Bespoke Experiential Solutions</h3><p data-t="r3Body">GenieKreator lets you build simulations, assessments, roleplays, and AI coaching around your own organization's context, no code required, and built to scale.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="group">
+    <div class="label" data-t="statsLabel">THE OPPORTUNITY</div>
+    <div class="stat-slider" id="statSlider">
+      <div class="stat-slide active" data-index="0"><div class="num">25%</div><p data-t="stat1">Tasks completed faster with AI assistance.</p></div>
+      <div class="stat-slide" data-index="1"><div class="num">12%</div><p data-t="stat2">More tasks completed overall.</p></div>
+      <div class="stat-slide" data-index="2"><div class="num">40%+</div><p data-t="stat3">Improvement in human-rated output quality.</p></div>
+    </div>
+    <div class="stat-dots" id="statDots">
+      <button class="active" data-index="0" type="button"></button>
+      <button data-index="1" type="button"></button>
+      <button data-index="2" type="button"></button>
+    </div>
+    <p class="stat-source" data-t="statSource">Source: Harvard Business School / Boston Consulting Group — "Navigating the Jagged Technological Frontier."</p>
+  </section>
+
+  <section class="group">
+    <div class="label" data-t="whyLabel">WHY AIM</div>
+    <div class="why-grid">
+      <div class="why-item"><div class="bar"></div><h3 data-t="why1Title">Human-Centered by Design</h3><p data-t="why1Body">AI expands human contribution while judgment, creativity, and accountability stay central.</p></div>
+      <div class="why-item"><div class="bar"></div><h3 data-t="why2Title">Capability, Not Tool Training</h3><p data-t="why2Body">People learn to choose, use, question, verify, and apply AI effectively.</p></div>
+      <div class="why-item"><div class="bar"></div><h3 data-t="why3Title">Local Relevance + Global Experience</h3><p data-t="why3Body">IMPACT-designed learning alongside established international simulations.</p></div>
+    </div>
+  </section>
+
+  <section class="closing">
+    <div class="closing-bg"><img src="assets/contact-photo.png" alt=""></div>
+    <div class="closing-overlay"></div>
+    <div class="closing-inner">
+      <h2 data-t="closing">Request a Customized Learning Journey</h2>
+      <a class="cta-btn" data-t="cta" href="Contact.dc.html">Book a Discovery Call</a>
+    </div>
+  </section>
+
+  <footer>
+    <span data-t="copyright">© 2026 Impact for Learning &amp; Development. All rights reserved.</span>
+    <button class="lang-btn" id="langToggleFooter" data-t="langBtn" type="button">العربية</button>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var EN = {
+    navHome: 'Home', navAbout: 'About Impact', navSolutions: 'Solutions', navPartners: 'International Partners', navContact: 'Contact', langBtn: 'العربية',
+    subLd: 'L&D Solutions', subOd: 'Organizational Development', subAim: 'AIM — AI in Motion', subCa: 'Assessments & Coaching', subGo: 'Impact GO', subGames: 'In-House Games & Simulations', subOneDay: "One Day's Program", subGamified: 'Gamified Themes',
+    eyebrow: 'SOLUTIONS — AIM', heading: 'AIM — AI in Motion',
+    intro: 'AIM moves people, teams, and organizations from AI access to AI capability — from knowing AI exists to knowing how to use it well. Three complementary routes, Learn, Experience, and Create, work together as one capability ecosystem.',
+    tagline: 'Empowering Employees, Not Replacing Them.',
+    cta: 'Book a Discovery Call',
+    routesLabel: 'ONE ECOSYSTEM, THREE ROUTES',
+    r1Title: 'IMPACT-Designed AI Programs',
+    r1Body: 'Facilitator-led programs across four levels, Understand & Apply, Specialize, Lead, Transform, customized to your business and grounded in local context.',
+    r2Tag: 'EXPERIENCE', r2Title: 'International AI Simulations',
+    r2Body: 'Simulation-powered learning with KNOLSKAPE that turns AI concepts into decisions, practice, and personalized feedback, backed by an international certificate on completion.',
+    r3Tag: 'CREATE', r3Title: 'Bespoke Experiential Solutions',
+    r3Body: "GenieKreator lets you build simulations, assessments, roleplays, and AI coaching around your own organization's context, no code required, and built to scale.",
+    statsLabel: 'THE OPPORTUNITY',
+    stat1: 'Tasks completed faster with AI assistance.', stat2: 'More tasks completed overall.', stat3: 'Improvement in human-rated output quality.',
+    statSource: 'Source: Harvard Business School / Boston Consulting Group — "Navigating the Jagged Technological Frontier."',
+    whyLabel: 'WHY AIM',
+    why1Title: 'Human-Centered by Design', why1Body: 'AI expands human contribution while judgment, creativity, and accountability stay central.',
+    why2Title: 'Capability, Not Tool Training', why2Body: 'People learn to choose, use, question, verify, and apply AI effectively.',
+    why3Title: 'Local Relevance + Global Experience', why3Body: 'IMPACT-designed learning alongside established international simulations.',
+    closing: 'Request a Customized Learning Journey', copyright: '© 2026 Impact for Learning & Development. All rights reserved.'
+  };
+  var AR = {
+    navHome: 'الرئيسية', navAbout: 'عن إمباكت', navSolutions: 'الحلول', navPartners: 'الشركاء الدوليون', navContact: 'تواصل معنا', langBtn: 'English',
+    subLd: 'حلول التعلم والتطوير', subOd: 'التطوير المؤسسي', subAim: 'AIM — الذكاء الاصطناعي في العمل', subCa: 'التقييمات والتدريب', subGo: 'Impact GO', subGames: 'ألعاب ومحاكاة داخلية', subOneDay: 'برنامج يوم واحد', subGamified: 'ثيمات التلعيب',
+    eyebrow: 'الحلول — AIM', heading: 'AIM — الذكاء الاصطناعي في العمل',
+    intro: 'ينقل AIM الأفراد والفرق والمؤسسات من الوصول إلى الذكاء الاصطناعي إلى امتلاك القدرة الحقيقية على استخدامه. ثلاثة مسارات متكاملة، التعلم، التجربة، الإنشاء، تعمل معاً كنظام واحد لبناء القدرات.',
+    tagline: 'تمكين الموظفين، لا استبدالهم.',
+    cta: 'حجز مكالمة استكشافية',
+    routesLabel: 'نظام واحد، ثلاثة مسارات',
+    r1Title: 'برامج ذكاء اصطناعي مصممة من إمباكت',
+    r1Body: 'برامج ميسّرة عبر أربعة مستويات — الفهم والتطبيق، التخصص، القيادة، التحول — مخصصة لأعمالكم وملائمة محلياً.',
+    r2Tag: 'التجربة', r2Title: 'محاكاة ذكاء اصطناعي دولية',
+    r2Body: 'تعلم قائم على المحاكاة مع KNOLSKAPE يترجم مفاهيم الذكاء الاصطناعي إلى قرارات وممارسة وتغذية راجعة شخصية، مدعوماً بشهادة إتمام دولية.',
+    r3Tag: 'الإنشاء', r3Title: 'حلول تجريبية مخصصة',
+    r3Body: 'يتيح GenieKreator بناء محاكاة وتقييمات وتمثيل أدوار وتدريب بالذكاء الاصطناعي حول سياق مؤسستكم الخاص — دون حاجة للبرمجة وقابل للتوسع.',
+    statsLabel: 'الفرصة',
+    stat1: 'إنجاز المهام بشكل أسرع بمساعدة الذكاء الاصطناعي.', stat2: 'إنجاز عدد أكبر من المهام إجمالاً.', stat3: 'تحسن في جودة المخرجات المقيّمة بشرياً.',
+    statSource: 'المصدر: كلية هارفارد للأعمال / بوسطن كونسلتنغ غروب — "Navigating the Jagged Technological Frontier".',
+    whyLabel: 'لماذا AIM',
+    why1Title: 'مصمم حول الإنسان', why1Body: 'يوسّع الذكاء الاصطناعي مساهمة الإنسان بينما يبقى الحكم والإبداع والمساءلة في المركز.',
+    why2Title: 'قدرة، لا تدريباً على أداة', why2Body: 'يتعلم الأفراد كيفية اختيار واستخدام واستجواب وتحقق وتطبيق الذكاء الاصطناعي بفعالية.',
+    why3Title: 'ملاءمة محلية وخبرة عالمية', why3Body: 'تعلم مصمم من إمباكت جنباً إلى جنب مع محاكاة دولية معتمدة.',
+    closing: 'اطلب رحلة تعلم مخصصة', copyright: '© 2026 إمباكت للتعلم والتطوير. جميع الحقوق محفوظة.'
+  };
+
+  var root = document.getElementById('root');
+  var targets = document.querySelectorAll('[data-t]');
+
+  function applyLang(lang) {
+    var t = lang === 'ar' ? AR : EN;
+    var isAr = lang === 'ar';
+    root.setAttribute('dir', isAr ? 'rtl' : 'ltr');
+    root.classList.toggle('lang-ar', isAr);
+    document.documentElement.setAttribute('lang', isAr ? 'ar' : 'en');
+    document.documentElement.setAttribute('dir', isAr ? 'rtl' : 'ltr');
+    targets.forEach(function (el) {
+      var key = el.getAttribute('data-t');
+      if (t[key] !== undefined) el.textContent = t[key];
+    });
+  }
+
+  var savedLang = localStorage.getItem('impactLang');
+  var currentLang = (savedLang === 'ar' || savedLang === 'en') ? savedLang : 'en';
+  applyLang(currentLang);
+
+  function toggleLang() {
+    currentLang = currentLang === 'ar' ? 'en' : 'ar';
+    localStorage.setItem('impactLang', currentLang);
+    applyLang(currentLang);
+  }
+  document.getElementById('langToggle').addEventListener('click', toggleLang);
+  document.getElementById('langToggleFooter').addEventListener('click', toggleLang);
+
+  (function () {
+    var N = 3, slide = 0;
+    var slides = Array.prototype.slice.call(document.getElementById('statSlider').querySelectorAll('.stat-slide'));
+    var dots = Array.prototype.slice.call(document.getElementById('statDots').querySelectorAll('button'));
+
+    function render() {
+      slides.forEach(function (s, i) { s.classList.toggle('active', i === slide); });
+      dots.forEach(function (d, i) { d.classList.toggle('active', i === slide); });
+    }
+
+    var timer;
+    function resetAutoplay() {
+      clearInterval(timer);
+      timer = setInterval(function () { slide = (slide + 1) % N; render(); }, 4000);
+    }
+    function select(i) { slide = i; render(); resetAutoplay(); }
+
+    dots.forEach(function (dot) {
+      dot.addEventListener('click', function () { select(parseInt(dot.getAttribute('data-index'), 10)); });
+    });
+    resetAutoplay();
+  })();
+})();
+</script>
+</body>
+</html>
