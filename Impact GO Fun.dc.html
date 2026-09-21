@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fun — Impact GO | Impact for Learning &amp; Development</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { color-scheme: dark; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: #0A141D; }
+  body { font-family: 'Inter', Helvetica, Arial, sans-serif; color: #F4FBFC; -webkit-font-smoothing: antialiased; }
+  a { text-decoration: none; }
+  button { font-family: inherit; }
+  img { max-width: 100%; display: block; }
+
+  #root { position: relative; width: 100%; background: #0A141D; }
+  #root.lang-ar { font-family: 'IBM Plex Sans Arabic', 'Inter', sans-serif; }
+
+  header { position: sticky; top: 0; z-index: 50; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 24px; padding: 14px clamp(20px, 6vw, 120px); background: rgba(10, 20, 29, 0.92); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(140, 205, 214, 0.22); }
+  header .brand img { height: clamp(28px, 3vw, 38px); width: auto; }
+  nav.main-nav { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 10px clamp(12px, 2.2vw, 36px); font-family: 'IBM Plex Mono', monospace; font-size: clamp(10px, 1.05vw, 12px); letter-spacing: 0.12em; text-transform: uppercase; }
+  nav.main-nav a { color: #F4FBFC; transition: color 0.2s ease; }
+  nav.main-nav a:hover, nav.main-nav a.active { color: #18D4E2; }
+  nav.main-nav a.contact-cta { color: #18D4E2; border: 1px solid rgba(24, 212, 226, 0.5); padding: 9px 20px; border-radius: 999px; }
+  nav.main-nav a.contact-cta:hover { background: rgba(24, 212, 226, 0.1); }
+  .lang-btn { background: transparent; border: 1px solid rgba(140, 205, 214, 0.4); color: #8FEAF0; padding: 8px 16px; border-radius: 999px; cursor: pointer; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; transition: border-color 0.2s ease, color 0.2s ease; }
+  .lang-btn:hover { border-color: #18D4E2; color: #18D4E2; }
+
+  .hero { position: relative; padding: clamp(80px, 14vh, 160px) clamp(24px, 6vw, 120px) clamp(60px, 8vh, 100px); overflow: hidden; display: grid; gap: 28px; max-width: 900px; margin: 0 auto; }
+  .back-link { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.18em; color: #7793A0; justify-self: start; transition: color 0.2s ease; }
+  .back-link:hover { color: #18D4E2; }
+  .tag { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.18em; color: #18D4E2; }
+  h1.page-title { font-weight: 700; font-size: clamp(30px, 4vw, 54px); line-height: 1.1; letter-spacing: -0.025em; text-wrap: pretty; }
+  p.page-body { color: #AFC7CD; font-size: clamp(16px, 1.3vw, 19px); line-height: 1.65; text-wrap: pretty; }
+
+  .gallery-section { position: relative; padding: 0 clamp(24px, 6vw, 120px) clamp(60px, 8vh, 100px); }
+  .gallery-inner { max-width: 1200px; margin: 0 auto; display: grid; gap: 16px; }
+  .label { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.18em; color: #7793A0; }
+
+  .carousel { position: relative; height: 380px; display: flex; align-items: center; justify-content: center; perspective: 1400px; }
+  .carousel-nav-btn { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(140, 205, 214, 0.3); background: rgba(10, 20, 29, 0.7); color: #F4FBFC; font-size: 18px; cursor: pointer; z-index: 20; transition: border-color 0.2s ease, color 0.2s ease; }
+  .carousel-nav-btn:hover { border-color: #18D4E2; color: #18D4E2; }
+  .carousel-nav-btn.prev { left: 0; }
+  .carousel-nav-btn.next { right: 0; }
+  .carousel-track { position: relative; width: 100%; height: 100%; }
+  .g-card { position: absolute; top: 50%; left: 50%; width: min(60vw, 480px); height: 340px; overflow: hidden; border-radius: 14px; box-shadow: 0 24px 50px rgba(0, 0, 0, 0.45); transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.5s ease; cursor: pointer; }
+  .g-card img { width: 100%; height: 100%; object-fit: contain; background: #0E1B26; border-radius: 14px; }
+  .carousel-dots { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
+  .carousel-dots button { width: 7px; height: 7px; border-radius: 4px; border: none; cursor: pointer; background: rgba(140, 205, 214, 0.35); transition: all 0.3s ease; }
+  .carousel-dots button.active { width: 22px; background: #18D4E2; }
+
+  .cta-section { position: relative; padding: 0 clamp(24px, 6vw, 120px) clamp(60px, 8vh, 100px); max-width: 900px; margin: 0 auto; }
+  .cta-btn { justify-self: start; color: #0A141D; background: #18D4E2; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; padding: 14px 28px; border-radius: 999px; transition: opacity 0.2s ease; }
+  .cta-btn:hover { opacity: 0.85; }
+
+  footer { position: relative; background: #0E1B26; border-top: 1px solid rgba(140, 205, 214, 0.22); padding: 24px clamp(24px, 6vw, 120px); display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #567179; margin-top: 80px; }
+</style>
+</head>
+<body>
+<div id="root" dir="ltr">
+  <header>
+    <a class="brand" href="Impact L&amp;D Parallax.dc.html"><img src="assets/logo.png" alt="Impact"></a>
+    <nav class="main-nav">
+      <a data-t="navHome" href="Impact L&amp;D Parallax.dc.html">Home</a>
+      <a data-t="navAbout" href="About Impact.dc.html">About Impact</a>
+      <a data-t="navSolutions" href="Solutions.dc.html" class="active">Solutions</a>
+      <a data-t="navPartners" href="International Partners.dc.html">International Partners</a>
+      <a data-t="navContact" href="Contact.dc.html" class="contact-cta">Contact</a>
+      <button class="lang-btn" id="langToggle" data-t="langBtn" type="button">العربية</button>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <a class="back-link" data-t="back" href="Impact GO.dc.html">← Impact GO</a>
+    <div class="tag" data-t="tag">IMPACT GO — FUN</div>
+    <h1 class="page-title" data-t="name">Fun</h1>
+    <p class="page-body" data-t="body">Engaging, high-energy activities that build genuine enjoyment and connection between teams. A look at real moments from Layla El Kabira, The Tribes, The Squad, and Pirates in action.</p>
+  </section>
+
+  <section class="gallery-section">
+    <div class="gallery-inner">
+      <div class="label" data-t="galleryLabel">FROM THE FIELD</div>
+      <div class="carousel">
+        <button class="carousel-nav-btn prev" id="cfPrev" aria-label="Previous" type="button">‹</button>
+        <button class="carousel-nav-btn next" id="cfNext" aria-label="Next" type="button">›</button>
+        <div class="carousel-track" id="cfTrack">
+          <div class="g-card" data-index="0"><img src="assets/gallery-team1.png" alt="Team building"></div>
+          <div class="g-card" data-index="1"><img src="assets/gallery-pirate1.png" alt="Pirates crowd"></div>
+          <div class="g-card" data-index="2"><img src="assets/gallery-pirate2.png" alt="Pirates on stage"></div>
+          <div class="g-card" data-index="3"><img src="assets/gallery-pirate3.png" alt="Viking pirate"></div>
+          <div class="g-card" data-index="4"><img src="assets/gallery-squad1.png" alt="The Squad"></div>
+          <div class="g-card" data-index="5"><img src="assets/gallery-squad2.png" alt="The Squad"></div>
+          <div class="g-card" data-index="6"><img src="assets/gallery-squad3.png" alt="The Squad"></div>
+          <div class="g-card" data-index="7"><img src="assets/gallery-squad4.png" alt="The Squad"></div>
+          <div class="g-card" data-index="8"><img src="assets/gallery-squad5.png" alt="The Squad"></div>
+          <div class="g-card" data-index="9"><img src="assets/gallery-squad6.png" alt="The Squad"></div>
+          <div class="g-card" data-index="10"><img src="assets/gallery-tribes1.png" alt="The Tribes"></div>
+          <div class="g-card" data-index="11"><img src="assets/gallery-tribes2.png" alt="The Tribes"></div>
+          <div class="g-card" data-index="12"><img src="assets/gallery-tribes3.png" alt="The Tribes"></div>
+          <div class="g-card" data-index="13"><img src="assets/gallery-tribes4.png" alt="The Tribes"></div>
+          <div class="g-card" data-index="14"><img src="assets/gallery-tribes5.png" alt="The Tribes"></div>
+          <div class="g-card" data-index="15"><img src="assets/gallery-laylaelkabira1.png" alt="Layla El Kabira"></div>
+          <div class="g-card" data-index="16"><img src="assets/gallery-laylaelkabira2.png" alt="Layla El Kabira"></div>
+          <div class="g-card" data-index="17"><img src="assets/gallery-laylaelkabira3.png" alt="Layla El Kabira"></div>
+        </div>
+      </div>
+      <div class="carousel-dots" id="cfDots">
+        <button data-index="0" type="button"></button>
+        <button data-index="1" type="button"></button>
+        <button data-index="2" type="button"></button>
+        <button data-index="3" type="button"></button>
+        <button data-index="4" type="button"></button>
+        <button data-index="5" type="button"></button>
+        <button data-index="6" type="button"></button>
+        <button data-index="7" type="button"></button>
+        <button data-index="8" type="button"></button>
+        <button data-index="9" type="button"></button>
+        <button data-index="10" type="button"></button>
+        <button data-index="11" type="button"></button>
+        <button data-index="12" type="button"></button>
+        <button data-index="13" type="button"></button>
+        <button data-index="14" type="button"></button>
+        <button data-index="15" type="button"></button>
+        <button data-index="16" type="button"></button>
+        <button data-index="17" type="button"></button>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-section">
+    <a class="cta-btn" data-t="cta" href="Contact.dc.html">Book a Discovery Call</a>
+  </section>
+
+  <footer>
+    <span data-t="copyright">© 2026 Impact for Learning &amp; Development. All rights reserved.</span>
+    <button class="lang-btn" id="langToggleFooter" data-t="langBtn" type="button">العربية</button>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var EN = {
+    navHome: 'Home', navAbout: 'About Impact', navSolutions: 'Solutions', navPartners: 'International Partners', navContact: 'Contact', langBtn: 'العربية',
+    back: '← Impact GO', tag: 'IMPACT GO — FUN', name: 'Fun',
+    body: 'Engaging, high-energy activities that build genuine enjoyment and connection between teams. A look at real moments from Layla El Kabira, The Tribes, The Squad, and Pirates in action.',
+    galleryLabel: 'FROM THE FIELD',
+    cta: 'Book a Discovery Call', copyright: '© 2026 Impact for Learning & Development. All rights reserved.'
+  };
+  var AR = {
+    navHome: 'الرئيسية', navAbout: 'عن إمباكت', navSolutions: 'الحلول', navPartners: 'الشركاء الدوليون', navContact: 'تواصل معنا', langBtn: 'English',
+    back: '← Impact GO', tag: 'Impact GO — المرح', name: 'المرح',
+    body: 'أنشطة تفاعلية عالية الطاقة تبني تواصلاً وانخراطاً حقيقياً بين الفرق. لقطات حقيقية من الليلة الكبيرة، القبائل، الفرقة، والقراصنة في الميدان.',
+    galleryLabel: 'من الميدان',
+    cta: 'حجز مكالمة استكشافية', copyright: '© 2026 إمباكت للتعلم والتطوير. جميع الحقوق محفوظة.'
+  };
+
+  var root = document.getElementById('root');
+  var targets = document.querySelectorAll('[data-t]');
+
+  function applyLang(lang) {
+    var t = lang === 'ar' ? AR : EN;
+    var isAr = lang === 'ar';
+    root.setAttribute('dir', isAr ? 'rtl' : 'ltr');
+    root.classList.toggle('lang-ar', isAr);
+    document.documentElement.setAttribute('lang', isAr ? 'ar' : 'en');
+    document.documentElement.setAttribute('dir', isAr ? 'rtl' : 'ltr');
+    targets.forEach(function (el) {
+      var key = el.getAttribute('data-t');
+      if (t[key] !== undefined) el.textContent = t[key];
+    });
+  }
+
+  var savedLang = localStorage.getItem('impactLang');
+  var currentLang = (savedLang === 'ar' || savedLang === 'en') ? savedLang : 'en';
+  applyLang(currentLang);
+
+  function toggleLang() {
+    currentLang = currentLang === 'ar' ? 'en' : 'ar';
+    localStorage.setItem('impactLang', currentLang);
+    applyLang(currentLang);
+  }
+  document.getElementById('langToggle').addEventListener('click', toggleLang);
+  document.getElementById('langToggleFooter').addEventListener('click', toggleLang);
+
+  (function () {
+    var N = 18, cf = 0;
+    var cards = Array.prototype.slice.call(document.getElementById('cfTrack').querySelectorAll('.g-card'));
+    var dots = Array.prototype.slice.call(document.getElementById('cfDots').querySelectorAll('button'));
+
+    function render() {
+      cards.forEach(function (card, i) {
+        var off = i - cf;
+        if (off > N / 2) off -= N;
+        if (off < -N / 2) off += N;
+        var isActive = off === 0;
+        var visible = Math.abs(off) <= 3;
+        var tx = off * 34, rot = off * -26, scale = isActive ? 1 : 0.72, z = 10 - Math.abs(off);
+        card.style.opacity = visible ? '1' : '0';
+        card.style.pointerEvents = visible ? 'auto' : 'none';
+        card.style.transform = 'translate(-50%, -50%) translateX(' + tx + '%) scale(' + scale + ') rotateY(' + rot + 'deg)';
+        card.style.zIndex = z;
+      });
+      dots.forEach(function (dot, i) { dot.classList.toggle('active', i === cf); });
+    }
+    render();
+
+    var timer;
+    function resetAutoplay() {
+      clearInterval(timer);
+      timer = setInterval(function () { cf = (cf + 1) % N; render(); }, 3200);
+    }
+    function goTo(i) { cf = ((i % N) + N) % N; render(); resetAutoplay(); }
+
+    document.getElementById('cfPrev').addEventListener('click', function () { goTo(cf - 1); });
+    document.getElementById('cfNext').addEventListener('click', function () { goTo(cf + 1); });
+    cards.forEach(function (card) {
+      card.addEventListener('click', function () { goTo(parseInt(card.getAttribute('data-index'), 10)); });
+    });
+    dots.forEach(function (dot) {
+      dot.addEventListener('click', function () { goTo(parseInt(dot.getAttribute('data-index'), 10)); });
+    });
+    resetAutoplay();
+  })();
+})();
+</script>
+</body>
+</html>
