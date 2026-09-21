@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>About Impact | Impact for Learning &amp; Development</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;600;700&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root { color-scheme: dark; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  html, body { background: #0A141D; }
+  body { font-family: 'Inter', Helvetica, Arial, sans-serif; color: #F4FBFC; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+  a { text-decoration: none; color: #18D4E2; }
+  a:hover { color: #8FEAF0; }
+  button { font-family: inherit; }
+  img { max-width: 100%; display: block; }
+  ::selection { background: #18D4E2; color: #0A141D; }
+
+  #root { position: relative; width: 100%; background: #0A141D; }
+  #root.lang-ar { font-family: 'IBM Plex Sans Arabic', 'Inter', sans-serif; }
+
+  header { position: sticky; top: 0; z-index: 50; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 24px; padding: 14px clamp(20px, 6vw, 120px); background: rgba(10, 20, 29, 0.92); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(140, 205, 214, 0.22); }
+  header .brand img { height: clamp(28px, 3vw, 38px); width: auto; }
+  nav.main-nav { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 10px clamp(12px, 2.2vw, 36px); font-family: 'IBM Plex Mono', monospace; font-size: clamp(10px, 1.05vw, 12px); letter-spacing: 0.12em; text-transform: uppercase; }
+  nav.main-nav a { color: #F4FBFC; text-decoration: none; transition: color 0.2s ease; }
+  nav.main-nav a:hover, nav.main-nav a.active { color: #18D4E2; }
+  nav.main-nav a.contact-cta { color: #18D4E2; border: 1px solid rgba(24, 212, 226, 0.5); padding: 9px 20px; border-radius: 999px; }
+  nav.main-nav a.contact-cta:hover { background: rgba(24, 212, 226, 0.1); }
+  .nav-drop { position: relative; }
+  .nav-drop > a { display: flex; align-items: center; gap: 7px; }
+  .nav-drop .caret { font-size: 9px; opacity: .7; }
+  .nav-drop-panel { position: absolute; top: 100%; left: -12px; padding-top: 14px; opacity: 0; transform: translateY(-8px); pointer-events: none; transition: opacity .22s ease, transform .22s ease; }
+  .nav-drop.partners .nav-drop-panel { left: auto; right: -12px; }
+  .nav-drop:hover .nav-drop-panel, .nav-drop:focus-within .nav-drop-panel { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  .nav-drop-inner { min-width: 280px; background: #0E1B26; border: 1px solid rgba(140,205,214,.22); padding: 8px; display: grid; }
+  .nav-drop-inner a { padding: 12px 16px; color: #F4FBFC; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; text-transform: none; display: flex; align-items: center; gap: 8px; transition: background .2s ease; }
+  .nav-drop-inner a:hover { background: #162835; color: #F4FBFC; }
+  .new-pill { background: #18D4E2; color: #0A141D; font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: .06em; padding: 2px 6px; border-radius: 4px; }
+  .lang-btn { background: transparent; border: 1px solid rgba(140, 205, 214, 0.4); color: #8FEAF0; padding: 8px 16px; border-radius: 999px; cursor: pointer; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; transition: border-color 0.2s ease, color 0.2s ease; }
+  .lang-btn:hover { border-color: #18D4E2; color: #18D4E2; }
+
+  .hero { position: relative; height: clamp(560px, 82vh, 780px); overflow: hidden; display: flex; align-items: center; }
+  .hero-bg { position: absolute; inset: 0; overflow: hidden; transition: opacity 1s ease; opacity: 0; }
+  .hero-bg.active { opacity: 1; }
+  .hero-bg img { width: 100%; height: 100%; object-fit: cover; opacity: .55; }
+  .hero-fade { position: absolute; inset: 0; background: linear-gradient(100deg, rgba(10,20,29,.4), rgba(10,20,29,.62) 55%, rgba(10,20,29,.9)); z-index: 1; }
+  .hero-nav-btn { position: absolute; top: 50%; transform: translateY(-50%); z-index: 3; width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(140,205,214,.35); background: rgba(10,20,29,.4); color: #F4FBFC; font-size: 18px; cursor: pointer; transition: border-color 0.2s ease, color 0.2s ease; }
+  .hero-nav-btn:hover { border-color: #18D4E2; color: #18D4E2; }
+  .hero-nav-btn.prev { left: clamp(12px, 2vw, 24px); }
+  .hero-nav-btn.next { right: clamp(12px, 2vw, 24px); }
+  .hero-caption-bar { position: absolute; bottom: 0; left: 0; right: 0; z-index: 2; border-top: 1px solid rgba(140,205,214,.22); background: rgba(10,20,29,.35); backdrop-filter: blur(6px); }
+  .hero-caption-inner { max-width: 1200px; margin: 0 auto; padding: 16px clamp(24px, 6vw, 100px); display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+  .hero-caption-left { display: flex; align-items: baseline; gap: 14px; }
+  .hero-caption-num { font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 700; color: rgba(140,205,214,.4); }
+  .hero-caption-text { margin: 0; color: #AFC7CD; font-size: 13px; line-height: 1.45; max-width: 44ch; }
+  .cta-btn { flex-shrink: 0; color: #0A141D; background: #18D4E2; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; padding: 14px 28px; border-radius: 999px; transition: background 0.2s ease; }
+  .cta-btn:hover { background: #8FEAF0; color: #0A141D; }
+  .hero-slides { position: relative; z-index: 2; width: 100%; height: 100%; max-width: 1200px; margin: 0 auto; padding: 0 clamp(24px, 6vw, 100px) 240px; box-sizing: border-box; }
+  .hero-slide { position: absolute; top: 0; bottom: 0; left: 0; right: 0; display: flex; flex-direction: column; align-items: center; text-align: center; justify-content: center; transition: opacity 0.5s ease, transform 0.5s ease; opacity: 0; transform: translateX(24px); pointer-events: none; }
+  .hero-slide.active { opacity: 1; transform: translateX(0); pointer-events: auto; }
+  .hero-slide .eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #7793A0; }
+  .hero-slide h1 { margin: 14px 0 0; font-weight: 800; font-size: clamp(32px, 5.6vw, 84px); line-height: 1.02; letter-spacing: -0.03em; max-width: 16ch; text-wrap: pretty; }
+  .hero-slide h1.stat { font-size: clamp(36px, 6.4vw, 96px); line-height: .98; }
+  .hero-slide h1 .plus { color: #18D4E2; }
+  .hero-slide p { margin: 14px 0 0; color: #DDEFF1; font-size: clamp(15px, 1.3vw, 18px); max-width: 46ch; }
+  .hero-dots { position: absolute; left: 50%; bottom: 28px; transform: translateX(-50%); z-index: 3; display: flex; gap: 10px; }
+  .hero-dots button { width: 10px; height: 10px; border-radius: 5px; border: none; cursor: pointer; background: rgba(140,205,214,.4); transition: all 0.3s ease; }
+  .hero-dots button.active { width: 26px; background: #18D4E2; }
+
+  .stats-section { position: relative; padding: 0 clamp(24px, 6vw, 120px) clamp(80px, 10vh, 120px); max-width: 1200px; margin: 0 auto; }
+  .stats-box { margin-top: 40px; border-radius: 4px; overflow: hidden; position: relative; border-top: 1px solid rgba(140,205,214,.22); }
+  .stats-bg { position: absolute; inset: 0; overflow: hidden; filter: blur(6px); }
+  .stats-bg img { width: 100%; height: 100%; object-fit: cover; }
+  .stats-overlay { position: absolute; inset: 0; background: rgba(10,20,29,.5); }
+  .stats-grid { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 32px 24px; padding: clamp(28px, 4vw, 48px); }
+  .stat-item { display: grid; gap: 8px; }
+  .stat-item .num { font-weight: 800; font-size: clamp(30px, 3.4vw, 46px); letter-spacing: -0.02em; color: #F4FBFC; }
+  .stat-item p { margin: 0; color: #DDEFF1; font-size: 14px; line-height: 1.55; }
+  @media (max-width: 800px) { .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+  .why-section { position: relative; padding: 0 clamp(24px, 6vw, 120px) clamp(100px, 14vh, 180px); max-width: 1200px; margin: 0 auto; display: grid; gap: 32px; }
+  .label { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #7793A0; }
+  .why-section .top-label { border-top: 1px solid rgba(140,205,214,.22); padding-top: 40px; }
+  .why-slider { position: relative; min-height: 180px; }
+  .why-slide { position: absolute; inset: 0; transition: opacity 0.6s ease, transform 0.6s ease; opacity: 0; transform: translateY(10px); pointer-events: none; }
+  .why-slide.active { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  .why-slide .bar { width: 28px; height: 3px; background: #18D4E2; margin-bottom: 14px; }
+  .why-slide h3 { margin: 0 0 10px; font-size: 22px; font-weight: 700; letter-spacing: -0.01em; }
+  .why-slide p { margin: 0; color: #AFC7CD; font-size: 16px; line-height: 1.65; max-width: 60ch; }
+  .why-dots { display: flex; gap: 10px; }
+  .why-dots button { width: 10px; height: 10px; border-radius: 5px; border: none; cursor: pointer; background: rgba(140,205,214,.3); transition: all 0.3s ease; }
+  .why-dots button.active { width: 26px; background: #18D4E2; }
+  .trusted-line { margin: 8px 0 0; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.18em; color: #7793A0; }
+  .trusted-logos { display: flex; flex-wrap: wrap; align-items: center; gap: clamp(28px, 5vw, 56px); padding-top: 8px; }
+  .trusted-logos img { height: 30px; width: auto; object-fit: contain; filter: brightness(0) invert(1); opacity: .75; transition: transform 0.5s ease, filter 0.5s ease, opacity 0.5s ease; }
+  .trusted-logos img:hover { transform: scale(1.08) rotate(-2deg); opacity: 1; filter: brightness(0) invert(1) drop-shadow(0 8px 24px rgba(24,212,226,.45)); }
+
+  .leadership-section { position: relative; padding: 0 clamp(24px, 6vw, 120px) clamp(100px, 14vh, 180px); max-width: 1200px; margin: 0 auto; }
+  .leadership-section .top-label { border-top: 1px solid rgba(140,205,214,.22); padding-top: 40px; margin-bottom: 32px; }
+  .leadership-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 32px; }
+  .leader-card { display: grid; gap: 20px; }
+  .leader-photo { width: 100%; aspect-ratio: 1; border-radius: 4px; overflow: hidden; }
+  .leader-photo img { width: 100%; height: 100%; object-fit: cover; }
+  .leader-card h3 { margin: 0 0 4px; font-size: 20px; font-weight: 700; }
+  .leader-card .title { margin: 0; color: #3FDDE8; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.12em; }
+
+  .vmv-section { position: relative; padding: clamp(80px, 10vh, 120px) clamp(24px, 6vw, 120px); max-width: 1200px; margin: 0 auto; display: grid; gap: 56px; border-top: 1px solid rgba(140,205,214,.22); }
+  .vm-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 40px; }
+  .vm-item { display: grid; gap: 12px; }
+  .vm-item p { margin: 0; font-size: clamp(18px, 1.8vw, 22px); font-weight: 700; line-height: 1.4; letter-spacing: -0.01em; }
+  .values-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; }
+  .value-item { display: grid; gap: 8px; }
+  .value-item h3 { margin: 0; font-size: 17px; font-weight: 700; }
+  .value-item p { margin: 0; color: #AFC7CD; font-size: 14px; line-height: 1.6; }
+  .text-block { display: grid; gap: 14px; max-width: 80ch; }
+  .text-block p { margin: 0; color: #DDEFF1; font-size: 16px; line-height: 1.75; white-space: pre-line; }
+
+  .products-section { position: relative; height: 100vh; min-height: 640px; overflow: hidden; background: #0E1B26; border-top: 1px solid rgba(140,205,214,.22); }
+  .products-heading { position: absolute; z-index: 3; top: clamp(50px, 9vh, 90px); left: 0; right: 0; text-align: center; padding: 0 24px; pointer-events: none; }
+  .products-heading .eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.26em; color: #3FDDE8; margin-bottom: 14px; }
+  .products-heading h2 { margin: 0; font-weight: 800; font-size: clamp(32px, 4vw, 48px); letter-spacing: -0.02em; color: #F4FBFC; }
+  .products-carousel { position: relative; z-index: 1; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; perspective: 1600px; }
+  .products-nav-btn { position: absolute; z-index: 20; width: 48px; height: 48px; border-radius: 50%; border: 1px solid rgba(140,205,214,.35); background: rgba(14,27,38,.6); color: #F4FBFC; font-size: 20px; cursor: pointer; transition: border-color 0.2s ease, color 0.2s ease; }
+  .products-nav-btn:hover { border-color: #18D4E2; color: #18D4E2; }
+  .products-nav-btn.prev { left: clamp(12px, 3vw, 40px); }
+  .products-nav-btn.next { right: clamp(12px, 3vw, 40px); }
+  .prod-card { position: absolute; top: 50%; left: 50%; width: min(34vw, 400px); height: min(42vh, 320px); overflow: hidden; box-shadow: 0 30px 70px rgba(0,0,0,.5); transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.6s ease; }
+  .prod-card-inner { position: relative; width: 100%; height: 100%; overflow: hidden; }
+  .prod-card-inner img { width: 100%; height: 100%; object-fit: cover; }
+  .prod-card-inner.logo-slot { background: #0E1B26; display: flex; align-items: center; justify-content: center; }
+  .prod-card-inner.logo-slot img { max-width: 60%; max-height: 60%; object-fit: contain; width: auto; height: auto; }
+  .prod-card-fade { position: absolute; inset: 0; background: linear-gradient(to top, rgba(10,20,29,.9), rgba(10,20,29,0) 55%); }
+  .prod-card-label { position: absolute; left: 20px; right: 20px; bottom: 18px; color: #F4FBFC; font-size: 17px; font-weight: 700; }
+  .products-dots { position: absolute; z-index: 4; bottom: 32px; left: 0; right: 0; display: flex; justify-content: center; gap: 6px; padding: 0 24px; flex-wrap: wrap; max-width: 700px; margin: 0 auto; }
+  .products-dots button { width: 7px; height: 7px; border-radius: 4px; border: none; cursor: pointer; background: rgba(140,205,214,.35); transition: all 0.3s ease; }
+  .products-dots button.active { width: 22px; background: #18D4E2; }
+
+  .closing { position: relative; min-height: 60vh; overflow: hidden; background: #18D4E2; color: #0A141D; display: flex; align-items: center; padding: clamp(80px, 12vh, 140px) clamp(24px, 6vw, 120px); }
+  .closing-bg { position: absolute; inset: 0; filter: blur(6px); }
+  .closing-bg img { width: 100%; height: 100%; object-fit: cover; }
+  .closing-overlay { position: absolute; inset: 0; background: rgba(24,212,226,.72); }
+  .closing-inner { position: relative; z-index: 2; max-width: 1200px; margin: 0 auto; display: grid; gap: 32px; }
+  .closing h2 { margin: 0; font-weight: 800; font-size: clamp(32px, 5vw, 80px); line-height: 1.02; letter-spacing: -0.03em; max-width: 18ch; }
+  .closing-cta { justify-self: start; color: #F4FBFC; background: #0A141D; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; padding: 14px 28px; border-radius: 999px; transition: opacity 0.2s ease; }
+  .closing-cta:hover { opacity: 0.8; color: #F4FBFC; }
+
+  footer { position: relative; background: #0E1B26; border-top: 1px solid rgba(140, 205, 214, 0.22); padding: 24px clamp(24px, 6vw, 120px); display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #567179; }
+</style>
+</head>
+<body>
+<div id="root" dir="ltr">
+  <header>
+    <a class="brand" href="Impact L&amp;D Parallax.dc.html"><img src="assets/logo.png" alt="Impact"></a>
+    <nav class="main-nav">
+      <a data-t="navHome" href="Impact L&amp;D Parallax.dc.html">Home</a>
+      <a data-t="navAbout" href="About Impact.dc.html" style="color:#18D4E2">About Impact</a>
+      <div class="nav-drop">
+        <a data-t="navSolutions" href="Solutions.dc.html">Solutions <span class="caret">▼</span></a>
+        <div class="nav-drop-panel">
+          <div class="nav-drop-inner">
+            <a data-t="subLd" href="L&amp;D Solutions.dc.html">L&amp;D Solutions</a>
+            <a data-t="subOd" href="Organizational Development.dc.html">Organizational Development</a>
+            <a href="AIM - AI in Motion.dc.html"><span data-t="subAim">AIM — AI in Motion</span><span class="new-pill">NEW</span></a>
+            <a data-t="subCa" href="Assessments &amp; Coaching.dc.html">Assessments &amp; Coaching</a>
+            <a data-t="subGo" href="Impact GO.dc.html">Impact GO</a>
+            <a data-t="subGames" href="In-House Games.dc.html">In-House Games &amp; Simulations</a>
+            <a data-t="subOneDay" href="One Days Program.dc.html">One Day's Program</a>
+            <a data-t="subGamified" href="Gamified Themes.dc.html">Gamified Themes</a>
+          </div>
+        </div>
+      </div>
+      <div class="nav-drop partners">
+        <a data-t="navPartners" href="International Partners.dc.html">International Partners <span class="caret">▼</span></a>
+        <div class="nav-drop-panel">
+          <div class="nav-drop-inner">
+            <a href="Partner Culture Partners.dc.html">Culture Partners</a>
+            <a href="Partner KnolSkape.dc.html">KNOLSKAPE</a>
+            <a href="Partner BCon.dc.html">BCon</a>
+            <a href="Partner Gallup.dc.html">Gallup</a>
+            <a href="Partner ManagementDrive.dc.html">ManagementDrive</a>
+          </div>
+        </div>
+      </div>
+      <a data-t="navContact" href="Contact.dc.html" class="contact-cta">Contact</a>
+      <button class="lang-btn" id="langToggle" data-t="langBtn" type="button">العربية</button>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div class="hero-bg active" data-index="0"><img src="assets/meeting.png" alt=""></div>
+    <div class="hero-bg" data-index="1"><img src="assets/handshake.png" alt=""></div>
+    <div class="hero-bg" data-index="2"><img src="assets/brand-boardroom-ripple.jpeg" alt=""></div>
+    <div class="hero-fade"></div>
+
+    <button class="hero-nav-btn prev" id="heroPrev" aria-label="Previous" type="button">‹</button>
+    <button class="hero-nav-btn next" id="heroNext" aria-label="Next" type="button">›</button>
+
+    <div class="hero-caption-bar">
+      <div class="hero-caption-inner">
+        <div class="hero-caption-left">
+          <span class="hero-caption-num" id="heroCaptionNum">01</span>
+          <p class="hero-caption-text" id="heroCaptionText" data-t="heroSub">Impact designs experiential learning journeys and business simulations that translate capability into real-world results. Our solutions are tailored to each organization, combining innovation, relevance, and practical application to create lasting behavioral change.</p>
+        </div>
+        <a class="cta-btn" data-t="cta" href="Contact.dc.html">Book a Discovery Call</a>
+      </div>
+    </div>
+
+    <div class="hero-slides">
+      <div class="hero-slide active" data-index="0">
+        <div class="eyebrow" data-t="eyebrow">ABOUT IMPACT</div>
+        <h1 data-t="heroTitle">Transforming Capability into Measurable Business Performance</h1>
+      </div>
+      <div class="hero-slide" data-index="1">
+        <div class="eyebrow" data-t="statLabel1">PARTICIPANTS DEVELOPED</div>
+        <h1 class="stat">150,000<span class="plus">+</span></h1>
+        <p data-t="stat1">Participants developed across leadership and professional development programs.</p>
+      </div>
+      <div class="hero-slide" data-index="2">
+        <div class="eyebrow" data-t="statLabel2">LEARNING HOURS DELIVERED</div>
+        <h1 class="stat">60,000<span class="plus">+</span></h1>
+        <p data-t="stat2">Learning hours delivered through experiential learning and business simulations.</p>
+      </div>
+    </div>
+
+    <div class="hero-dots" id="heroDots">
+      <button class="active" data-index="0" type="button"></button>
+      <button data-index="1" type="button"></button>
+      <button data-index="2" type="button"></button>
+    </div>
+  </section>
+
+  <section class="stats-section">
+    <div class="stats-box">
+      <div class="stats-bg"><img src="assets/handshake.png" alt=""></div>
+      <div class="stats-overlay"></div>
+      <div class="stats-grid">
+        <div class="stat-item"><div class="num">150,000+</div><p data-t="stat1">Participants developed across leadership and professional development programs.</p></div>
+        <div class="stat-item"><div class="num">60,000+</div><p data-t="stat2">Learning hours delivered through experiential learning and business simulations.</p></div>
+        <div class="stat-item"><div class="num">7,000+</div><p data-t="stat3">Coaching sessions supporting leadership growth and capability development.</p></div>
+        <div class="stat-item"><div class="num">95%</div><p data-t="stat4">Participant satisfaction across development programs.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="why-section">
+    <div class="label top-label" data-t="whyLabel">WHY ORGANIZATIONS PARTNER WITH IMPACT</div>
+    <div class="why-slider" id="whySlider">
+      <div class="why-slide active" data-index="0"><div class="bar"></div><h3 data-t="why1Title">Experiential Simulations</h3><p data-t="why1Body">Immersive business simulations that recreate real organizational challenges and accelerate applied learning.</p></div>
+      <div class="why-slide" data-index="1"><div class="bar"></div><h3 data-t="why2Title">Tailored Learning Journeys</h3><p data-t="why2Body">Structured programs that combine assessments, experiential learning, and coaching to drive sustained leadership growth.</p></div>
+      <div class="why-slide" data-index="2"><div class="bar"></div><h3 data-t="why3Title">Regional Expertise, Global Methodologies</h3><p data-t="why3Body">Globally informed learning solutions delivered with a deep understanding of the MENA business environment.</p></div>
+    </div>
+    <div class="why-dots" id="whyDots">
+      <button class="active" data-index="0" type="button"></button>
+      <button data-index="1" type="button"></button>
+      <button data-index="2" type="button"></button>
+    </div>
+    <p class="trusted-line" data-t="trustedLine">International Partners</p>
+    <div class="trusted-logos">
+      <img src="assets/partner-culture.png" alt="Culture Partners">
+      <img src="assets/partner-knolskape-dark.png" alt="KNOLSKAPE">
+      <img src="assets/partner-bcon.png" alt="BCon" style="height:34px">
+      <img src="assets/partner-gallup.png" alt="Gallup" style="height:26px">
+      <img src="assets/partner-managementdrive.png" alt="ManagementDrive" style="height:28px">
+    </div>
+  </section>
+
+  <section class="leadership-section">
+    <div class="label top-label" data-t="leadershipLabel">LEADERSHIP</div>
+    <div class="leadership-grid">
+      <div class="leader-card">
+        <div class="leader-photo"><img src="assets/ceo-mahmoud-embaby.png" alt="Mahmoud Embaby"></div>
+        <div><h3 data-t="ceoName">Mahmoud Embaby</h3><p class="title" data-t="ceoTitle">CHIEF EXECUTIVE OFFICER</p></div>
+      </div>
+      <div class="leader-card">
+        <div class="leader-photo"><img src="assets/cfo-kareem-abdullah.jpeg" alt="Kareem Abdullah"></div>
+        <div><h3 data-t="cfoName">Kareem Abdullah</h3><p class="title" data-t="cfoTitle">CHIEF STRATEGIC OFFICER</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="vmv-section">
+    <div class="vm-grid">
+      <div class="vm-item"><div class="label" data-t="visionLabel">VISION</div><p data-t="visionBody">Leading human development in the MEA region by influencing positive change in individuals, teams, organizations, and communities.</p></div>
+      <div class="vm-item"><div class="label" data-t="missionLabel">MISSION</div><p data-t="missionBody">Create innovative, customer focused people development solutions that meet the highest quality standards, align with international benchmarks, and deliver exceptional client satisfaction.</p></div>
+    </div>
+
+    <div style="display:grid;gap:24px">
+      <div class="label" data-t="valuesLabel">VALUES</div>
+      <div class="values-grid">
+        <div class="value-item"><h3 data-t="value1Title">Impact</h3><p data-t="value1Body">We focus on learning that drives measurable performance and real business results.</p></div>
+        <div class="value-item"><h3 data-t="value2Title">Trust</h3><p data-t="value2Body">We build lasting partnerships through credibility, consistency, and shared accountability.</p></div>
+        <div class="value-item"><h3 data-t="value3Title">Customer Centricity</h3><p data-t="value3Body">We design every solution around client context, goals, and learner needs.</p></div>
+        <div class="value-item"><h3 data-t="value4Title">Quality</h3><p data-t="value4Body">We hold our work to high standards to ensure depth, relevance, and excellence in delivery.</p></div>
+        <div class="value-item"><h3 data-t="value5Title">Agility</h3><p data-t="value5Body">We adapt quickly to changing business realities with flexible, responsive solutions.</p></div>
+        <div class="value-item"><h3 data-t="value6Title">Diversity</h3><p data-t="value6Body">We value varied perspectives, inclusive collaboration, and the richness they bring to learning.</p></div>
+      </div>
+    </div>
+
+    <div class="text-block">
+      <div class="label" data-t="regionalLabel">REGIONAL PRESENCE &amp; PARTNERSHIPS</div>
+      <p data-t="regionalBody">Impact operates across the MENA region through a strong on-ground presence in Cairo, Dubai, and Riyadh, supporting organizations across Egypt, KSA, and the UAE.
+
+Our ecosystem brings together leading global partners to deliver world-class, locally relevant solutions. This includes Culture Partners, creators of the award-winning Discovery Maps® used by over 3 million learners worldwide, Knolskape, a multi-award-winning provider of business simulations, and BCon, pioneers in behavioral science and innovation frameworks that drive high-performance cultures. We also integrate Gallup's executive coaching methodologies to strengthen leadership effectiveness and engagement.
+
+Across the region, Impact has engaged more than 150,000 participants and delivered over 60,000 learning hours, building long-term partnerships with organizations across industries. Our approach focuses on driving measurable improvements in leadership capability, team effectiveness, and organizational performance.</p>
+    </div>
+
+    <div class="text-block">
+      <div class="label" data-t="milestonesLabel">MILESTONES &amp; ACHIEVEMENTS</div>
+      <p data-t="milestonesBody">Impact has delivered large-scale learning and development programs across public and private sectors, supporting organizations in building leadership capability at scale.
+
+By localizing international certification journeys for regional rollout, Impact ensures global standards are applied with local relevance.
+
+With more than 150,000 learners reached through leadership, capability building, and experiential learning initiatives, Impact continues to build long-term partnerships across the MENA region.</p>
+    </div>
+  </section>
+
+  <section class="products-section">
+    <div class="products-heading">
+      <div class="eyebrow" data-t="productsEyebrow">OUR PRODUCTS</div>
+      <h2 data-t="productsHeading">Explore what we build</h2>
+    </div>
+    <div class="products-carousel">
+      <button class="products-nav-btn prev" id="prodPrev" aria-label="Previous" type="button">‹</button>
+      <button class="products-nav-btn next" id="prodNext" aria-label="Next" type="button">›</button>
+      <div id="prodTrack">
+        <a class="prod-card" data-index="0" href="L&amp;D Solutions.dc.html"><div class="prod-card-inner"><img src="assets/meeting.png" alt=""><div class="prod-card-fade"></div><div class="prod-card-label" data-t="subLd">L&amp;D Solutions</div></div></a>
+        <a class="prod-card" data-index="1" href="Organizational Development.dc.html"><div class="prod-card-inner"><img src="assets/brand-boardroom-ripple.jpeg" alt=""><div class="prod-card-fade"></div><div class="prod-card-label" data-t="subOd">Organizational Development</div></div></a>
+        <a class="prod-card" data-index="2" href="AIM - AI in Motion.dc.html"><div class="prod-card-inner logo-slot"><img src="assets/aim-logo-gradient.png" alt=""><div class="prod-card-fade"></div><div class="prod-card-label" data-t="subAim">AIM — AI in Motion</div></div></a>
+        <a class="prod-card" data-index="3" href="Assessments &amp; Coaching.dc.html"><div class="prod-card-inner"><img src="assets/handshake.png" alt=""><div class="prod-card-fade"></div><div class="prod-card-label" data-t="subCa">Assessments &amp; Coaching</div></div></a>
+        <a class="prod-card" data-index="4" href="Impact GO.dc.html"><div class="prod-card-inner logo-slot"><img src="assets/impactgo-logo.png" alt=""><div class="prod-card-fade"></div><div class="prod-card-label" data-t="subGo">Impact GO</div></div></a>
+        <a class="prod-card" data-index="5" href="In-House Games.dc.html"><div class="prod-card-inner"><img src="assets/brand-boardroom-ripple.jpeg" alt=""><div class="prod-card-fade"></div><div class="prod-card-label" data-t="subGames">In-House Games &amp; Simulations</div></div></a>
+        <a class="prod-card" data-index="6" href="One Days Program.dc.html"><div class="prod-card-inner"><img src="assets/handshake.png" alt=""><div class="prod-card-fade"></div><div class="prod-card-label" data-t="subOneDay">One Day's Program</div></div></a>
+        <a class="prod-card" data-index="7" href="Gamified Themes.dc.html"><div class="prod-card-inner"><img src="assets/brand-skyline-ripple.jpeg" alt=""><div class="prod-card-fade"></div><div class="prod-card-label" data-t="subGamified">Gamified Themes</div></div></a>
+        <a class="prod-card" data-index="8" href="Leading Self.dc.html"><div class="prod-card-inner"><img src="assets/meeting.png" alt="" style="object-position:50% 20%"><div class="prod-card-fade"></div><div class="prod-card-label" data-t="subLeadSelf">Leading Self</div></div></a>
+        <a class="prod-card" data-index="9" href="Leading People.dc.html"><div class="prod-card-inner"><img src="assets/handshake.png" alt=""><div class="prod-card-fade"></div><div class="prod-card-label" data-t="subLeadPeople">Leading People</div></div></a>
+        <a class="prod-card" data-index="10" href="Leading Business.dc.html"><div class="prod-card-inner"><img src="assets/brand-boardroom-ripple.jpeg" alt=""><div class="prod-card-fade"></div><div class="prod-card-label" data-t="subLeadBusiness">Leading Business</div></div></a>
+        <a class="prod-card" data-index="11" href="Leading Functions.dc.html"><div class="prod-card-inner"><img src="assets/brand-skyline-ripple.jpeg" alt=""><div class="prod-card-fade"></div><div class="prod-card-label" data-t="subLeadFunctions">Leading Functions</div></div></a>
+      </div>
+    </div>
+    <div class="products-dots" id="prodDots">
+      <button data-index="0" type="button"></button>
+      <button data-index="1" type="button"></button>
+      <button data-index="2" type="button"></button>
+      <button data-index="3" type="button"></button>
+      <button data-index="4" type="button"></button>
+      <button data-index="5" type="button"></button>
+      <button data-index="6" type="button"></button>
+      <button data-index="7" type="button"></button>
+      <button data-index="8" type="button"></button>
+      <button data-index="9" type="button"></button>
+      <button data-index="10" type="button"></button>
+      <button data-index="11" type="button"></button>
+    </div>
+  </section>
+
+  <section class="closing">
+    <div class="closing-bg"><img src="assets/contact-photo.png" alt=""></div>
+    <div class="closing-overlay"></div>
+    <div class="closing-inner">
+      <h2 data-t="closing">Ready to build capability that shows up in performance?</h2>
+      <a class="closing-cta" data-t="cta" href="Contact.dc.html">Book a Discovery Call</a>
+    </div>
+  </section>
+
+  <footer>
+    <span data-t="copyright">© 2026 Impact for Learning &amp; Development. All rights reserved.</span>
+    <button class="lang-btn" id="langToggleFooter" data-t="langBtn" type="button">العربية</button>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var EN = {
+    navHome: 'Home', navAbout: 'About Impact', navSolutions: 'Solutions', navPartners: 'International Partners', navContact: 'Contact', langBtn: 'العربية',
+    subLd: 'L&D Solutions', subOd: 'Organizational Development', subAim: 'AIM — AI in Motion', subCa: 'Assessments & Coaching', subGo: 'Impact GO', subGames: 'In-House Games & Simulations', subOneDay: "One Day's Program", subGamified: 'Gamified Themes',
+    eyebrow: 'ABOUT IMPACT', heroTitle: 'Transforming Capability into Measurable Business Performance',
+    heroSub: 'Impact designs experiential learning journeys and business simulations that translate capability into real-world results. Our solutions are tailored to each organization, combining innovation, relevance, and practical application to create lasting behavioral change.',
+    cta: 'Book a Discovery Call',
+    stat1: 'Participants developed across leadership and professional development programs.',
+    stat2: 'Learning hours delivered through experiential learning and business simulations.',
+    stat3: 'Coaching sessions supporting leadership growth and capability development.',
+    stat4: 'Participant satisfaction across development programs.',
+    whyLabel: 'WHY ORGANIZATIONS PARTNER WITH IMPACT',
+    statLabel1: 'PARTICIPANTS DEVELOPED', statLabel2: 'LEARNING HOURS DELIVERED',
+    why1Title: 'Experiential Simulations', why1Body: 'Immersive business simulations that recreate real organizational challenges and accelerate applied learning.',
+    why2Title: 'Tailored Learning Journeys', why2Body: 'Structured programs that combine assessments, experiential learning, and coaching to drive sustained leadership growth.',
+    why3Title: 'Regional Expertise, Global Methodologies', why3Body: 'Globally informed learning solutions delivered with a deep understanding of the MENA business environment.',
+    trustedLine: 'International Partners',
+    productsEyebrow: 'OUR PRODUCTS', productsHeading: 'Explore what we build',
+    leadershipLabel: 'LEADERSHIP', ceoName: 'Mahmoud Embaby', ceoTitle: 'CHIEF EXECUTIVE OFFICER', cfoName: 'Kareem Abdullah', cfoTitle: 'CHIEF STRATEGIC OFFICER',
+    subLeadSelf: 'Leading Self', subLeadPeople: 'Leading People', subLeadBusiness: 'Leading Business', subLeadFunctions: 'Leading Functions',
+    visionLabel: 'VISION', visionBody: 'Leading human development in the MEA region by influencing positive change in individuals, teams, organizations, and communities.',
+    missionLabel: 'MISSION', missionBody: 'Create innovative, customer focused people development solutions that meet the highest quality standards, align with international benchmarks, and deliver exceptional client satisfaction.',
+    valuesLabel: 'VALUES',
+    value1Title: 'Impact', value1Body: 'We focus on learning that drives measurable performance and real business results.',
+    value2Title: 'Trust', value2Body: 'We build lasting partnerships through credibility, consistency, and shared accountability.',
+    value3Title: 'Customer Centricity', value3Body: 'We design every solution around client context, goals, and learner needs.',
+    value4Title: 'Quality', value4Body: 'We hold our work to high standards to ensure depth, relevance, and excellence in delivery.',
+    value5Title: 'Agility', value5Body: 'We adapt quickly to changing business realities with flexible, responsive solutions.',
+    value6Title: 'Diversity', value6Body: 'We value varied perspectives, inclusive collaboration, and the richness they bring to learning.',
+    regionalLabel: 'REGIONAL PRESENCE & PARTNERSHIPS',
+    regionalBody: "Impact operates across the MENA region through a strong on-ground presence in Cairo, Dubai, and Riyadh, supporting organizations across Egypt, KSA, and the UAE.\n\nOur ecosystem brings together leading global partners to deliver world-class, locally relevant solutions. This includes Culture Partners, creators of the award-winning Discovery Maps® used by over 3 million learners worldwide, Knolskape, a multi-award-winning provider of business simulations, and BCon, pioneers in behavioral science and innovation frameworks that drive high-performance cultures. We also integrate Gallup's executive coaching methodologies to strengthen leadership effectiveness and engagement.\n\nAcross the region, Impact has engaged more than 150,000 participants and delivered over 60,000 learning hours, building long-term partnerships with organizations across industries. Our approach focuses on driving measurable improvements in leadership capability, team effectiveness, and organizational performance.",
+    milestonesLabel: 'MILESTONES & ACHIEVEMENTS',
+    milestonesBody: 'Impact has delivered large-scale learning and development programs across public and private sectors, supporting organizations in building leadership capability at scale.\n\nBy localizing international certification journeys for regional rollout, Impact ensures global standards are applied with local relevance.\n\nWith more than 150,000 learners reached through leadership, capability building, and experiential learning initiatives, Impact continues to build long-term partnerships across the MENA region.',
+    closing: 'Ready to build capability that shows up in performance?',
+    copyright: '© 2026 Impact for Learning & Development. All rights reserved.'
+  };
+  var AR = {
+    navHome: 'الرئيسية', navAbout: 'عن إمباكت', navSolutions: 'الحلول', navPartners: 'الشركاء الدوليون', navContact: 'تواصل معنا', langBtn: 'English',
+    subLd: 'حلول التعلم والتطوير', subOd: 'التطوير المؤسسي', subAim: 'AIM — الذكاء الاصطناعي في العمل', subCa: 'التقييمات والتدريب', subGo: 'Impact GO', subGames: 'ألعاب ومحاكاة داخلية', subOneDay: 'برنامج يوم واحد', subGamified: 'ثيمات التلعيب',
+    eyebrow: 'عن إمباكت', heroTitle: 'تحويل القدرات إلى أداء أعمال قابل للقياس',
+    heroSub: 'تصمم إمباكت رحلات تعلم تجريبية ومحاكاة أعمال تترجم القدرات إلى نتائج حقيقية. حلولنا مصممة خصيصاً لكل مؤسسة، تجمع بين الابتكار والملاءمة والتطبيق العملي لإحداث تغيير سلوكي مستمر.',
+    cta: 'حجز مكالمة استكشافية',
+    stat1: 'مشارك تم تطويره عبر برامج القيادة والتطوير المهني.',
+    stat2: 'ساعة تعلم قُدّمت من خلال التعلم التجريبي ومحاكاة الأعمال.',
+    stat3: 'جلسة تدريب دعمت نمو القيادة وتطوير القدرات.',
+    stat4: 'نسبة رضا المشاركين عبر برامج التطوير.',
+    whyLabel: 'لماذا تختار المؤسسات إمباكت',
+    statLabel1: 'مشارك تم تطويره', statLabel2: 'ساعات تعلم مقدمة',
+    why1Title: 'محاكاة تجريبية', why1Body: 'محاكاة أعمال غامرة تعيد إنتاج تحديات مؤسسية حقيقية وتسرّع التعلم التطبيقي.',
+    why2Title: 'رحلات تعلم مصممة خصيصاً', why2Body: 'برامج منظمة تجمع بين التقييمات والتعلم التجريبي والتدريب لتحقيق نمو قيادي مستمر.',
+    why3Title: 'خبرة إقليمية ومنهجيات عالمية', why3Body: 'حلول تعلم مستندة إلى منهجيات عالمية مع فهم عميق لبيئة الأعمال في منطقة الشرق الأوسط وشمال أفريقيا.',
+    trustedLine: 'موثوق به من مؤسسات رائدة في قطاعات متعددة',
+    productsEyebrow: 'منتجاتنا', productsHeading: 'تعرف على ما نقدمه',
+    leadershipLabel: 'القيادة', ceoName: 'محمود المبابي', ceoTitle: 'الرئيس التنفيذي', cfoName: 'كريم عبدالله', cfoTitle: 'المدير الاستراتيجي',
+    subLeadSelf: 'قيادة الذات', subLeadPeople: 'قيادة الآخرين', subLeadBusiness: 'قيادة الأعمال', subLeadFunctions: 'القيادة الوظيفية',
+    visionLabel: 'VISION', visionBody: 'Leading human development in the MEA region by influencing positive change in individuals, teams, organizations, and communities.',
+    missionLabel: 'MISSION', missionBody: 'Create innovative, customer focused people development solutions that meet the highest quality standards, align with international benchmarks, and deliver exceptional client satisfaction.',
+    valuesLabel: 'VALUES',
+    value1Title: 'Impact', value1Body: 'We focus on learning that drives measurable performance and real business results.',
+    value2Title: 'Trust', value2Body: 'We build lasting partnerships through credibility, consistency, and shared accountability.',
+    value3Title: 'Customer Centricity', value3Body: 'We design every solution around client context, goals, and learner needs.',
+    value4Title: 'Quality', value4Body: 'We hold our work to high standards to ensure depth, relevance, and excellence in delivery.',
+    value5Title: 'Agility', value5Body: 'We adapt quickly to changing business realities with flexible, responsive solutions.',
+    value6Title: 'Diversity', value6Body: 'We value varied perspectives, inclusive collaboration, and the richness they bring to learning.',
+    regionalLabel: 'REGIONAL PRESENCE & PARTNERSHIPS',
+    regionalBody: "Impact operates across the MENA region through a strong on-ground presence in Cairo, Dubai, and Riyadh, supporting organizations across Egypt, KSA, and the UAE.\n\nOur ecosystem brings together leading global partners to deliver world-class, locally relevant solutions. This includes Culture Partners, creators of the award-winning Discovery Maps® used by over 3 million learners worldwide, Knolskape, a multi-award-winning provider of business simulations, and BCon, pioneers in behavioral science and innovation frameworks that drive high-performance cultures. We also integrate Gallup's executive coaching methodologies to strengthen leadership effectiveness and engagement.\n\nAcross the region, Impact has engaged more than 150,000 participants and delivered over 60,000 learning hours, building long-term partnerships with organizations across industries. Our approach focuses on driving measurable improvements in leadership capability, team effectiveness, and organizational performance.",
+    milestonesLabel: 'MILESTONES & ACHIEVEMENTS',
+    milestonesBody: 'Impact has delivered large-scale learning and development programs across public and private sectors, supporting organizations in building leadership capability at scale.\n\nBy localizing international certification journeys for regional rollout, Impact ensures global standards are applied with local relevance.\n\nWith more than 150,000 learners reached through leadership, capability building, and experiential learning initiatives, Impact continues to build long-term partnerships across the MENA region.',
+    closing: 'مستعد لبناء قدرات تنعكس على الأداء؟',
+    copyright: '© 2026 إمباكت للتعلم والتطوير. جميع الحقوق محفوظة.'
+  };
+
+  var root = document.getElementById('root');
+  var targets = document.querySelectorAll('[data-t]');
+
+  function applyLang(lang) {
+    var t = lang === 'ar' ? AR : EN;
+    var isAr = lang === 'ar';
+    root.setAttribute('dir', isAr ? 'rtl' : 'ltr');
+    root.classList.toggle('lang-ar', isAr);
+    document.documentElement.setAttribute('lang', isAr ? 'ar' : 'en');
+    document.documentElement.setAttribute('dir', isAr ? 'rtl' : 'ltr');
+    targets.forEach(function (el) {
+      var key = el.getAttribute('data-t');
+      if (t[key] !== undefined) el.textContent = t[key];
+    });
+    updateHeroCaption();
+  }
+
+  var savedLang = localStorage.getItem('impactLang');
+  var currentLang = (savedLang === 'ar' || savedLang === 'en') ? savedLang : 'en';
+
+  function toggleLang() {
+    currentLang = currentLang === 'ar' ? 'en' : 'ar';
+    localStorage.setItem('impactLang', currentLang);
+    applyLang(currentLang);
+  }
+  document.getElementById('langToggle').addEventListener('click', toggleLang);
+  document.getElementById('langToggleFooter').addEventListener('click', toggleLang);
+
+  var heroCaptions;
+  function updateHeroCaption() {
+    var t = currentLang === 'ar' ? AR : EN;
+    heroCaptions = [t.heroSub, t.stat1, t.stat2];
+    var captionEl = document.getElementById('heroCaptionText');
+    if (captionEl) captionEl.textContent = heroCaptions[heroState.slide];
+  }
+
+  applyLang(currentLang);
+
+  var heroState = { slide: 0, N: 3 };
+  var heroBgs = Array.prototype.slice.call(document.querySelectorAll('.hero-bg'));
+  var heroSlides = Array.prototype.slice.call(document.querySelectorAll('.hero-slide'));
+  var heroDots = Array.prototype.slice.call(document.getElementById('heroDots').querySelectorAll('button'));
+  var heroCaptionNum = document.getElementById('heroCaptionNum');
+
+  function renderHero() {
+    heroBgs.forEach(function (el, i) { el.classList.toggle('active', i === heroState.slide); });
+    heroSlides.forEach(function (el, i) { el.classList.toggle('active', i === heroState.slide); });
+    heroDots.forEach(function (el, i) { el.classList.toggle('active', i === heroState.slide); });
+    heroCaptionNum.textContent = '0' + (heroState.slide + 1);
+    updateHeroCaption();
+  }
+
+  var heroTimer;
+  function resetHeroAutoplay() {
+    clearInterval(heroTimer);
+    heroTimer = setInterval(function () { heroState.slide = (heroState.slide + 1) % heroState.N; renderHero(); }, 6000);
+  }
+  function goToHero(i) { heroState.slide = ((i % heroState.N) + heroState.N) % heroState.N; renderHero(); resetHeroAutoplay(); }
+
+  document.getElementById('heroPrev').addEventListener('click', function () { goToHero(heroState.slide - 1); });
+  document.getElementById('heroNext').addEventListener('click', function () { goToHero(heroState.slide + 1); });
+  heroDots.forEach(function (dot) {
+    dot.addEventListener('click', function () { goToHero(parseInt(dot.getAttribute('data-index'), 10)); });
+  });
+  resetHeroAutoplay();
+
+  var whyState = { slide: 0, N: 3 };
+  var whySlides = Array.prototype.slice.call(document.getElementById('whySlider').querySelectorAll('.why-slide'));
+  var whyDots = Array.prototype.slice.call(document.getElementById('whyDots').querySelectorAll('button'));
+  function renderWhy() {
+    whySlides.forEach(function (el, i) { el.classList.toggle('active', i === whyState.slide); });
+    whyDots.forEach(function (el, i) { el.classList.toggle('active', i === whyState.slide); });
+  }
+  var whyTimer;
+  function resetWhyAutoplay() {
+    clearInterval(whyTimer);
+    whyTimer = setInterval(function () { whyState.slide = (whyState.slide + 1) % whyState.N; renderWhy(); }, 5000);
+  }
+  whyDots.forEach(function (dot) {
+    dot.addEventListener('click', function () {
+      whyState.slide = parseInt(dot.getAttribute('data-index'), 10);
+      renderWhy();
+      resetWhyAutoplay();
+    });
+  });
+  resetWhyAutoplay();
+
+  (function () {
+    var N = 12, cf = 0;
+    var cards = Array.prototype.slice.call(document.getElementById('prodTrack').querySelectorAll('.prod-card'));
+    var dots = Array.prototype.slice.call(document.getElementById('prodDots').querySelectorAll('button'));
+
+    function render() {
+      cards.forEach(function (card, i) {
+        var off = i - cf;
+        if (off > N / 2) off -= N;
+        if (off < -N / 2) off += N;
+        var isActive = off === 0;
+        var show = Math.abs(off) <= 2;
+        var tx = off * 32, rot = off * -26, scale = isActive ? 1 : Math.max(0.55, 0.8 - Math.abs(off) * 0.1), z = 10 - Math.abs(off), blur = isActive ? 0 : 2;
+        card.style.display = show ? 'block' : 'none';
+        card.style.transform = 'translate(-50%, -50%) translateX(' + tx + '%) scale(' + scale + ') rotateY(' + rot + 'deg)';
+        card.style.zIndex = z;
+        card.style.filter = 'brightness(' + (isActive ? 1 : 0.4) + ') blur(' + blur + 'px)';
+      });
+      dots.forEach(function (dot, i) { dot.classList.toggle('active', i === cf); });
+    }
+    render();
+
+    var timer;
+    function resetAutoplay() {
+      clearInterval(timer);
+      timer = setInterval(function () { cf = (cf + 1) % N; render(); }, 3500);
+    }
+    function goTo(i) { cf = ((i % N) + N) % N; render(); resetAutoplay(); }
+
+    document.getElementById('prodPrev').addEventListener('click', function () { goTo(cf - 1); });
+    document.getElementById('prodNext').addEventListener('click', function () { goTo(cf + 1); });
+    dots.forEach(function (dot) {
+      dot.addEventListener('click', function () { goTo(parseInt(dot.getAttribute('data-index'), 10)); });
+    });
+    resetAutoplay();
+  })();
+})();
+</script>
+</body>
+</html>
