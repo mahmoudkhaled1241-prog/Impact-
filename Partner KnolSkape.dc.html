@@ -199,6 +199,46 @@
   }
   .discovery-cta:hover { opacity: 0.85; }
 
+  .portfolio-banner {
+    position: relative;
+    min-height: 50vh;
+    overflow: hidden;
+    background: #0E1B26;
+    color: #F4FBFC;
+    display: flex;
+    align-items: center;
+    padding: clamp(80px, 12vh, 140px) clamp(24px, 6vw, 120px);
+  }
+  .portfolio-banner img.bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: blur(6px) grayscale(1);
+  }
+  .portfolio-banner .overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 20, 29, 0.55);
+  }
+  .portfolio-banner .inner {
+    position: relative;
+    z-index: 2;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    gap: 32px;
+  }
+  .portfolio-banner h2 {
+    margin: 0;
+    font-weight: 800;
+    font-size: clamp(32px, 5vw, 80px);
+    line-height: 1.02;
+    letter-spacing: -0.03em;
+    max-width: 18ch;
+  }
+
   footer {
     position: relative;
     background: #0E1B26;
@@ -212,7 +252,6 @@
     font-family: 'IBM Plex Mono', monospace;
     font-size: 12px;
     color: #567179;
-    margin-top: 80px;
   }
 </style>
 </head>
@@ -235,13 +274,13 @@
   <section class="partner-section">
     <a class="back-link" data-t="back" href="International Partners.dc.html">← All partners</a>
 
-    <div class="partner-logo-box">
-      <img src="assets/partner-knolskape-color.png" alt="KnolSkape">
-    </div>
+    <a class="partner-logo-box" href="https://knolskape.com/" target="_blank" rel="noopener">
+      <img src="assets/partner-knolskape-dark.png" alt="KNOLSKAPE">
+    </a>
 
     <h1 class="partner-name" data-t="name">KNOLSKAPE</h1>
 
-    <p class="partner-body" data-t="body">Multi award winning online simulations provider offering assessment, development, and engagement through a powerful online platform.</p>
+    <p class="partner-body" data-t="body">KNOLSKAPE uses AI-powered experiential technology, immersive simulations, and gamified assessments to turn capability building into measurable performance readiness. Its solutions strengthen leadership, digital and AI adoption, customer-facing skills, and organizational transformation through contextual practice. Through this partnership, Impact combines KNOLSKAPE's global technology with regional expertise and facilitation, delivering learning experiences tailored to the realities of organizations across Egypt and the wider MENA region.</p>
 
     <div class="programs">
       <div class="programs-label" data-t="progsLabel">PROGRAMS &amp; TOOLS</div>
@@ -270,6 +309,15 @@
     </div>
   </section>
 
+  <section class="portfolio-banner">
+    <img class="bg" src="assets/handshake.png" alt="">
+    <div class="overlay"></div>
+    <div class="inner">
+      <h2 data-t="portfolioHeading">Explore the International Partners Portfolio</h2>
+      <a class="discovery-cta" data-t="cta" href="Contact.dc.html">Book a Discovery Call</a>
+    </div>
+  </section>
+
   <footer>
     <span data-t="copyright">© 2026 Impact for Learning &amp; Development. All rights reserved.</span>
     <button class="lang-btn" id="langToggleFooter" data-t="langBtn" type="button">العربية</button>
@@ -281,13 +329,15 @@
   var EN = {
     navHome: 'Home', navAbout: 'About Impact', navSolutions: 'Solutions', navPartners: 'International Partners', navContact: 'Contact', langBtn: 'العربية',
     back: '← All partners', name: 'KNOLSKAPE', progsLabel: 'PROGRAMS & TOOLS',
-    body: 'Multi award winning online simulations provider offering assessment, development, and engagement through a powerful online platform.',
+    body: "KNOLSKAPE uses AI-powered experiential technology, immersive simulations, and gamified assessments to turn capability building into measurable performance readiness. Its solutions strengthen leadership, digital and AI adoption, customer-facing skills, and organizational transformation through contextual practice. Through this partnership, Impact combines KNOLSKAPE's global technology with regional expertise and facilitation, delivering learning experiences tailored to the realities of organizations across Egypt and the wider MENA region.",
+    portfolioHeading: 'Explore the International Partners Portfolio',
     cta: 'Book a Discovery Call', copyright: '© 2026 Impact for Learning & Development. All rights reserved.'
   };
   var AR = {
     navHome: 'الرئيسية', navAbout: 'عن إمباكت', navSolutions: 'الحلول', navPartners: 'الشركاء الدوليون', navContact: 'تواصل معنا', langBtn: 'English',
     back: '← جميع الشركاء', name: 'KNOLSKAPE', progsLabel: 'البرامج والأدوات',
     body: 'مزود محاكاة عبر الإنترنت حائز على جوائز متعددة يقدم التقييم والتطوير والانخراط من خلال منصة إلكترونية قوية.',
+    portfolioHeading: 'استكشف محفظة الشركاء الدوليين',
     cta: 'حجز مكالمة استكشافية', copyright: '© 2026 إمباكت للتعلم والتطوير. جميع الحقوق محفوظة.'
   };
 
