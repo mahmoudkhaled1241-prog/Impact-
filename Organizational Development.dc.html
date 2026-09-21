@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Organizational Development | Impact for Learning &amp; Development</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;600;700&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root { color-scheme: dark; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  html, body { background: #0A141D; }
+  body { font-family: 'Inter', Helvetica, Arial, sans-serif; color: #F4FBFC; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+  a { text-decoration: none; color: #18D4E2; }
+  a:hover { color: #8FEAF0; }
+  button { font-family: inherit; }
+  img { max-width: 100%; display: block; }
+  ::selection { background: #18D4E2; color: #0A141D; }
+
+  #root { position: relative; width: 100%; background: #0A141D; }
+  #root.lang-ar { font-family: 'IBM Plex Sans Arabic', 'Inter', sans-serif; }
+
+  header { position: sticky; top: 0; z-index: 50; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 24px; padding: 14px clamp(20px, 6vw, 120px); background: rgba(10, 20, 29, 0.92); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(140, 205, 214, 0.22); }
+  header .brand img { height: clamp(28px, 3vw, 38px); width: auto; }
+  nav.main-nav { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 10px clamp(12px, 2.2vw, 36px); font-family: 'IBM Plex Mono', monospace; font-size: clamp(10px, 1.05vw, 12px); letter-spacing: 0.12em; text-transform: uppercase; }
+  nav.main-nav a { color: #F4FBFC; text-decoration: none; transition: color 0.2s ease; }
+  nav.main-nav a:hover, nav.main-nav a.active { color: #18D4E2; }
+  nav.main-nav a.contact-cta { color: #18D4E2; border: 1px solid rgba(24, 212, 226, 0.5); padding: 9px 20px; border-radius: 999px; }
+  nav.main-nav a.contact-cta:hover { background: rgba(24, 212, 226, 0.1); }
+  .nav-drop { position: relative; }
+  .nav-drop > a { display: flex; align-items: center; gap: 7px; }
+  .nav-drop .caret { font-size: 9px; opacity: .7; }
+  .nav-drop-panel { position: absolute; top: 100%; left: -12px; padding-top: 14px; opacity: 0; transform: translateY(-8px); pointer-events: none; transition: opacity .22s ease, transform .22s ease; }
+  .nav-drop.partners .nav-drop-panel { left: auto; right: -12px; }
+  .nav-drop:hover .nav-drop-panel, .nav-drop:focus-within .nav-drop-panel { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  .nav-drop-inner { min-width: 280px; background: #0E1B26; border: 1px solid rgba(140,205,214,.22); padding: 8px; display: grid; }
+  .nav-drop-inner a { padding: 12px 16px; color: #F4FBFC; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; text-transform: none; display: flex; align-items: center; gap: 8px; transition: background .2s ease; }
+  .nav-drop-inner a:hover { background: #162835; color: #F4FBFC; }
+  .new-pill { background: #18D4E2; color: #0A141D; font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: .06em; padding: 2px 6px; border-radius: 4px; }
+  .lang-btn { background: transparent; border: 1px solid rgba(140, 205, 214, 0.4); color: #8FEAF0; padding: 8px 16px; border-radius: 999px; cursor: pointer; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; transition: border-color 0.2s ease, color 0.2s ease; }
+  .lang-btn:hover { border-color: #18D4E2; color: #18D4E2; }
+
+  .hero { position: relative; padding: clamp(80px, 14vh, 160px) clamp(24px, 6vw, 120px) clamp(48px, 6vh, 80px); overflow: hidden; display: grid; gap: 24px; max-width: 1200px; margin: 0 auto; }
+  .hero-bg { position: absolute; inset: 0; overflow: hidden; z-index: -1; }
+  .hero-bg img { width: 100%; height: 100%; object-fit: cover; opacity: .8; transition: transform 0.25s ease-out; transform: scale(1.08); }
+  .hero-overlay { position: absolute; inset: 0; z-index: -1; background: linear-gradient(100deg, rgba(10,20,29,.35), rgba(10,20,29,.55) 55%, rgba(10,20,29,.85)); }
+  .eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #7793A0; }
+  h1.page-title { font-weight: 700; font-size: clamp(32px, 4.4vw, 60px); line-height: 1.1; letter-spacing: -0.025em; max-width: 22ch; text-wrap: pretty; }
+  p.page-intro { color: #AFC7CD; font-size: clamp(16px, 1.3vw, 18px); line-height: 1.65; max-width: 68ch; text-wrap: pretty; }
+  .hero-detail { display: grid; gap: 24px; max-width: 800px; border-top: 1px solid rgba(140, 205, 214, 0.22); padding-top: 32px; margin-top: 8px; }
+  .hero-detail h3 { margin: 0 0 8px; font-size: 18px; font-weight: 700; }
+  .hero-detail p { margin: 0; color: #AFC7CD; font-size: 15px; line-height: 1.65; }
+
+  .tabs-wrap { position: relative; padding: 0 clamp(24px, 6vw, 120px); max-width: 1200px; margin: 0 auto; }
+  .tabs { display: flex; gap: clamp(16px, 2.6vw, 32px); border-bottom: 1px solid rgba(140, 205, 214, 0.22); overflow-x: auto; }
+  .tab-btn { padding: 16px 0; background: transparent; border: none; font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: -0.005em; cursor: pointer; white-space: nowrap; color: #AFC7CD; border-bottom: 2px solid transparent; transition: color 0.2s ease, border-color 0.2s ease; }
+  .tab-btn.active { color: #18D4E2; border-bottom-color: #18D4E2; }
+
+  .tab-content-wrap { position: relative; padding: clamp(48px, 7vh, 80px) clamp(24px, 6vw, 120px) clamp(120px, 16vh, 200px); max-width: 1200px; margin: 0 auto; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: grid; gap: 24px; max-width: 800px; }
+  .tab-panel .thumb { height: 240px; overflow: hidden; }
+  .tab-panel .thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .tab-panel p.lead { margin: 0; color: #AFC7CD; font-size: 17px; line-height: 1.65; }
+  .tab-panel .detail h3 { margin: 0 0 8px; font-size: 18px; font-weight: 700; }
+  .tab-panel .detail p { margin: 0; color: #AFC7CD; font-size: 15px; line-height: 1.65; }
+  .tab-panel .detail p.flow { color: #18D4E2; font-weight: 600; }
+  .cta-btn { justify-self: start; color: #0A141D; background: #18D4E2; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; padding: 14px 28px; border-radius: 999px; transition: background 0.2s ease; }
+  .cta-btn:hover { background: #8FEAF0; color: #0A141D; }
+
+  .closing { position: relative; min-height: 50vh; overflow: hidden; background: #0E1B26; color: #F4FBFC; display: flex; align-items: center; padding: clamp(80px, 12vh, 140px) clamp(24px, 6vw, 120px); }
+  .closing-bg { position: absolute; inset: 0; filter: blur(6px); }
+  .closing-bg img { width: 100%; height: 100%; object-fit: cover; }
+  .closing-overlay { position: absolute; inset: 0; background: rgba(10, 20, 29, 0.35); }
+  .closing-inner { position: relative; z-index: 2; max-width: 1200px; margin: 0 auto; display: grid; gap: 32px; }
+  .closing h2 { margin: 0; font-weight: 800; font-size: clamp(32px, 5vw, 80px); line-height: 1.02; letter-spacing: -0.03em; max-width: 18ch; }
+
+  footer { position: relative; background: #0E1B26; border-top: 1px solid rgba(140, 205, 214, 0.22); padding: 24px clamp(24px, 6vw, 120px); display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #567179; }
+</style>
+</head>
+<body>
+<div id="root" dir="ltr">
+  <header>
+    <a class="brand" href="Impact L&amp;D Parallax.dc.html"><img src="assets/logo.png" alt="Impact"></a>
+    <nav class="main-nav">
+      <a data-t="navHome" href="Impact L&amp;D Parallax.dc.html">Home</a>
+      <a data-t="navAbout" href="About Impact.dc.html">About Impact</a>
+      <div class="nav-drop">
+        <a data-t="navSolutions" href="Solutions.dc.html" class="active">Solutions <span class="caret">▼</span></a>
+        <div class="nav-drop-panel">
+          <div class="nav-drop-inner">
+            <a data-t="subLd" href="L&amp;D Solutions.dc.html">L&amp;D Solutions</a>
+            <a data-t="subOd" href="Organizational Development.dc.html" style="color:#18D4E2">Organizational Development</a>
+            <a href="AIM - AI in Motion.dc.html"><span data-t="subAim">AIM — AI in Motion</span><span class="new-pill">NEW</span></a>
+            <a data-t="subCa" href="Assessments &amp; Coaching.dc.html">Assessments &amp; Coaching</a>
+            <a data-t="subGo" href="Impact GO.dc.html">Impact GO</a>
+            <a data-t="subGames" href="In-House Games.dc.html">In-House Games &amp; Simulations</a>
+            <a data-t="subOneDay" href="One Days Program.dc.html">One Day's Program</a>
+            <a data-t="subGamified" href="Gamified Themes.dc.html">Gamified Themes</a>
+          </div>
+        </div>
+      </div>
+      <div class="nav-drop partners">
+        <a data-t="navPartners" href="International Partners.dc.html">International Partners <span class="caret">▼</span></a>
+        <div class="nav-drop-panel">
+          <div class="nav-drop-inner">
+            <a href="Partner Culture Partners.dc.html">Culture Partners</a>
+            <a href="Partner KnolSkape.dc.html">KNOLSKAPE</a>
+            <a href="Partner BCon.dc.html">BCon</a>
+            <a href="Partner Gallup.dc.html">Gallup</a>
+            <a href="Partner ManagementDrive.dc.html">ManagementDrive</a>
+          </div>
+        </div>
+      </div>
+      <a data-t="navContact" href="Contact.dc.html" class="contact-cta">Contact</a>
+      <button class="lang-btn" id="langToggle" data-t="langBtn" type="button">العربية</button>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div class="hero-bg"><img id="heroImg" src="assets/brand-boardroom-ripple.jpeg" alt=""></div>
+    <div class="hero-overlay"></div>
+    <div class="eyebrow" data-t="eyebrow">SOLUTIONS — ORGANIZATIONAL DEVELOPMENT</div>
+    <h1 class="page-title" data-t="heading">Organizational Development</h1>
+    <p class="page-intro" data-t="intro1">Impact's Organizational Development services align strategy, capability, and organizational systems to drive sustainable performance and long-term growth across the GCC.</p>
+    <p class="page-intro" data-t="intro2">We work across six interconnected practice areas, delivering integrated solutions including strategy, talent development, competency building, organizational policies and processes, corporate governance, and cultural transformation, ensuring that people, processes, and structures work together effectively to enable execution at scale.</p>
+    <div class="hero-detail">
+      <div><h3 data-t="whatYouGet">What you get</h3><p data-t="whatYouGetBody">End-to-end Organizational Development interventions delivered through in-house execution and global expertise, with no reliance on off-the-shelf frameworks. Ensuring stronger alignment, governance, and execution. From diagnosis through to sustainable implementation delivered as one seamless solution.</p></div>
+      <div><h3 data-t="outcomesTitle">Outcomes</h3><p data-t="outcomesTop">Clear operating models, stronger accountability, healthier culture, better cross functional performance, and measurable readiness for the regulatory and strategic demands of operating in the GCC.</p></div>
+    </div>
+  </section>
+
+  <section class="tabs-wrap">
+    <div class="tabs" id="tabs">
+      <button class="tab-btn active" data-tab="strategy" data-t="tabStrategy" type="button">Strategy</button>
+      <button class="tab-btn" data-tab="talent" data-t="tabTalent" type="button">Talent Development</button>
+      <button class="tab-btn" data-tab="comp" data-t="tabComp" type="button">Competency Building</button>
+      <button class="tab-btn" data-tab="policy" data-t="tabPolicy" type="button">Policies &amp; Procedures</button>
+      <button class="tab-btn" data-tab="culture" data-t="tabCulture" type="button">Cultural Transformation</button>
+      <button class="tab-btn" data-tab="gov" data-t="tabGov" type="button">Corporate Governance</button>
+    </div>
+  </section>
+
+  <section class="tab-content-wrap">
+
+    <div class="tab-panel active" data-panel="strategy">
+      <div class="thumb"><img src="assets/brand-boardroom-ripple.jpeg" alt=""></div>
+      <p class="lead" data-t="strategyIntro">Effective strategy goes beyond direction, it requires clarity, focus, and the ability to translate ambition into action. Impact partners with leadership teams across the GCC to shape clear, actionable strategies that connect business priorities with people, capability, and execution, enabling organizations to move from intent to measurable performance.</p>
+      <div class="detail"><h3 data-t="whatYouGet">What you get</h3><p data-t="strategyBody">Strategic diagnostics, prioritized roadmaps, and structured co-creation. We work alongside your leadership ensuring strategy outputs reflect global best practice and the realities of GCC markets.</p></div>
+      <a class="cta-btn" data-t="strategyCta" href="Contact.dc.html">Book a strategy session</a>
+    </div>
+
+    <div class="tab-panel" data-panel="talent">
+      <div class="thumb"><img src="assets/handshake.png" alt=""></div>
+      <p class="lead" data-t="talentIntro">Sustainable performance is driven by the strength and readiness of an organization's talent. Impact designs integrated development journeys that build leadership capability, accelerate high-potential growth, and strengthen critical roles, ensuring talent is equipped to deliver on current and future business priorities.</p>
+      <p style="margin:0;color:#AFC7CD;font-size:15px;line-height:1.65" data-t="talentBody">Building strong leadership pipelines requires more than standalone training programs. Impact designs integrated development pathways that combine assessment, experiential learning, simulations, and coaching to support sustained capability growth across the organization. Our approach begins with assessments and diagnostic tools that identify strengths, gaps, and leadership potential, informing structured development journeys that combine experiential workshops, business simulations, and applied learning experiences, supported throughout by coaching and feedback.</p>
+      <div class="detail"><h3 data-t="outcomesTitle">Outcomes</h3><p data-t="talentOutcomes">Stronger pipelines, better readiness, and accelerated performance.</p></div>
+      <a class="cta-btn" data-t="talentCta" href="Contact.dc.html">Map your growth</a>
+    </div>
+
+    <div class="tab-panel" data-panel="comp">
+      <div class="thumb"><img src="assets/meeting.png" alt=""></div>
+      <p class="lead" data-t="compIntro">Organizational performance is ultimately shaped by the capabilities people bring to their roles every day. Impact develops and activates competency frameworks that translate business needs and strategic priorities into practical, role-relevant development pathways, enabling organizations to build capability that is measurable, scalable, and aligned with performance outcomes.</p>
+      <div class="detail"><h3 data-t="whatYouGet">What you get</h3><p data-t="compBody">Custom competency frameworks, role-based development pathways, and reinforcement mechanisms that support performance-based learning. We design frameworks that go beyond documentation, building them into development journeys, performance conversations, and learning infrastructure your organization can maintain.</p></div>
+      <a class="cta-btn" data-t="compCta" href="Contact.dc.html">Let's discuss more</a>
+    </div>
+
+    <div class="tab-panel" data-panel="policy">
+      <div class="thumb"><img src="assets/brand-boardroom-ripple.jpeg" alt="" style="object-position: 50% 30%"></div>
+      <p class="lead" data-t="policyIntro">Execution at scale depends on clarity in how decisions are made, how work gets done, and how accountability is structured across the organization. Impact structures organizational policies and procedures that define decision flows, standardize operations, and reduce ambiguity, enabling teams to operate more efficiently and with greater consistency across functions.</p>
+      <div class="detail"><h3 data-t="outcomesTitle">Outcomes</h3><p data-t="policyOutcomes">Reduced ambiguity, faster onboarding, stronger compliance, and smoother execution across functions — an HR and operations infrastructure built to scale.</p></div>
+      <a class="cta-btn" data-t="policyCta" href="Contact.dc.html">Discuss your policy and procedure needs</a>
+    </div>
+
+    <div class="tab-panel" data-panel="culture">
+      <div class="thumb"><img src="assets/handshake.png" alt="" style="object-position: 50% 30%"></div>
+      <p class="lead" data-t="cultureIntro">Transforming culture requires more than communication initiatives or isolated workshops. It requires shifting how people think, behave, and collaborate every day, and ensuring that leadership practices, team rituals, and organizational systems reinforce the change rather than resist it. Impact partners with organizations across the GCC to translate strategy and values into practical leadership behaviors, team rituals, and aligned systems that shape sustainable culture and performance.</p>
+      <div class="detail"><h3 data-t="whyMatters">Why it matters</h3><p data-t="cultureWhy">When culture is not aligned with strategy, organizations experience it everywhere: slow execution, weak cross-functional collaboration, and resistance to change. Cultural transformation helps align leadership behaviors, team practices, and organizational systems with the direction the business needs to move — turning strategic intent into everyday action and making change stick.</p></div>
+      <div class="detail"><h3 data-t="framework">Transformation Framework</h3><p class="flow" data-t="frameworkFlow">Mindset → Behavior → Rituals → Systems → Sustainable Culture</p></div>
+      <div class="detail"><h3 data-t="expectedOutcomes">Expected Outcomes</h3><p data-t="cultureOutcomes">Stronger alignment between strategy and behavior, improved collaboration across teams, leaders who role-model the desired culture, and stronger accountability for performance.</p></div>
+    </div>
+
+    <div class="tab-panel" data-panel="gov">
+      <div class="thumb"><img src="assets/meeting.png" alt="" style="object-position: 50% 30%"></div>
+      <p class="lead" data-t="govIntro">Strong governance is essential to balancing control, accountability, and effective execution. Impact establishes governance frameworks that clarify roles, responsibilities, and decision-making authority, enabling organizations to strengthen alignment, improve oversight, and operate with greater confidence at scale.</p>
+      <div class="detail"><h3 data-t="outcomesTitle">Outcomes</h3><p data-t="govOutcomes">Clear decision-making structures and accountability, defined roles and governance frameworks across functions, improved alignment between leadership and execution, and faster, more effective organizational decision-making — a governance model built to support the next stage of organizational growth.</p></div>
+      <a class="cta-btn" data-t="govCta" href="Contact.dc.html">Explore governance support</a>
+    </div>
+
+  </section>
+
+  <section class="closing">
+    <div class="closing-bg"><img src="assets/contact-photo.png" alt=""></div>
+    <div class="closing-overlay"></div>
+    <div class="closing-inner">
+      <h2 data-t="closing">Request a Customized Learning Journey</h2>
+      <a class="cta-btn" data-t="cta" href="Contact.dc.html">Book a Discovery Call</a>
+    </div>
+  </section>
+
+  <footer>
+    <span data-t="copyright">© 2026 Impact for Learning &amp; Development. All rights reserved.</span>
+    <button class="lang-btn" id="langToggleFooter" data-t="langBtn" type="button">العربية</button>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var EN = {
+    navHome: 'Home', navAbout: 'About Impact', navSolutions: 'Solutions', navPartners: 'International Partners', navContact: 'Contact', langBtn: 'العربية',
+    subLd: 'L&D Solutions', subOd: 'Organizational Development', subAim: 'AIM — AI in Motion', subCa: 'Assessments & Coaching', subGo: 'Impact GO', subGames: 'In-House Games & Simulations', subOneDay: "One Day's Program", subGamified: 'Gamified Themes',
+    eyebrow: 'SOLUTIONS — ORGANIZATIONAL DEVELOPMENT', heading: 'Organizational Development',
+    intro1: "Impact's Organizational Development services align strategy, capability, and organizational systems to drive sustainable performance and long-term growth across the GCC.",
+    intro2: 'We work across six interconnected practice areas, delivering integrated solutions including strategy, talent development, competency building, organizational policies and processes, corporate governance, and cultural transformation, ensuring that people, processes, and structures work together effectively to enable execution at scale.',
+    whatYouGet: 'What you get',
+    whatYouGetBody: 'End-to-end Organizational Development interventions delivered through in-house execution and global expertise, with no reliance on off-the-shelf frameworks. Ensuring stronger alignment, governance, and execution. From diagnosis through to sustainable implementation delivered as one seamless solution.',
+    outcomesTitle: 'Outcomes',
+    outcomesTop: 'Clear operating models, stronger accountability, healthier culture, better cross functional performance, and measurable readiness for the regulatory and strategic demands of operating in the GCC.',
+    tabStrategy: 'Strategy', tabTalent: 'Talent Development', tabComp: 'Competency Building', tabPolicy: 'Policies & Procedures', tabCulture: 'Cultural Transformation', tabGov: 'Corporate Governance',
+    strategyIntro: 'Effective strategy goes beyond direction, it requires clarity, focus, and the ability to translate ambition into action. Impact partners with leadership teams across the GCC to shape clear, actionable strategies that connect business priorities with people, capability, and execution, enabling organizations to move from intent to measurable performance.',
+    strategyBody: 'Strategic diagnostics, prioritized roadmaps, and structured co-creation. We work alongside your leadership ensuring strategy outputs reflect global best practice and the realities of GCC markets.',
+    strategyCta: 'Book a strategy session',
+    talentIntro: "Sustainable performance is driven by the strength and readiness of an organization's talent. Impact designs integrated development journeys that build leadership capability, accelerate high-potential growth, and strengthen critical roles, ensuring talent is equipped to deliver on current and future business priorities.",
+    talentBody: 'Building strong leadership pipelines requires more than standalone training programs. Impact designs integrated development pathways that combine assessment, experiential learning, simulations, and coaching to support sustained capability growth across the organization. Our approach begins with assessments and diagnostic tools that identify strengths, gaps, and leadership potential, informing structured development journeys that combine experiential workshops, business simulations, and applied learning experiences, supported throughout by coaching and feedback.',
+    talentOutcomes: 'Stronger pipelines, better readiness, and accelerated performance.',
+    talentCta: 'Map your growth',
+    compIntro: 'Organizational performance is ultimately shaped by the capabilities people bring to their roles every day. Impact develops and activates competency frameworks that translate business needs and strategic priorities into practical, role-relevant development pathways, enabling organizations to build capability that is measurable, scalable, and aligned with performance outcomes.',
+    compBody: 'Custom competency frameworks, role-based development pathways, and reinforcement mechanisms that support performance-based learning. We design frameworks that go beyond documentation, building them into development journeys, performance conversations, and learning infrastructure your organization can maintain.',
+    compCta: "Let's discuss more",
+    policyIntro: 'Execution at scale depends on clarity in how decisions are made, how work gets done, and how accountability is structured across the organization. Impact structures organizational policies and procedures that define decision flows, standardize operations, and reduce ambiguity, enabling teams to operate more efficiently and with greater consistency across functions.',
+    policyOutcomes: 'Reduced ambiguity, faster onboarding, stronger compliance, and smoother execution across functions — an HR and operations infrastructure built to scale.',
+    policyCta: 'Discuss your policy and procedure needs',
+    cultureIntro: 'Transforming culture requires more than communication initiatives or isolated workshops. It requires shifting how people think, behave, and collaborate every day, and ensuring that leadership practices, team rituals, and organizational systems reinforce the change rather than resist it. Impact partners with organizations across the GCC to translate strategy and values into practical leadership behaviors, team rituals, and aligned systems that shape sustainable culture and performance.',
+    whyMatters: 'Why it matters',
+    cultureWhy: 'When culture is not aligned with strategy, organizations experience it everywhere: slow execution, weak cross-functional collaboration, and resistance to change. Cultural transformation helps align leadership behaviors, team practices, and organizational systems with the direction the business needs to move — turning strategic intent into everyday action and making change stick.',
+    framework: 'Transformation Framework', frameworkFlow: 'Mindset → Behavior → Rituals → Systems → Sustainable Culture',
+    expectedOutcomes: 'Expected Outcomes',
+    cultureOutcomes: 'Stronger alignment between strategy and behavior, improved collaboration across teams, leaders who role-model the desired culture, and stronger accountability for performance.',
+    govIntro: 'Strong governance is essential to balancing control, accountability, and effective execution. Impact establishes governance frameworks that clarify roles, responsibilities, and decision-making authority, enabling organizations to strengthen alignment, improve oversight, and operate with greater confidence at scale.',
+    govOutcomes: 'Clear decision-making structures and accountability, defined roles and governance frameworks across functions, improved alignment between leadership and execution, and faster, more effective organizational decision-making — a governance model built to support the next stage of organizational growth.',
+    govCta: 'Explore governance support',
+    closing: 'Request a Customized Learning Journey', cta: 'Book a Discovery Call',
+    copyright: '© 2026 Impact for Learning & Development. All rights reserved.'
+  };
+  var AR = {
+    navHome: 'الرئيسية', navAbout: 'عن إمباكت', navSolutions: 'الحلول', navPartners: 'الشركاء الدوليون', navContact: 'تواصل معنا', langBtn: 'English',
+    subLd: 'حلول التعلم والتطوير', subOd: 'التطوير المؤسسي', subAim: 'AIM — الذكاء الاصطناعي في العمل', subCa: 'التقييمات والتدريب', subGo: 'Impact GO', subGames: 'ألعاب ومحاكاة داخلية', subOneDay: 'برنامج يوم واحد', subGamified: 'ثيمات التلعيب',
+    eyebrow: 'الحلول — التطوير المؤسسي', heading: 'التطوير المؤسسي',
+    intro1: 'تعمل خدمات التطوير المؤسسي من إمباكت على مواءمة الاستراتيجية والقدرات والأنظمة المؤسسية لتحقيق أداء مستدام ونمو طويل الأمد عبر منطقة الخليج.',
+    intro2: 'نعمل عبر ستة مجالات ممارسة متكاملة، تقدم حلولاً شاملة تشمل الاستراتيجية وتطوير المواهب وبناء القدرات والسياسات والإجراءات المؤسسية والحوكمة المؤسسية والتحول الثقافي، لضمان تعاون الأفراد والعمليات والهياكل بفعالية لتمكين التنفيذ على نطاق واسع.',
+    whatYouGet: 'ماذا تحصل عليه',
+    whatYouGetBody: 'تدخلات تطوير مؤسسي شاملة تُنفَّذ داخلياً بخبرة عالمية، دون الاعتماد على أطر جاهزة. لضمان توافق وحوكمة وتنفيذ أقوى. من التشخيص إلى التنفيذ المستدام كحل واحد متكامل.',
+    outcomesTitle: 'النتائج',
+    outcomesTop: 'نماذج تشغيل واضحة، مساءلة أقوى، ثقافة أكثر صحة، أداء أفضل بين الوظائف، وجاهزية قابلة للقياس لمتطلبات العمل التنظيمية والاستراتيجية في منطقة الخليج.',
+    tabStrategy: 'الاستراتيجية', tabTalent: 'تطوير المواهب', tabComp: 'بناء القدرات', tabPolicy: 'السياسات والإجراءات', tabCulture: 'التحول الثقافي', tabGov: 'الحوكمة المؤسسية',
+    strategyIntro: 'الاستراتيجية الفعالة تتجاوز التوجيه؛ فهي تتطلب وضوحاً وتركيزاً وقدرة على ترجمة الطموح إلى إجراءات. تتعاون إمباكت مع فرق القيادة عبر منطقة الخليج لصياغة استراتيجيات واضحة وقابلة للتنفيذ تربط أولويات الأعمال بالأفراد والقدرات والتنفيذ، مما يمكّن المؤسسات من التحول من النية إلى أداء قابل للقياس.',
+    strategyBody: 'تشخيصات استراتيجية، خرائط طريق مرتبة بالأولوية، وعمل تشاركي منظم. نعمل مع قيادتكم لضمان أن مخرجات الاستراتيجية تعكس أفضل الممارسات العالمية وواقع أسواق الخليج.',
+    strategyCta: 'حجز جلسة استراتيجية',
+    talentIntro: 'الأداء المستدام تقوده قوة وجاهزية مواهب المؤسسة. تصمم إمباكت رحلات تطوير متكاملة تبني قدرات القيادة، وتسرّع نمو الموظفين ذوي الإمكانات العالية، وتعزز الأدوار الحرجة، لضمان استعداد المواهب لتحقيق أولويات الأعمال الحالية والمستقبلية.',
+    talentBody: 'بناء خطوط قيادة قوية يتطلب أكثر من برامج تدريب منفردة. تصمم إمباكت مسارات تطوير متكاملة تجمع بين التقييم والتعلم التجريبي والمحاكاة والتدريب لدعم نمو القدرات المستمر عبر المؤسسة. يبدأ نهجنا بالتقييمات وأدوات التشخيص التي تحدد نقاط القوة والثغرات وإمكانات القيادة، لتغذية رحلات تطوير منظمة تجمع بين ورش العمل التجريبية ومحاكاة الأعمال وتجارب التعلم التطبيقي، مدعومة طوال الرحلة بالتدريب والتغذية الراجعة.',
+    talentOutcomes: 'خطوط قيادة أقوى، جاهزية أفضل، وأداء متسارع.',
+    talentCta: 'خطط لنمو مؤسستك',
+    compIntro: 'الأداء المؤسسي في النهاية تشكّله القدرات التي يجلبها الأفراد لأدوارهم كل يوم. تطور إمباكت وتفعّل أطر القدرات التي تترجم احتياجات الأعمال والأولويات الاستراتيجية إلى مسارات تطوير عملية ومرتبطة بالدور، مما يمكّن المؤسسات من بناء قدرات قابلة للقياس والتوسع ومتوافقة مع نتائج الأداء.',
+    compBody: 'أطر قدرات مخصصة، مسارات تطوير قائمة على الدور، وآليات تعزيز تدعم التعلم القائم على الأداء. نصمم أطراً تتجاوز التوثيق، وتُبنى في رحلات التطوير ومحادثات الأداء وبنية التعلم التي تستطيع مؤسستك الحفاظ عليها.',
+    compCta: 'لنتحدث أكثر',
+    policyIntro: 'التنفيذ على نطاق واسع يعتمد على وضوح كيفية اتخاذ القرارات وإنجاز العمل وهيكلة المساءلة عبر المؤسسة. تبني إمباكت سياسات وإجراءات مؤسسية تحدد تدفقات القرار، وتوحّد العمليات، وتقلل الغموض، مما يمكّن الفرق من العمل بكفاءة أكبر واتساق أكبر عبر الوظائف.',
+    policyOutcomes: 'غموض أقل، إعداد أسرع للموظفين الجدد، امتثال أقوى، وتنفيذ أكثر سلاسة عبر الوظائف — بنية موارد بشرية وعمليات مصممة للتوسع.',
+    policyCta: 'ناقش احتياجاتك من السياسات والإجراءات',
+    cultureIntro: 'تحويل الثقافة يتطلب أكثر من مبادرات تواصل أو ورش عمل منفردة. يتطلب تغيير طريقة تفكير الأفراد وسلوكهم وتعاونهم كل يوم، وضمان أن ممارسات القيادة وطقوس الفريق والأنظمة المؤسسية تعزز التغيير لا أن تقاومه. تتعاون إمباكت مع المؤسسات عبر منطقة الخليج لترجمة الاستراتيجية والقيم إلى سلوكيات قيادية عملية وطقوس فريق وأنظمة متوافقة تشكّل ثقافة وأداءً مستدامين.',
+    whyMatters: 'لماذا يهم هذا',
+    cultureWhy: 'عندما لا تتوافق الثقافة مع الاستراتيجية، تشعر المؤسسات بذلك في كل مكان: تنفيذ بطيء، تعاون ضعيف بين الوظائف، ومقاومة للتغيير. يساعد التحول الثقافي على مواءمة سلوكيات القيادة وممارسات الفريق والأنظمة المؤسسية مع الاتجاه الذي يحتاج العمل إلى التحرك نحوه — محولاً النية الاستراتيجية إلى إجراء يومي وجاعلاً التغيير يستمر.',
+    framework: 'إطار التحول', frameworkFlow: 'العقلية ← السلوك ← الطقوس ← الأنظمة ← ثقافة مستدامة',
+    expectedOutcomes: 'النتائج المتوقعة',
+    cultureOutcomes: 'توافق أقوى بين الاستراتيجية والسلوك، تعاون أفضل بين الفرق، قادة يجسدون الثقافة المرغوبة، ومساءلة أقوى عن الأداء.',
+    govIntro: 'الحوكمة القوية أساسية لتحقيق التوازن بين الرقابة والمساءلة والتنفيذ الفعال. تؤسس إمباكت أطر حوكمة توضح الأدوار والمسؤوليات وسلطة اتخاذ القرار، مما يمكّن المؤسسات من تعزيز التوافق وتحسين الإشراف والعمل بثقة أكبر على نطاق واسع.',
+    govOutcomes: 'هياكل اتخاذ قرار ومساءلة واضحة، أدوار وأطر حوكمة محددة عبر الوظائف، توافق أفضل بين القيادة والتنفيذ، وقرارات مؤسسية أسرع وأكثر فعالية — نموذج حوكمة مصمم لدعم المرحلة القادمة من النمو المؤسسي.',
+    govCta: 'استكشف دعم الحوكمة',
+    closing: 'اطلب رحلة تعلم مخصصة', cta: 'حجز مكالمة استكشافية',
+    copyright: '© 2026 إمباكت للتعلم والتطوير. جميع الحقوق محفوظة.'
+  };
+
+  var root = document.getElementById('root');
+  var targets = document.querySelectorAll('[data-t]');
+
+  function applyLang(lang) {
+    var t = lang === 'ar' ? AR : EN;
+    var isAr = lang === 'ar';
+    root.setAttribute('dir', isAr ? 'rtl' : 'ltr');
+    root.classList.toggle('lang-ar', isAr);
+    document.documentElement.setAttribute('lang', isAr ? 'ar' : 'en');
+    document.documentElement.setAttribute('dir', isAr ? 'rtl' : 'ltr');
+    targets.forEach(function (el) {
+      var key = el.getAttribute('data-t');
+      if (t[key] !== undefined) el.textContent = t[key];
+    });
+  }
+
+  var savedLang = localStorage.getItem('impactLang');
+  var currentLang = (savedLang === 'ar' || savedLang === 'en') ? savedLang : 'en';
+  applyLang(currentLang);
+
+  function toggleLang() {
+    currentLang = currentLang === 'ar' ? 'en' : 'ar';
+    localStorage.setItem('impactLang', currentLang);
+    applyLang(currentLang);
+  }
+  document.getElementById('langToggle').addEventListener('click', toggleLang);
+  document.getElementById('langToggleFooter').addEventListener('click', toggleLang);
+
+  var tabBtns = Array.prototype.slice.call(document.querySelectorAll('.tab-btn'));
+  var panels = Array.prototype.slice.call(document.querySelectorAll('.tab-panel'));
+  tabBtns.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var target = btn.getAttribute('data-tab');
+      tabBtns.forEach(function (b) { b.classList.toggle('active', b === btn); });
+      panels.forEach(function (p) { p.classList.toggle('active', p.getAttribute('data-panel') === target); });
+    });
+  });
+
+  var heroImg = document.getElementById('heroImg');
+  if (heroImg) {
+    document.addEventListener('mousemove', function (e) {
+      var x = (e.clientX / innerWidth - 0.5) * 24;
+      var y = (e.clientY / innerHeight - 0.5) * 24;
+      heroImg.style.transform = 'scale(1.08) translate(' + x + 'px, ' + y + 'px)';
+    }, { passive: true });
+  }
+})();
+</script>
+</body>
+</html>
