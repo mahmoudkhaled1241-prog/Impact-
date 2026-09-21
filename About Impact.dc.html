@@ -473,6 +473,7 @@ With more than 150,000 learners reached through leadership, capability building,
   document.getElementById('langToggle').addEventListener('click', toggleLang);
   document.getElementById('langToggleFooter').addEventListener('click', toggleLang);
 
+  var heroState = { slide: 0, N: 3 };
   var heroCaptions;
   function updateHeroCaption() {
     var t = currentLang === 'ar' ? AR : EN;
@@ -483,7 +484,6 @@ With more than 150,000 learners reached through leadership, capability building,
 
   applyLang(currentLang);
 
-  var heroState = { slide: 0, N: 3 };
   var heroBgs = Array.prototype.slice.call(document.querySelectorAll('.hero-bg'));
   var heroSlides = Array.prototype.slice.call(document.querySelectorAll('.hero-slide'));
   var heroDots = Array.prototype.slice.call(document.getElementById('heroDots').querySelectorAll('button'));
