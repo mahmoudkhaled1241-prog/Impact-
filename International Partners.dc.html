@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>International Partners | Impact for Learning &amp; Development</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;600;700&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root { color-scheme: dark; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  html, body { background: #0A141D; }
+  body { font-family: 'Inter', Helvetica, Arial, sans-serif; color: #F4FBFC; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+  a { text-decoration: none; color: #18D4E2; }
+  a:hover { color: #8FEAF0; }
+  button { font-family: inherit; }
+  img { max-width: 100%; display: block; }
+  ::selection { background: #18D4E2; color: #0A141D; }
+
+  #root { position: relative; width: 100%; background: #0A141D; }
+  #root.lang-ar { font-family: 'IBM Plex Sans Arabic', 'Inter', sans-serif; }
+
+  header { position: sticky; top: 0; z-index: 50; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 24px; padding: 14px clamp(20px, 6vw, 120px); background: rgba(10, 20, 29, 0.92); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(140, 205, 214, 0.22); }
+  header .brand img { height: clamp(28px, 3vw, 38px); width: auto; }
+  nav.main-nav { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 10px clamp(12px, 2.2vw, 36px); font-family: 'IBM Plex Mono', monospace; font-size: clamp(10px, 1.05vw, 12px); letter-spacing: 0.12em; text-transform: uppercase; }
+  nav.main-nav a { color: #F4FBFC; text-decoration: none; transition: color 0.2s ease; }
+  nav.main-nav a:hover, nav.main-nav a.active { color: #18D4E2; }
+  nav.main-nav a.contact-cta { color: #18D4E2; border: 1px solid rgba(24, 212, 226, 0.5); padding: 9px 20px; border-radius: 999px; }
+  nav.main-nav a.contact-cta:hover { background: rgba(24, 212, 226, 0.1); }
+  .nav-drop { position: relative; }
+  .nav-drop > a { display: flex; align-items: center; gap: 7px; }
+  .nav-drop .caret { font-size: 9px; opacity: .7; }
+  .nav-drop-panel { position: absolute; top: 100%; left: -12px; padding-top: 14px; opacity: 0; transform: translateY(-8px); pointer-events: none; transition: opacity .22s ease, transform .22s ease; }
+  .nav-drop.partners .nav-drop-panel { left: auto; right: -12px; }
+  .nav-drop:hover .nav-drop-panel, .nav-drop:focus-within .nav-drop-panel { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  .nav-drop-inner { min-width: 280px; background: #0E1B26; border: 1px solid rgba(140,205,214,.22); padding: 8px; display: grid; }
+  .nav-drop-inner a { padding: 12px 16px; color: #F4FBFC; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; text-transform: none; display: flex; align-items: center; gap: 8px; transition: background .2s ease; }
+  .nav-drop-inner a:hover { background: #162835; color: #F4FBFC; }
+  .new-pill { background: #18D4E2; color: #0A141D; font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: .06em; padding: 2px 6px; border-radius: 4px; }
+  .lang-btn { background: transparent; border: 1px solid rgba(140, 205, 214, 0.4); color: #8FEAF0; padding: 8px 16px; border-radius: 999px; cursor: pointer; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; transition: border-color 0.2s ease, color 0.2s ease; }
+  .lang-btn:hover { border-color: #18D4E2; color: #18D4E2; }
+
+  .hero { position: relative; padding: clamp(80px, 14vh, 160px) clamp(24px, 6vw, 120px) clamp(48px, 6vh, 80px); overflow: hidden; display: grid; gap: 24px; max-width: 1200px; margin: 0 auto; }
+  .hero-bg { position: absolute; inset: 0; overflow: hidden; }
+  .hero-bg img { width: 100%; height: 100%; object-fit: cover; opacity: .8; transition: transform 0.25s ease-out; transform: scale(1.08); }
+  .hero-overlay { position: absolute; inset: 0; background: linear-gradient(100deg, rgba(10,20,29,.35), rgba(10,20,29,.55) 55%, rgba(10,20,29,.85)); }
+  .hero-inner { position: relative; z-index: 1; display: grid; gap: 24px; }
+  .eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #7793A0; }
+  h1.page-title { font-weight: 700; font-size: clamp(32px, 4.4vw, 60px); line-height: 1.1; letter-spacing: -0.025em; max-width: 22ch; text-wrap: pretty; }
+  p.page-intro { color: #AFC7CD; font-size: clamp(16px, 1.3vw, 18px); line-height: 1.65; max-width: 68ch; text-wrap: pretty; }
+
+  .group { position: relative; padding: 0 clamp(24px, 6vw, 120px) clamp(100px, 14vh, 180px); max-width: 1200px; margin: 0 auto; display: grid; gap: 24px; border-top: 1px solid rgba(140, 205, 214, 0.22); padding-top: 56px; }
+
+  .carousel { position: relative; height: 280px; display: flex; align-items: center; justify-content: center; perspective: 1400px; }
+  .carousel-nav-btn { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(140, 205, 214, 0.3); background: rgba(10, 20, 29, 0.7); color: #F4FBFC; font-size: 18px; cursor: pointer; z-index: 20; transition: border-color 0.2s ease, color 0.2s ease; }
+  .carousel-nav-btn:hover { border-color: #18D4E2; color: #18D4E2; }
+  .carousel-nav-btn.prev { left: 0; }
+  .carousel-nav-btn.next { right: 0; }
+  .carousel-track { position: relative; width: 100%; height: 100%; }
+  .p-card { position: absolute; top: 50%; left: 50%; width: min(46vw, 320px); height: 260px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; border-radius: 14px; box-shadow: 0 24px 50px rgba(0, 0, 0, 0.45); transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.5s ease; cursor: pointer; text-decoration: none; color: #0A141D; }
+  .p-card img { max-width: 78%; max-height: 40%; object-fit: contain; }
+  .p-card h3 { margin: 8px 0 0; font-size: 17px; font-weight: 700; text-align: center; }
+  .p-card p { margin: 0; color: #4B5A66; font-size: 13px; line-height: 1.55; text-align: center; max-width: 90%; }
+  .carousel-dots { display: flex; gap: 6px; justify-content: center; margin-top: 16px; }
+  .carousel-dots button { width: 7px; height: 7px; border-radius: 4px; border: none; cursor: pointer; background: rgba(140, 205, 214, 0.35); transition: all 0.3s ease; }
+  .carousel-dots button.active { width: 22px; background: #18D4E2; }
+
+  .closing { position: relative; min-height: 50vh; overflow: hidden; background: #0E1B26; color: #F4FBFC; display: flex; align-items: center; padding: clamp(80px, 12vh, 140px) clamp(24px, 6vw, 120px); }
+  .closing-bg { position: absolute; inset: 0; filter: blur(6px); }
+  .closing-bg img { width: 100%; height: 100%; object-fit: cover; }
+  .closing-overlay { position: absolute; inset: 0; background: rgba(10, 20, 29, 0.35); }
+  .closing-inner { position: relative; z-index: 2; max-width: 1200px; margin: 0 auto; display: grid; gap: 32px; }
+  .closing h2 { margin: 0; font-weight: 800; font-size: clamp(32px, 5vw, 80px); line-height: 1.02; letter-spacing: -0.03em; max-width: 18ch; }
+  .cta-btn { justify-self: start; color: #0A141D; background: #18D4E2; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; padding: 14px 28px; border-radius: 999px; transition: background 0.2s ease; }
+  .cta-btn:hover { background: #8FEAF0; color: #0A141D; }
+
+  footer { position: relative; background: #0E1B26; border-top: 1px solid rgba(140, 205, 214, 0.22); padding: 24px clamp(24px, 6vw, 120px); display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #567179; }
+</style>
+</head>
+<body>
+<div id="root" dir="ltr">
+  <header>
+    <a class="brand" href="Impact L&amp;D Parallax.dc.html"><img src="assets/logo.png" alt="Impact"></a>
+    <nav class="main-nav">
+      <a data-t="navHome" href="Impact L&amp;D Parallax.dc.html">Home</a>
+      <a data-t="navAbout" href="About Impact.dc.html">About Impact</a>
+      <div class="nav-drop">
+        <a data-t="navSolutions" href="Solutions.dc.html">Solutions <span class="caret">▼</span></a>
+        <div class="nav-drop-panel">
+          <div class="nav-drop-inner">
+            <a data-t="subLd" href="L&amp;D Solutions.dc.html">L&amp;D Solutions</a>
+            <a data-t="subOd" href="Organizational Development.dc.html">Organizational Development</a>
+            <a href="AIM - AI in Motion.dc.html"><span data-t="subAim">AIM — AI in Motion</span><span class="new-pill">NEW</span></a>
+            <a data-t="subCa" href="Assessments &amp; Coaching.dc.html">Assessments &amp; Coaching</a>
+            <a data-t="subGo" href="Impact GO.dc.html">Impact GO</a>
+            <a data-t="subGames" href="In-House Games.dc.html">In-House Games &amp; Simulations</a>
+            <a data-t="subOneDay" href="One Days Program.dc.html">One Day's Program</a>
+            <a data-t="subGamified" href="Gamified Themes.dc.html">Gamified Themes</a>
+          </div>
+        </div>
+      </div>
+      <div class="nav-drop partners">
+        <a data-t="navPartners" href="International Partners.dc.html" class="active">International Partners <span class="caret">▼</span></a>
+        <div class="nav-drop-panel">
+          <div class="nav-drop-inner">
+            <a href="Partner Culture Partners.dc.html">Culture Partners</a>
+            <a href="Partner KnolSkape.dc.html">KNOLSKAPE</a>
+            <a href="Partner BCon.dc.html">BCon</a>
+            <a href="Partner Gallup.dc.html">Gallup</a>
+            <a href="Partner ManagementDrive.dc.html">ManagementDrive</a>
+          </div>
+        </div>
+      </div>
+      <a data-t="navContact" href="Contact.dc.html" class="contact-cta">Contact</a>
+      <button class="lang-btn" id="langToggle" data-t="langBtn" type="button">العربية</button>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div class="hero-bg"><img id="heroImg" src="assets/meeting.png" alt=""></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-inner">
+      <div class="eyebrow" data-t="eyebrow">INTERNATIONAL PARTNERS</div>
+      <h1 class="page-title" data-t="heading">International Affiliates &amp; Global Solutions</h1>
+      <p class="page-intro" data-t="intro">Access world-class methodologies through our affiliates network, bringing global expertise in leadership development, behavioral science, business simulations, and digital learning platforms, delivered with regional relevance and local execution.</p>
+      <p class="page-intro" data-t="intro2">Impact collaborates with leading international partners to bring globally recognized learning solutions and methodologies to organizations across the MENA region. Through partnerships with organizations such as Paradigm Learning and KNOLSKAPE, Impact delivers award‑winning business simulations, experiential learning tools, and leadership development solutions that combine global expertise with regional context.</p>
+    </div>
+  </section>
+
+  <section class="group">
+    <div class="carousel">
+      <button class="carousel-nav-btn prev" id="cfPrev" aria-label="Previous" type="button">‹</button>
+      <button class="carousel-nav-btn next" id="cfNext" aria-label="Next" type="button">›</button>
+      <div class="carousel-track" id="cfTrack">
+        <a class="p-card" data-index="0" href="Partner Culture Partners.dc.html"><img src="assets/partner-culture.png" alt="Culture Partners"><h3 data-t="p1Name">Culture Partners</h3><p data-t="p1Body">Award winning discovery learning maps and classroom based business games used by leading organizations worldwide.</p></a>
+        <a class="p-card" data-index="1" href="Partner KnolSkape.dc.html"><img src="assets/partner-knolskape-dark.png" alt="KnolSkape"><h3 data-t="p2Name">KNOLSKAPE</h3><p data-t="p2Body">Multi award winning online simulations provider offering assessment, development, and engagement through a powerful online platform.</p></a>
+        <a class="p-card" data-index="2" href="Partner BCon.dc.html"><img src="assets/partner-bcon-mark.png" alt="BCon"><h3 data-t="p3Name">BCon</h3><p data-t="p3Body">Behavioral science based tools that promote productivity, innovation, and high trust problem solving climates.</p></a>
+        <a class="p-card" data-index="3" href="Partner Gallup.dc.html"><img src="assets/partner-gallup.png" alt="Gallup"><img src="assets/gallup-certified-badge.png" alt="Gallup Certified Strengths Coach" style="height:24px;width:auto;object-fit:contain;margin-top:4px"><h3 data-t="p4Name">Gallup</h3><p data-t="p4Body">Global analytics and advice firm behind CliftonStrengths® supporting leaders with decades of research and development.</p></a>
+        <a class="p-card" data-index="4" href="Partner ManagementDrive.dc.html"><img src="assets/partner-managementdrive.png" alt="ManagementDrive"><h3 data-t="p5Name">ManagementDrive</h3><p data-t="p5Body">Regional delivery partner supporting on-the-ground execution and facilitation across the GCC.</p></a>
+      </div>
+    </div>
+    <div class="carousel-dots" id="cfDots">
+      <button data-index="0" type="button"></button>
+      <button data-index="1" type="button"></button>
+      <button data-index="2" type="button"></button>
+      <button data-index="3" type="button"></button>
+      <button data-index="4" type="button"></button>
+    </div>
+  </section>
+
+  <section class="closing">
+    <div class="closing-bg"><img src="assets/contact-photo.png" alt=""></div>
+    <div class="closing-overlay"></div>
+    <div class="closing-inner">
+      <h2 data-t="closing">Request a Customized Learning Journey</h2>
+      <a class="cta-btn" data-t="cta" href="Contact.dc.html">Book a Discovery Call</a>
+    </div>
+  </section>
+
+  <footer>
+    <span data-t="copyright">© 2026 Impact for Learning &amp; Development. All rights reserved.</span>
+    <button class="lang-btn" id="langToggleFooter" data-t="langBtn" type="button">العربية</button>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var EN = {
+    navHome: 'Home', navAbout: 'About Impact', navSolutions: 'Solutions', navPartners: 'International Partners', navContact: 'Contact', langBtn: 'العربية',
+    subLd: 'L&D Solutions', subOd: 'Organizational Development', subAim: 'AIM — AI in Motion', subCa: 'Assessments & Coaching', subGo: 'Impact GO', subGames: 'In-House Games & Simulations', subOneDay: "One Day's Program", subGamified: 'Gamified Themes',
+    eyebrow: 'INTERNATIONAL PARTNERS', heading: 'International Affiliates & Global Solutions',
+    intro: 'Access world-class methodologies through our affiliates network, bringing global expertise in leadership development, behavioral science, business simulations, and digital learning platforms, delivered with regional relevance and local execution.',
+    intro2: 'Impact collaborates with leading international partners to bring globally recognized learning solutions and methodologies to organizations across the MENA region. Through partnerships with organizations such as Paradigm Learning and KNOLSKAPE, Impact delivers award‑winning business simulations, experiential learning tools, and leadership development solutions that combine global expertise with regional context.',
+    p1Name: 'Culture Partners', p1Body: 'Award winning discovery learning maps and classroom based business games used by leading organizations worldwide.',
+    p2Name: 'KNOLSKAPE', p2Body: 'Multi award winning online simulations provider offering assessment, development, and engagement through a powerful online platform.',
+    p3Name: 'BCon', p3Body: 'Behavioral science based tools that promote productivity, innovation, and high trust problem solving climates.',
+    p4Name: 'Gallup', p4Body: 'Global analytics and advice firm behind CliftonStrengths® supporting leaders with decades of research and development.',
+    p5Name: 'ManagementDrive', p5Body: 'Regional delivery partner supporting on-the-ground execution and facilitation across the GCC.',
+    closing: 'Request a Customized Learning Journey', cta: 'Book a Discovery Call',
+    copyright: '© 2026 Impact for Learning & Development. All rights reserved.'
+  };
+  var AR = {
+    navHome: 'الرئيسية', navAbout: 'عن إمباكت', navSolutions: 'الحلول', navPartners: 'الشركاء الدوليون', navContact: 'تواصل معنا', langBtn: 'English',
+    subLd: 'حلول التعلم والتطوير', subOd: 'التطوير المؤسسي', subAim: 'AIM — الذكاء الاصطناعي في العمل', subCa: 'التقييمات والتدريب', subGo: 'Impact GO', subGames: 'ألعاب ومحاكاة داخلية', subOneDay: 'برنامج يوم واحد', subGamified: 'ثيمات التلعيب',
+    eyebrow: 'الشركاء الدوليون', heading: 'الشركاء الدوليون والحلول العالمية',
+    intro: 'تصل إلى منهجيات عالمية المستوى من خلال شبكة شركائنا، التي تقدم خبرة عالمية في تطوير القيادة والعلوم السلوكية ومحاكاة الأعمال ومنصات التعلم الرقمي، مقدمة بملاءمة إقليمية وتنفيذ محلي.',
+    intro2: 'تتعاون إمباكت مع شركاء دوليين رائدين لتقديم حلول ومنهجيات تعلم معترف بها عالمياً للمؤسسات عبر منطقة الشرق الأوسط وشمال أفريقيا. من خلال شراكات مع مؤسسات مثل Paradigm Learning وKNOLSKAPE، تقدم إمباكت محاكاة أعمال حائزة على جوائز، وأدوات تعلم تجريبي، وحلول تطوير قيادة تجمع بين الخبرة العالمية والسياق الإقليمي.',
+    p1Name: 'Culture Partners', p1Body: 'خرائط تعلم استكشافية وألعاب أعمال صفية حائزة على جوائز تستخدمها مؤسسات رائدة حول العالم.',
+    p2Name: 'KNOLSKAPE', p2Body: 'مزود محاكاة عبر الإنترنت حائز على جوائز متعددة يقدم التقييم والتطوير والانخراط من خلال منصة إلكترونية قوية.',
+    p3Name: 'BCon', p3Body: 'أدوات مستندة إلى العلوم السلوكية تعزز الإنتاجية والابتكار وبيئات حل المشكلات القائمة على الثقة العالية.',
+    p4Name: 'Gallup', p4Body: 'شركة تحليلات واستشارات عالمية تقف خلف CliftonStrengths®، تدعم القادة بعقود من البحث والتطوير.',
+    p5Name: 'ManagementDrive', p5Body: 'شريك تنفيذ إقليمي يدعم التنفيذ والتيسير على الأرض عبر منطقة الخليج.',
+    closing: 'اطلب رحلة تعلم مخصصة', cta: 'حجز مكالمة استكشافية',
+    copyright: '© 2026 إمباكت للتعلم والتطوير. جميع الحقوق محفوظة.'
+  };
+
+  var root = document.getElementById('root');
+  var targets = document.querySelectorAll('[data-t]');
+
+  function applyLang(lang) {
+    var t = lang === 'ar' ? AR : EN;
+    var isAr = lang === 'ar';
+    root.setAttribute('dir', isAr ? 'rtl' : 'ltr');
+    root.classList.toggle('lang-ar', isAr);
+    document.documentElement.setAttribute('lang', isAr ? 'ar' : 'en');
+    document.documentElement.setAttribute('dir', isAr ? 'rtl' : 'ltr');
+    targets.forEach(function (el) {
+      var key = el.getAttribute('data-t');
+      if (t[key] !== undefined) el.textContent = t[key];
+    });
+  }
+
+  var savedLang = localStorage.getItem('impactLang');
+  var currentLang = (savedLang === 'ar' || savedLang === 'en') ? savedLang : 'en';
+  applyLang(currentLang);
+
+  function toggleLang() {
+    currentLang = currentLang === 'ar' ? 'en' : 'ar';
+    localStorage.setItem('impactLang', currentLang);
+    applyLang(currentLang);
+  }
+  document.getElementById('langToggle').addEventListener('click', toggleLang);
+  document.getElementById('langToggleFooter').addEventListener('click', toggleLang);
+
+  var heroImg = document.getElementById('heroImg');
+  if (heroImg) {
+    document.addEventListener('mousemove', function (e) {
+      var x = (e.clientX / innerWidth - 0.5) * 24;
+      var y = (e.clientY / innerHeight - 0.5) * 24;
+      heroImg.style.transform = 'scale(1.08) translate(' + x + 'px, ' + y + 'px)';
+    }, { passive: true });
+  }
+
+  (function () {
+    var N = 5, cf = 0;
+    var cards = Array.prototype.slice.call(document.getElementById('cfTrack').querySelectorAll('.p-card'));
+    var dots = Array.prototype.slice.call(document.getElementById('cfDots').querySelectorAll('button'));
+
+    function render() {
+      cards.forEach(function (card, i) {
+        var off = i - cf;
+        if (off > N / 2) off -= N;
+        if (off < -N / 2) off += N;
+        var isActive = off === 0;
+        var tx = off * 32, rot = off * -26, scale = isActive ? 1 : 0.72, z = 10 - Math.abs(off);
+        card.style.background = isActive ? '#FFFFFF' : '#8a939c';
+        card.style.transform = 'translate(-50%, -50%) translateX(' + tx + '%) scale(' + scale + ') rotateY(' + rot + 'deg)';
+        card.style.zIndex = z;
+      });
+      dots.forEach(function (dot, i) { dot.classList.toggle('active', i === cf); });
+    }
+    render();
+
+    var timer;
+    function resetAutoplay() {
+      clearInterval(timer);
+      timer = setInterval(function () { cf = (cf + 1) % N; render(); }, 3200);
+    }
+    function select(i) { cf = ((i % N) + N) % N; render(); resetAutoplay(); }
+
+    document.getElementById('cfPrev').addEventListener('click', function () { select(cf - 1); });
+    document.getElementById('cfNext').addEventListener('click', function () { select(cf + 1); });
+    cards.forEach(function (card) {
+      card.addEventListener('click', function () { select(parseInt(card.getAttribute('data-index'), 10)); });
+    });
+    dots.forEach(function (dot) {
+      dot.addEventListener('click', function () { select(parseInt(dot.getAttribute('data-index'), 10)); });
+    });
+    resetAutoplay();
+  })();
+})();
+</script>
+</body>
+</html>

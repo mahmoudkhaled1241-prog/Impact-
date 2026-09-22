@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>L&amp;D Solutions | Impact for Learning &amp; Development</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;600;700&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root { color-scheme: dark; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  html, body { background: #0A141D; }
+  body { font-family: 'Inter', Helvetica, Arial, sans-serif; color: #F4FBFC; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+  a { text-decoration: none; color: #18D4E2; }
+  a:hover { color: #8FEAF0; }
+  button { font-family: inherit; }
+  img { max-width: 100%; display: block; }
+  ::selection { background: #18D4E2; color: #0A141D; }
+
+  #root { position: relative; width: 100%; background: #0A141D; }
+  #root.lang-ar { font-family: 'IBM Plex Sans Arabic', 'Inter', sans-serif; }
+
+  header { position: sticky; top: 0; z-index: 50; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 24px; padding: 14px clamp(20px, 6vw, 120px); background: rgba(10, 20, 29, 0.92); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(140, 205, 214, 0.22); }
+  header .brand img { height: clamp(28px, 3vw, 38px); width: auto; }
+  nav.main-nav { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 10px clamp(12px, 2.2vw, 36px); font-family: 'IBM Plex Mono', monospace; font-size: clamp(10px, 1.05vw, 12px); letter-spacing: 0.12em; text-transform: uppercase; }
+  nav.main-nav a { color: #F4FBFC; text-decoration: none; transition: color 0.2s ease; }
+  nav.main-nav a:hover, nav.main-nav a.active { color: #18D4E2; }
+  nav.main-nav a.contact-cta { color: #18D4E2; border: 1px solid rgba(24, 212, 226, 0.5); padding: 9px 20px; border-radius: 999px; }
+  nav.main-nav a.contact-cta:hover { background: rgba(24, 212, 226, 0.1); }
+  .nav-drop { position: relative; }
+  .nav-drop > a { display: flex; align-items: center; gap: 7px; }
+  .nav-drop .caret { font-size: 9px; opacity: .7; }
+  .nav-drop-panel { position: absolute; top: 100%; left: -12px; padding-top: 14px; opacity: 0; transform: translateY(-8px); pointer-events: none; transition: opacity .22s ease, transform .22s ease; }
+  .nav-drop.partners .nav-drop-panel { left: auto; right: -12px; }
+  .nav-drop:hover .nav-drop-panel, .nav-drop:focus-within .nav-drop-panel { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  .nav-drop-inner { min-width: 280px; background: #0E1B26; border: 1px solid rgba(140,205,214,.22); padding: 8px; display: grid; }
+  .nav-drop-inner a { padding: 12px 16px; color: #F4FBFC; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; text-transform: none; display: flex; align-items: center; gap: 8px; transition: background .2s ease; }
+  .nav-drop-inner a:hover { background: #162835; color: #F4FBFC; }
+  .new-pill { background: #18D4E2; color: #0A141D; font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: .06em; padding: 2px 6px; border-radius: 4px; }
+  .lang-btn { background: transparent; border: 1px solid rgba(140, 205, 214, 0.4); color: #8FEAF0; padding: 8px 16px; border-radius: 999px; cursor: pointer; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; transition: border-color 0.2s ease, color 0.2s ease; }
+  .lang-btn:hover { border-color: #18D4E2; color: #18D4E2; }
+
+  .hero { position: relative; padding: clamp(80px, 14vh, 160px) clamp(24px, 6vw, 120px) clamp(48px, 6vh, 80px); overflow: hidden; display: grid; gap: 24px; max-width: 1200px; margin: 0 auto; }
+  .hero-bg { position: absolute; inset: 0; overflow: hidden; }
+  .hero-bg img { width: 100%; height: 100%; object-fit: cover; opacity: .8; transition: transform 0.25s ease-out; transform: scale(1.08); }
+  .hero-overlay { position: absolute; inset: 0; background: linear-gradient(100deg, rgba(10,20,29,.35), rgba(10,20,29,.55) 55%, rgba(10,20,29,.85)); }
+  .hero-inner { position: relative; z-index: 1; display: grid; gap: 24px; }
+  .eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #7793A0; }
+  h1.page-title { font-weight: 700; font-size: clamp(32px, 4.4vw, 60px); line-height: 1.1; letter-spacing: -0.025em; max-width: 22ch; text-wrap: pretty; }
+  p.page-intro { color: #AFC7CD; font-size: clamp(16px, 1.3vw, 18px); line-height: 1.65; max-width: 68ch; text-wrap: pretty; }
+  .cta-btn { justify-self: start; color: #0A141D; background: #18D4E2; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; padding: 14px 28px; border-radius: 999px; transition: background 0.2s ease; }
+  .cta-btn:hover { background: #8FEAF0; color: #0A141D; }
+
+  .tabs-wrap { position: relative; padding: 0 clamp(24px, 6vw, 120px); max-width: 1200px; margin: 0 auto; }
+  .tabs { display: flex; gap: clamp(18px, 3vw, 36px); border-bottom: 1px solid rgba(140, 205, 214, 0.22); overflow-x: auto; }
+  .tab-btn { padding: 16px 0; background: transparent; border: none; font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: -0.005em; cursor: pointer; white-space: nowrap; color: #AFC7CD; border-bottom: 2px solid transparent; transition: color 0.2s ease, border-color 0.2s ease; }
+  .tab-btn.active { color: #18D4E2; border-bottom-color: #18D4E2; }
+
+  .tab-content-wrap { position: relative; padding: clamp(48px, 7vh, 80px) clamp(24px, 6vw, 120px) clamp(120px, 16vh, 200px); max-width: 1200px; margin: 0 auto; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: grid; gap: 32px; }
+  .tab-panel.narrow { max-width: 800px; }
+  .lead { margin: 0; color: #AFC7CD; font-size: 17px; line-height: 1.65; max-width: 800px; }
+  .label { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; color: #7793A0; }
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 28px; }
+  .cards-grid.wide { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 32px; }
+  .info-card { background: #122230; display: grid; grid-template-rows: 140px 1fr; transition: transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s ease; position: relative; z-index: 1; color: #F4FBFC; }
+  .info-card:hover { transform: scale(1.04); z-index: 2; box-shadow: 0 20px 44px rgba(0,0,0,.45); }
+  .info-card .thumb { overflow: hidden; }
+  .info-card .thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .info-card .body { padding: 20px 22px; display: grid; gap: 8px; }
+  .info-card .body h3 { margin: 0; font-size: 17px; font-weight: 700; }
+  .info-card .body p { margin: 0; color: #AFC7CD; font-size: 14px; line-height: 1.6; }
+  .info-card.level { grid-template-rows: 130px 1fr; }
+  .info-card.level .body h3 { font-size: 18px; letter-spacing: -0.01em; }
+  .info-card.level .body p { font-size: 13px; }
+  .info-card.level .body p strong { color: #F4FBFC; }
+  .info-card.comp .thumb { }
+  .info-card.comp { grid-template-rows: 150px 1fr; }
+  .info-card.comp .body p { font-size: 13px; }
+
+  .detail-block { display: grid; gap: 24px; border-top: 1px solid rgba(140, 205, 214, 0.22); padding-top: 32px; }
+  .detail-block h3 { margin: 0 0 8px; font-size: 18px; font-weight: 700; }
+  .detail-block p { margin: 0; color: #AFC7CD; font-size: 15px; line-height: 1.65; }
+
+  .best-fit { margin: 0; color: #18D4E2; font-size: 14px; font-weight: 600; letter-spacing: 0.04em; }
+
+  .closing { position: relative; min-height: 50vh; overflow: hidden; background: #0E1B26; color: #F4FBFC; display: flex; align-items: center; padding: clamp(80px, 12vh, 140px) clamp(24px, 6vw, 120px); }
+  .closing-bg { position: absolute; inset: 0; filter: blur(6px); }
+  .closing-bg img { width: 100%; height: 100%; object-fit: cover; }
+  .closing-overlay { position: absolute; inset: 0; background: rgba(10, 20, 29, 0.35); }
+  .closing-inner { position: relative; z-index: 2; max-width: 1200px; margin: 0 auto; display: grid; gap: 32px; }
+  .closing h2 { margin: 0; font-weight: 800; font-size: clamp(32px, 5vw, 80px); line-height: 1.02; letter-spacing: -0.03em; max-width: 18ch; }
+
+  footer { position: relative; background: #0E1B26; border-top: 1px solid rgba(140, 205, 214, 0.22); padding: 24px clamp(24px, 6vw, 120px); display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #567179; }
+</style>
+</head>
+<body>
+<div id="root" dir="ltr">
+  <header>
+    <a class="brand" href="Impact L&amp;D Parallax.dc.html"><img src="assets/logo.png" alt="Impact"></a>
+    <nav class="main-nav">
+      <a data-t="navHome" href="Impact L&amp;D Parallax.dc.html">Home</a>
+      <a data-t="navAbout" href="About Impact.dc.html">About Impact</a>
+      <div class="nav-drop">
+        <a data-t="navSolutions" href="Solutions.dc.html" class="active">Solutions <span class="caret">▼</span></a>
+        <div class="nav-drop-panel">
+          <div class="nav-drop-inner">
+            <a data-t="subLd" href="L&amp;D Solutions.dc.html" style="color:#18D4E2">L&amp;D Solutions</a>
+            <a data-t="subOd" href="Organizational Development.dc.html">Organizational Development</a>
+            <a href="AIM - AI in Motion.dc.html"><span data-t="subAim">AIM — AI in Motion</span><span class="new-pill">NEW</span></a>
+            <a data-t="subCa" href="Assessments &amp; Coaching.dc.html">Assessments &amp; Coaching</a>
+            <a data-t="subGo" href="Impact GO.dc.html">Impact GO</a>
+            <a data-t="subGames" href="In-House Games.dc.html">In-House Games &amp; Simulations</a>
+            <a data-t="subOneDay" href="One Days Program.dc.html">One Day's Program</a>
+            <a data-t="subGamified" href="Gamified Themes.dc.html">Gamified Themes</a>
+          </div>
+        </div>
+      </div>
+      <div class="nav-drop partners">
+        <a data-t="navPartners" href="International Partners.dc.html">International Partners <span class="caret">▼</span></a>
+        <div class="nav-drop-panel">
+          <div class="nav-drop-inner">
+            <a href="Partner Culture Partners.dc.html">Culture Partners</a>
+            <a href="Partner KnolSkape.dc.html">KNOLSKAPE</a>
+            <a href="Partner BCon.dc.html">BCon</a>
+            <a href="Partner Gallup.dc.html">Gallup</a>
+            <a href="Partner ManagementDrive.dc.html">ManagementDrive</a>
+          </div>
+        </div>
+      </div>
+      <a data-t="navContact" href="Contact.dc.html" class="contact-cta">Contact</a>
+      <button class="lang-btn" id="langToggle" data-t="langBtn" type="button">العربية</button>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div class="hero-bg"><img id="heroImg" src="assets/brand-handshake-ripple.png" alt=""></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-inner">
+      <div class="eyebrow" data-t="eyebrow">SOLUTIONS — L&amp;D SOLUTIONS</div>
+      <h1 class="page-title" data-t="heading">Learning &amp; Development</h1>
+      <p class="page-intro" data-t="intro1">Impact designs and delivers structured learning journeys that move beyond one time interventions to enable sustained capability development.</p>
+      <p class="page-intro" data-t="intro2">Our approach combines design, delivery, and continuous learning reinforcement, to ensure learning is applied in real business contexts and translated into measurable performance outcomes.</p>
+      <a class="cta-btn" data-t="ctaTop" href="Contact.dc.html">Request a Customized Learning Journey</a>
+    </div>
+  </section>
+
+  <section class="tabs-wrap">
+    <div class="tabs" id="tabs">
+      <button class="tab-btn active" data-tab="exp" data-t="tabExp" type="button">Experiential Learning</button>
+      <button class="tab-btn" data-tab="level" data-t="tabLevel" type="button">Participant Level Solutions</button>
+      <button class="tab-btn" data-tab="comp" data-t="tabComp" type="button">Competency-Based Solutions</button>
+      <button class="tab-btn" data-tab="dur" data-t="tabDur" type="button">Duration-Based Solutions</button>
+    </div>
+  </section>
+
+  <section class="tab-content-wrap" id="s-comp">
+
+    <div class="tab-panel narrow active" data-panel="exp">
+      <p class="lead" data-t="expIntro">Learning sticks when people experience it. Through immersive simulations and hands-on learning journeys, Impact helps participants build capabilities faster, retain insights longer, and apply them directly in the workplace.</p>
+      <div style="display: grid; gap: 24px">
+        <div class="label" data-t="coreFormats">CORE FORMATS</div>
+        <div class="cards-grid">
+          <div class="info-card"><div class="thumb"><img src="assets/meeting.png" alt=""></div><div class="body"><h3 data-t="simTitle">Business Simulations</h3><p data-t="simBody">Immersive experiences that replicate real organizational challenges and allow participants to practice decision-making in a risk-free environment.</p></div></div>
+          <div class="info-card"><div class="thumb"><img src="assets/handshake.png" alt=""></div><div class="body"><h3 data-t="scenTitle">Scenario-Based Workshops</h3><p data-t="scenBody">Facilitated workshops built around practical scenarios that encourage problem solving, collaboration, and reflection.</p></div></div>
+          <div class="info-card"><div class="thumb"><img src="assets/brand-building-ripple.png" alt=""></div><div class="body"><h3 data-t="gameTitle">Gamified Learning Journeys</h3><p data-t="gameBody">Structured experiences that use challenge, storytelling, and interaction to increase engagement and retention.</p></div></div>
+        </div>
+      </div>
+      <div class="detail-block">
+        <div><h3 data-t="facTitle">Facilitation &amp; Application</h3><p data-t="facBody">Every experience is supported by expert facilitation and structured debriefing to help participants reflect on decisions, extract insights, and connect lessons to real workplace challenges. This ensures learning translates into practical behavior change, not just engagement in the moment.</p></div>
+        <div><h3 data-t="flexTitle">Flexible Delivery</h3><p data-t="flexBody">Programs can be delivered in person, virtually, or in hybrid formats depending on your organization's needs, audience, and scale. This flexibility makes experiential learning easier to deploy across teams, functions, and geographies.</p></div>
+        <div><h3 data-t="outcomesTitle">Outcomes</h3><p data-t="outcomesBody">Experiential learning helps organizations accelerate skill transfer, strengthen behavior change, and create measurable business impact through deeper engagement and real-world application.</p></div>
+      </div>
+      <a class="cta-btn" data-t="expCta" href="Contact.dc.html">Explore our experiential learning solutions</a>
+    </div>
+
+    <div class="tab-panel" data-panel="level">
+      <p class="lead" data-t="levelIntro">Organizations invest in different levels of development depending on their growth stage, leadership pipeline maturity, and business priorities. Impact supports organizations in building capability across all levels, from frontline employees to senior leaders, ensuring alignment between individual development and organizational performance.</p>
+      <div class="cards-grid wide">
+        <div class="info-card level"><div class="thumb"><img src="assets/meeting.png" alt=""></div><div class="body"><h3 data-t="frontTitle">Frontline Employees</h3><p><strong data-t="challengesLabel">Common challenges:</strong> <span data-t="frontChallenges">communication and customer interaction, maintaining execution discipline, and sustaining service quality.</span></p><p><strong data-t="formatsLabel">Formats:</strong> <span data-t="frontFormats">simulations, experiential workshops, and practical coaching.</span></p></div></div>
+        <div class="info-card level"><div class="thumb"><img src="assets/handshake.png" alt=""></div><div class="body"><h3 data-t="supTitle">Supervisors</h3><p><strong data-t="challengesLabel">Common challenges:</strong> <span data-t="supChallenges">team coordination, accountability, and operational leadership.</span></p><p><strong data-t="formatsLabel">Formats:</strong> <span data-t="supFormats">experiential leadership labs and team management simulations.</span></p></div></div>
+        <div class="info-card level"><div class="thumb"><img src="assets/brand-meeting-ripple.jpeg" alt=""></div><div class="body"><h3 data-t="midTitle">Middle Managers</h3><p><strong data-t="challengesLabel">Common challenges:</strong> <span data-t="midChallenges">cross functional alignment and turning strategic priorities into action.</span></p><p><strong data-t="formatsLabel">Formats:</strong> <span data-t="midFormats">structured leadership journeys and business simulations.</span></p></div></div>
+        <div class="info-card level"><div class="thumb"><img src="assets/brand-handshake-ripple.png" alt=""></div><div class="body"><h3 data-t="seniorTitle">Senior Leaders</h3><p><strong data-t="challengesLabel">Common challenges:</strong> <span data-t="seniorChallenges">strategic leadership, organizational transformation, and culture.</span></p><p><strong data-t="formatsLabel">Formats:</strong> <span data-t="seniorFormats">executive simulations, leadership labs, and executive coaching.</span></p></div></div>
+      </div>
+      <a class="cta-btn" data-t="exploreSolutions" href="Solutions.dc.html">Explore our solutions</a>
+    </div>
+
+    <div class="tab-panel" data-panel="comp">
+      <p class="lead" data-t="compIntro">Impact helps organizations define and build the capabilities required for performance by translating competency frameworks into clear, observable behaviors across roles and levels. Our approach ensures that competencies are not theoretical, but directly reflected in how individuals make decisions, collaborate, and deliver results, enabling true performance-based development across the organization.</p>
+      <div style="display: grid; gap: 24px">
+        <div class="label" data-t="tracksLabel">FOUR INTEGRATED PILLARS</div>
+        <div class="cards-grid wide">
+          <a class="info-card comp" href="Leading Self.dc.html"><div class="thumb"><img src="assets/meeting.png" alt=""></div><div class="body"><h3 data-t="selfTitle">Leading Self</h3><p data-t="selfBody">Personal effectiveness, interpersonal skills, balance &amp; wellbeing, and business professionalism.</p></div></a>
+          <a class="info-card comp" href="Leading People.dc.html"><div class="thumb"><img src="assets/handshake.png" alt=""></div><div class="body"><h3 data-t="peopleTitle">Leading People</h3><p data-t="peopleBody">Coaching, objective setting, and the everyday skills of managing and developing others.</p></div></a>
+          <a class="info-card comp" href="Leading Business.dc.html"><div class="thumb"><img src="assets/brand-boardroom-ripple.jpeg" alt=""></div><div class="body"><h3 data-t="businessTitle">Leading Business</h3><p data-t="businessBody">Strategy and business leadership alongside the practical discipline of managing work.</p></div></a>
+          <a class="info-card comp" href="Leading Functions.dc.html"><div class="thumb"><img src="assets/brand-skyline-ripple.jpeg" alt=""></div><div class="body"><h3 data-t="functionsTitle">Leading Functions</h3><p data-t="functionsBody">Sales &amp; customer service, HR, and function-specific programs built around real roles.</p></div></a>
+        </div>
+      </div>
+      <a class="cta-btn" data-t="startDesigning" href="Contact.dc.html">Start designing</a>
+    </div>
+
+    <div class="tab-panel narrow" data-panel="dur">
+      <p class="lead" data-t="durIntro">Organizations choose different learning formats depending on their objectives, timelines, and the level of impact required. Impact offers flexible learning formats ranging from short learning interventions to long-term capability journeys, enabling organizations to deploy scalable learning solutions that align with business priorities and workforce needs.</p>
+      <div class="cards-grid">
+        <div class="info-card"><div class="thumb"><img src="assets/meeting.png" alt=""></div><div class="body"><h3 data-t="shortTitle">Short Interventions</h3><p data-t="shortBody">Focused workshops, simulations, or learning labs designed to address specific skills or challenges within a short timeframe.</p></div></div>
+        <div class="info-card"><div class="thumb"><img src="assets/handshake.png" alt=""></div><div class="body"><h3 data-t="seriesTitle">Program Series</h3><p data-t="seriesBody">Multi session learning programs delivered over several weeks or months to reinforce learning and encourage behavioral change over time.</p></div></div>
+        <div class="info-card"><div class="thumb"><img src="assets/brand-skyline-ripple.jpeg" alt=""></div><div class="body"><h3 data-t="journeyTitle">Development Journeys</h3><p data-t="journeyBody">Comprehensive leadership development pathways that integrate assessments, experiential learning, business simulations, and coaching to support long-term capability building.</p></div></div>
+      </div>
+      <p class="best-fit" data-t="bestFit">BEST FIT BY NEED</p>
+      <a class="cta-btn" data-t="durCta" href="Contact.dc.html">Let's design the right solution</a>
+    </div>
+
+  </section>
+
+  <section class="closing">
+    <div class="closing-bg"><img src="assets/contact-photo.png" alt=""></div>
+    <div class="closing-overlay"></div>
+    <div class="closing-inner">
+      <h2 data-t="closing">Request a Customized Learning Journey</h2>
+      <a class="cta-btn" data-t="cta" href="Contact.dc.html">Book a Discovery Call</a>
+    </div>
+  </section>
+
+  <footer>
+    <span data-t="copyright">© 2026 Impact for Learning &amp; Development. All rights reserved.</span>
+    <button class="lang-btn" id="langToggleFooter" data-t="langBtn" type="button">العربية</button>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var EN = {
+    navHome: 'Home', navAbout: 'About Impact', navSolutions: 'Solutions', navPartners: 'International Partners', navContact: 'Contact', langBtn: 'العربية',
+    subLd: 'L&D Solutions', subOd: 'Organizational Development', subAim: 'AIM — AI in Motion', subCa: 'Assessments & Coaching', subGo: 'Impact GO', subGames: 'In-House Games & Simulations', subOneDay: "One Day's Program", subGamified: 'Gamified Themes',
+    eyebrow: 'SOLUTIONS — L&D SOLUTIONS', heading: 'Learning & Development',
+    intro1: 'Impact designs and delivers structured learning journeys that move beyond one time interventions to enable sustained capability development.',
+    intro2: 'Our approach combines design, delivery, and continuous learning reinforcement, to ensure learning is applied in real business contexts and translated into measurable performance outcomes.',
+    ctaTop: 'Request a Customized Learning Journey',
+    tabExp: 'Experiential Learning', tabLevel: 'Participant Level Solutions', tabComp: 'Competency-Based Solutions', tabDur: 'Duration-Based Solutions',
+    expIntro: 'Learning sticks when people experience it. Through immersive simulations and hands-on learning journeys, Impact helps participants build capabilities faster, retain insights longer, and apply them directly in the workplace.',
+    coreFormats: 'CORE FORMATS',
+    simTitle: 'Business Simulations', simBody: 'Immersive experiences that replicate real organizational challenges and allow participants to practice decision-making in a risk-free environment.',
+    scenTitle: 'Scenario-Based Workshops', scenBody: 'Facilitated workshops built around practical scenarios that encourage problem solving, collaboration, and reflection.',
+    gameTitle: 'Gamified Learning Journeys', gameBody: 'Structured experiences that use challenge, storytelling, and interaction to increase engagement and retention.',
+    facTitle: 'Facilitation & Application', facBody: 'Every experience is supported by expert facilitation and structured debriefing to help participants reflect on decisions, extract insights, and connect lessons to real workplace challenges. This ensures learning translates into practical behavior change, not just engagement in the moment.',
+    flexTitle: 'Flexible Delivery', flexBody: "Programs can be delivered in person, virtually, or in hybrid formats depending on your organization's needs, audience, and scale. This flexibility makes experiential learning easier to deploy across teams, functions, and geographies.",
+    outcomesTitle: 'Outcomes', outcomesBody: 'Experiential learning helps organizations accelerate skill transfer, strengthen behavior change, and create measurable business impact through deeper engagement and real-world application.',
+    expCta: 'Explore our experiential learning solutions',
+    levelIntro: 'Organizations invest in different levels of development depending on their growth stage, leadership pipeline maturity, and business priorities. Impact supports organizations in building capability across all levels, from frontline employees to senior leaders, ensuring alignment between individual development and organizational performance.',
+    challengesLabel: 'Common challenges:', formatsLabel: 'Formats:',
+    frontTitle: 'Frontline Employees', frontChallenges: 'communication and customer interaction, maintaining execution discipline, and sustaining service quality.', frontFormats: 'simulations, experiential workshops, and practical coaching.',
+    supTitle: 'Supervisors', supChallenges: 'team coordination, accountability, and operational leadership.', supFormats: 'experiential leadership labs and team management simulations.',
+    midTitle: 'Middle Managers', midChallenges: 'cross functional alignment and turning strategic priorities into action.', midFormats: 'structured leadership journeys and business simulations.',
+    seniorTitle: 'Senior Leaders', seniorChallenges: 'strategic leadership, organizational transformation, and culture.', seniorFormats: 'executive simulations, leadership labs, and executive coaching.',
+    exploreSolutions: 'Explore our solutions',
+    compIntro: 'Impact helps organizations define and build the capabilities required for performance by translating competency frameworks into clear, observable behaviors across roles and levels. Our approach ensures that competencies are not theoretical, but directly reflected in how individuals make decisions, collaborate, and deliver results, enabling true performance-based development across the organization.',
+    tracksLabel: 'FOUR INTEGRATED PILLARS',
+    selfTitle: 'Leading Self', selfBody: 'Personal effectiveness, interpersonal skills, balance & wellbeing, and business professionalism.',
+    peopleTitle: 'Leading People', peopleBody: 'Coaching, objective setting, and the everyday skills of managing and developing others.',
+    businessTitle: 'Leading Business', businessBody: 'Strategy and business leadership alongside the practical discipline of managing work.',
+    functionsTitle: 'Leading Functions', functionsBody: 'Sales & customer service, HR, and function-specific programs built around real roles.',
+    startDesigning: 'Start designing',
+    durIntro: 'Organizations choose different learning formats depending on their objectives, timelines, and the level of impact required. Impact offers flexible learning formats ranging from short learning interventions to long-term capability journeys, enabling organizations to deploy scalable learning solutions that align with business priorities and workforce needs.',
+    shortTitle: 'Short Interventions', shortBody: 'Focused workshops, simulations, or learning labs designed to address specific skills or challenges within a short timeframe.',
+    seriesTitle: 'Program Series', seriesBody: 'Multi session learning programs delivered over several weeks or months to reinforce learning and encourage behavioral change over time.',
+    journeyTitle: 'Development Journeys', journeyBody: 'Comprehensive leadership development pathways that integrate assessments, experiential learning, business simulations, and coaching to support long-term capability building.',
+    bestFit: 'BEST FIT BY NEED', durCta: "Let's design the right solution",
+    closing: 'Request a Customized Learning Journey', cta: 'Book a Discovery Call',
+    copyright: '© 2026 Impact for Learning & Development. All rights reserved.'
+  };
+  var AR = {
+    navHome: 'الرئيسية', navAbout: 'عن إمباكت', navSolutions: 'الحلول', navPartners: 'الشركاء الدوليون', navContact: 'تواصل معنا', langBtn: 'English',
+    subLd: 'حلول التعلم والتطوير', subOd: 'التطوير المؤسسي', subAim: 'AIM — الذكاء الاصطناعي في العمل', subCa: 'التقييمات والتدريب', subGo: 'Impact GO', subGames: 'ألعاب ومحاكاة داخلية', subOneDay: 'برنامج يوم واحد', subGamified: 'ثيمات التلعيب',
+    eyebrow: 'الحلول — حلول التعلم والتطوير', heading: 'التعلم والتطوير',
+    intro1: 'تصمم إمباكت وتقدم رحلات تعلم منظمة تتجاوز التدخلات لمرة واحدة لتمكين تطوير قدرات مستمر.',
+    intro2: 'يجمع نهجنا بين التصميم والتنفيذ والتعزيز المستمر للتعلم، لضمان تطبيق التعلم في سياقات عمل حقيقية وترجمته إلى نتائج أداء قابلة للقياس.',
+    ctaTop: 'طلب رحلة تعلم مخصصة',
+    tabExp: 'التعلم التجريبي', tabLevel: 'حلول بحسب مستوى المشارك', tabComp: 'حلول قائمة على القدرات', tabDur: 'حلول قائمة على المدة',
+    expIntro: 'يترسخ التعلم عندما يعيشه الأفراد. من خلال محاكاة غامرة ورحلات تعلم عملية، تساعد إمباكت المشاركين على بناء القدرات بشكل أسرع، والاحتفاظ بالمعرفة لفترة أطول، وتطبيقها مباشرة في مكان العمل.',
+    coreFormats: 'الأشكال الأساسية',
+    simTitle: 'محاكاة الأعمال', simBody: 'تجارب غامرة تعيد إنتاج تحديات مؤسسية حقيقية وتتيح للمشاركين ممارسة اتخاذ القرار في بيئة خالية من المخاطر.',
+    scenTitle: 'ورش عمل قائمة على السيناريوهات', scenBody: 'ورش عمل ميسّرة مبنية على سيناريوهات عملية تشجع على حل المشكلات والتعاون والتفكير.',
+    gameTitle: 'رحلات تعلم قائمة على التلعيب', gameBody: 'تجارب منظمة تستخدم التحدي والسرد والتفاعل لزيادة الانخراط والاستيعاب.',
+    facTitle: 'التيسير والتطبيق', facBody: 'كل تجربة مدعومة بتيسير متخصص وجلسات تحليل منظمة تساعد المشاركين على التفكير في قراراتهم واستخلاص الرؤى وربط الدروس بتحديات عملهم الحقيقية. هذا يضمن أن يترجم التعلم إلى تغيير سلوكي عملي، لا مجرد انخراط لحظي.',
+    flexTitle: 'تنفيذ مرن', flexBody: 'يمكن تقديم البرامج حضورياً أو عن بُعد أو بشكل مختلط، بحسب احتياجات مؤسستك والجمهور والحجم. هذه المرونة تسهّل نشر التعلم التجريبي عبر الفرق والوظائف والمواقع الجغرافية.',
+    outcomesTitle: 'النتائج', outcomesBody: 'يساعد التعلم التجريبي المؤسسات على تسريع انتقال المهارات، وتعزيز التغيير السلوكي، وتحقيق أثر أعمال قابل للقياس من خلال انخراط أعمق وتطبيق فعلي.',
+    expCta: 'استكشف حلول التعلم التجريبي',
+    levelIntro: 'تستثمر المؤسسات في مستويات تطوير مختلفة بحسب مرحلة نموها ونضج خط القيادة وأولويات الأعمال. تدعم إمباكت المؤسسات في بناء القدرات على جميع المستويات، من الموظفين الأماميين إلى كبار القادة، لضمان التوافق بين التطوير الفردي والأداء المؤسسي.',
+    challengesLabel: 'التحديات الشائعة:', formatsLabel: 'الأشكال:',
+    frontTitle: 'الموظفون الأماميون', frontChallenges: 'التواصل والتفاعل مع العملاء، والحفاظ على انضباط التنفيذ، واستمرارية جودة الخدمة.', frontFormats: 'محاكاة، ورش عمل تجريبية، وتدريب عملي.',
+    supTitle: 'المشرفون', supChallenges: 'تنسيق الفريق، والمساءلة، والقيادة التشغيلية.', supFormats: 'مختبرات قيادة تجريبية ومحاكاة إدارة فرق.',
+    midTitle: 'المدراء المتوسطون', midChallenges: 'التوافق بين الوظائف وترجمة الأولويات الاستراتيجية إلى إجراءات.', midFormats: 'رحلات قيادة منظمة ومحاكاة أعمال.',
+    seniorTitle: 'كبار القادة', seniorChallenges: 'القيادة الاستراتيجية، والتحول المؤسسي، والثقافة.', seniorFormats: 'محاكاة تنفيذية، مختبرات قيادة، وتدريب تنفيذي.',
+    exploreSolutions: 'استكشف حلولنا',
+    compIntro: 'تساعد إمباكت المؤسسات على تحديد وبناء القدرات المطلوبة للأداء من خلال ترجمة أطر القدرات إلى سلوكيات واضحة وقابلة للملاحظة عبر الأدوار والمستويات. يضمن نهجنا أن القدرات ليست نظرية، بل تنعكس مباشرة في طريقة اتخاذ الأفراد للقرارات وتعاونهم وتحقيقهم للنتائج، مما يمكّن تطويراً حقيقياً قائماً على الأداء عبر المؤسسة.',
+    tracksLabel: 'أربع ركائز متكاملة',
+    selfTitle: 'قيادة الذات', selfBody: 'الفعالية الشخصية، والمهارات الشخصية، والتوازن والرفاهية، والاحترافية المهنية.',
+    peopleTitle: 'قيادة الأفراد', peopleBody: 'التدريب، وتحديد الأهداف، والمهارات اليومية لإدارة الآخرين وتطويرهم.',
+    businessTitle: 'قيادة الأعمال', businessBody: 'الاستراتيجية وقيادة الأعمال إلى جانب الانضباط العملي لإدارة العمل.',
+    functionsTitle: 'قيادة الوظائف', functionsBody: 'المبيعات وخدمة العملاء والموارد البشرية وبرامج مخصصة للأدوار الوظيفية.',
+    startDesigning: 'ابدأ التصميم',
+    durIntro: 'تختار المؤسسات أشكال تعلم مختلفة بحسب أهدافها وجدولها الزمني ومستوى الأثر المطلوب. تقدم إمباكت أشكال تعلم مرنة تتراوح من تدخلات قصيرة إلى رحلات قدرات طويلة الأمد، مما يمكّن المؤسسات من نشر حلول تعلم قابلة للتوسع تتوافق مع أولويات الأعمال واحتياجات فريق العمل.',
+    shortTitle: 'تدخلات قصيرة', shortBody: 'ورش عمل أو محاكاة أو مختبرات تعلم مركزة مصممة لمعالجة مهارات أو تحديات محددة خلال فترة قصيرة.',
+    seriesTitle: 'سلاسل برامج', seriesBody: 'برامج تعلم متعددة الجلسات تُقدَّم على مدى أسابيع أو أشهر لتعزيز التعلم وتشجيع التغيير السلوكي بمرور الوقت.',
+    journeyTitle: 'رحلات تطوير', journeyBody: 'مسارات تطوير قيادة شاملة تجمع بين التقييمات والتعلم التجريبي ومحاكاة الأعمال والتدريب لدعم بناء القدرات على المدى الطويل.',
+    bestFit: 'الأنسب بحسب الحاجة', durCta: 'لنصمم الحل المناسب',
+    closing: 'اطلب رحلة تعلم مخصصة', cta: 'حجز مكالمة استكشافية',
+    copyright: '© 2026 إمباكت للتعلم والتطوير. جميع الحقوق محفوظة.'
+  };
+
+  var root = document.getElementById('root');
+  var targets = document.querySelectorAll('[data-t]');
+
+  function applyLang(lang) {
+    var t = lang === 'ar' ? AR : EN;
+    var isAr = lang === 'ar';
+    root.setAttribute('dir', isAr ? 'rtl' : 'ltr');
+    root.classList.toggle('lang-ar', isAr);
+    document.documentElement.setAttribute('lang', isAr ? 'ar' : 'en');
+    document.documentElement.setAttribute('dir', isAr ? 'rtl' : 'ltr');
+    targets.forEach(function (el) {
+      var key = el.getAttribute('data-t');
+      if (t[key] !== undefined) el.textContent = t[key];
+    });
+  }
+
+  var savedLang = localStorage.getItem('impactLang');
+  var currentLang = (savedLang === 'ar' || savedLang === 'en') ? savedLang : 'en';
+  applyLang(currentLang);
+
+  function toggleLang() {
+    currentLang = currentLang === 'ar' ? 'en' : 'ar';
+    localStorage.setItem('impactLang', currentLang);
+    applyLang(currentLang);
+  }
+  document.getElementById('langToggle').addEventListener('click', toggleLang);
+  document.getElementById('langToggleFooter').addEventListener('click', toggleLang);
+
+  var tabBtns = Array.prototype.slice.call(document.querySelectorAll('.tab-btn'));
+  var panels = Array.prototype.slice.call(document.querySelectorAll('.tab-panel'));
+  tabBtns.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var target = btn.getAttribute('data-tab');
+      tabBtns.forEach(function (b) { b.classList.toggle('active', b === btn); });
+      panels.forEach(function (p) { p.classList.toggle('active', p.getAttribute('data-panel') === target); });
+    });
+  });
+
+  var heroImg = document.getElementById('heroImg');
+  if (heroImg) {
+    document.addEventListener('mousemove', function (e) {
+      var x = (e.clientX / innerWidth - 0.5) * 24;
+      var y = (e.clientY / innerHeight - 0.5) * 24;
+      heroImg.style.transform = 'scale(1.08) translate(' + x + 'px, ' + y + 'px)';
+    }, { passive: true });
+  }
+})();
+</script>
+</body>
+</html>

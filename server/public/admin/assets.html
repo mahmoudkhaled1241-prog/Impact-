@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Assets | Impact CMS</title>
+<link rel="stylesheet" href="/admin/static/admin.css">
+</head>
+<body>
+<header class="admin-header" id="adminHeader"></header>
+<main class="admin-main">
+  <h1>Image assets</h1>
+  <p class="sub">Every file in <code>assets/</code>. Upload a new image, or replace an existing one by re-using its exact filename (so every page referencing it updates automatically).</p>
+
+  <div class="toolbar">
+    <input type="text" id="searchBox" placeholder="Filter by filename…">
+  </div>
+
+  <div class="card">
+    <div class="upload-drop" id="dropZone">
+      Drop an image here, or <label style="color:#18D4E2;cursor:pointer">browse<input type="file" id="fileInput" accept="image/*" style="display:none"></label>.
+      To replace an existing asset, name the new file identically before uploading.
+    </div>
+    <div id="uploadStatus" style="font-size:13px;color:#7793A0;min-height:18px"></div>
+    <div class="asset-grid" id="assetGrid"></div>
+    <div class="empty" id="emptyState" style="display:none">No assets match your filter.</div>
+  </div>
+</main>
+
+<script src="/admin/static/admin.js"></script>
+<script>
+renderAdminHeader('/admin/assets');
+
+var allAssets = [];
+
+function assetTileHtml(a) {
+  var src = '/assets/' + encodeURIComponent(a.name);
+  return '<div class="asset-tile" data-name="' + escapeHtml(a.name) + '">' +
+    '<img src="' + src + '" alt="" loading="lazy" onerror="this.style.opacity=0.2">' +
+    '<div class="meta">' + escapeHtml(a.name) + '<br>' + Math.round(a.size / 1024) + ' KB</div>' +
+    '<div class="row">' +
+      '<button class="btn secondary" data-copy="' + escapeHtml(a.name) + '">Copy path</button>' +
+      '<button class="btn danger" data-delete="' + escapeHtml(a.name) + '">Delete</button>' +
+    '</div>' +
+  '</div>';
+}
+
+function renderGrid(assets) {
+  var grid = document.getElementById('assetGrid');
+  var empty = document.getElementById('emptyState');
+  if (assets.length === 0) {
+    grid.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  grid.innerHTML = assets.map(assetTileHtml).join('');
+
+  grid.querySelectorAll('[data-copy]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      navigator.clipboard.writeText('assets/' + btn.getAttribute('data-copy'));
+      btn.textContent = 'Copied!';
+      setTimeout(function () { btn.textContent = 'Copy path'; }, 1200);
+    });
+  });
+  grid.querySelectorAll('[data-delete]').forEach(function (btn) {
+    btn.addEventListener('click', async function () {
+      var name = btn.getAttribute('data-delete');
+      if (!confirm('Delete "' + name + '"? Any page still referencing this filename will show a broken image.')) return;
+      await api('/assets/' + encodeURIComponent(name), { method: 'DELETE' });
+      load();
+    });
+  });
+}
+
+async function load() {
+  var data = await api('/assets');
+  allAssets = data.assets.sort(function (a, b) { return a.name.localeCompare(b.name); });
+  renderGrid(allAssets);
+}
+
+document.getElementById('searchBox').addEventListener('input', function (e) {
+  var q = e.target.value.toLowerCase();
+  renderGrid(allAssets.filter(function (a) { return a.name.toLowerCase().includes(q); }));
+});
+
+async function doUpload(file) {
+  var statusEl = document.getElementById('uploadStatus');
+  statusEl.textContent = 'Uploading ' + file.name + '…';
+  var fd = new FormData();
+  fd.append('file', file);
+  try {
+    var res = await fetch('/api/admin/assets', { method: 'POST', body: fd, credentials: 'same-origin' });
+    var data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Upload failed');
+    statusEl.textContent = 'Uploaded ' + data.name + '.';
+    load();
+  } catch (err) {
+    statusEl.textContent = 'Error: ' + err.message;
+  }
+}
+
+document.getElementById('fileInput').addEventListener('change', function (e) {
+  if (e.target.files[0]) doUpload(e.target.files[0]);
+});
+
+var dropZone = document.getElementById('dropZone');
+['dragenter', 'dragover'].forEach(function (evt) {
+  dropZone.addEventListener(evt, function (e) { e.preventDefault(); dropZone.classList.add('drag'); });
+});
+['dragleave', 'drop'].forEach(function (evt) {
+  dropZone.addEventListener(evt, function (e) { e.preventDefault(); dropZone.classList.remove('drag'); });
+});
+dropZone.addEventListener('drop', function (e) {
+  var file = e.dataTransfer.files[0];
+  if (file) doUpload(file);
+});
+
+load();
+</script>
+</body>
+</html>

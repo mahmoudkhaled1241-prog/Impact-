@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Impact GO | Impact for Learning &amp; Development</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;600;700&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root { color-scheme: dark; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  html, body { background: #0A141D; }
+  body { font-family: 'Inter', Helvetica, Arial, sans-serif; color: #F4FBFC; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+  a { text-decoration: none; color: #18D4E2; }
+  a:hover { color: #8FEAF0; }
+  button { font-family: inherit; }
+  img { max-width: 100%; display: block; }
+  ::selection { background: #18D4E2; color: #0A141D; }
+
+  #root { position: relative; width: 100%; background: #0A141D; }
+  #root.lang-ar { font-family: 'IBM Plex Sans Arabic', 'Inter', sans-serif; }
+
+  header { position: sticky; top: 0; z-index: 50; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 24px; padding: 14px clamp(20px, 6vw, 120px); background: rgba(10, 20, 29, 0.92); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(140, 205, 214, 0.22); }
+  header .brand img { height: clamp(28px, 3vw, 38px); width: auto; }
+  nav.main-nav { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 10px clamp(12px, 2.2vw, 36px); font-family: 'IBM Plex Mono', monospace; font-size: clamp(10px, 1.05vw, 12px); letter-spacing: 0.12em; text-transform: uppercase; }
+  nav.main-nav a { color: #F4FBFC; text-decoration: none; transition: color 0.2s ease; }
+  nav.main-nav a:hover, nav.main-nav a.active { color: #18D4E2; }
+  nav.main-nav a.contact-cta { color: #18D4E2; border: 1px solid rgba(24, 212, 226, 0.5); padding: 9px 20px; border-radius: 999px; }
+  nav.main-nav a.contact-cta:hover { background: rgba(24, 212, 226, 0.1); }
+  .nav-drop { position: relative; }
+  .nav-drop > a { display: flex; align-items: center; gap: 7px; }
+  .nav-drop .caret { font-size: 9px; opacity: .7; }
+  .nav-drop-panel { position: absolute; top: 100%; left: -12px; padding-top: 14px; opacity: 0; transform: translateY(-8px); pointer-events: none; transition: opacity .22s ease, transform .22s ease; }
+  .nav-drop.partners .nav-drop-panel { left: auto; right: -12px; }
+  .nav-drop:hover .nav-drop-panel, .nav-drop:focus-within .nav-drop-panel { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  .nav-drop-inner { min-width: 280px; background: #0E1B26; border: 1px solid rgba(140,205,214,.22); padding: 8px; display: grid; }
+  .nav-drop-inner a { padding: 12px 16px; color: #F4FBFC; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; text-transform: none; display: flex; align-items: center; gap: 8px; transition: background .2s ease; }
+  .nav-drop-inner a:hover { background: #162835; color: #F4FBFC; }
+  .new-pill { background: #18D4E2; color: #0A141D; font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: .06em; padding: 2px 6px; border-radius: 4px; }
+  .lang-btn { background: transparent; border: 1px solid rgba(140, 205, 214, 0.4); color: #8FEAF0; padding: 8px 16px; border-radius: 999px; cursor: pointer; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; transition: border-color 0.2s ease, color 0.2s ease; }
+  .lang-btn:hover { border-color: #18D4E2; color: #18D4E2; }
+
+  .hero { position: relative; padding: clamp(80px, 14vh, 160px) clamp(24px, 6vw, 120px) clamp(48px, 6vh, 80px); overflow: hidden; display: grid; gap: 24px; max-width: 1200px; margin: 0 auto; }
+  .hero-bg { position: absolute; inset: 0; overflow: hidden; }
+  .hero-bg img { width: 100%; height: 100%; object-fit: cover; opacity: .8; transition: transform 0.25s ease-out; transform: scale(1.08); }
+  .hero-overlay { position: absolute; inset: 0; background: linear-gradient(100deg, rgba(10,20,29,.35), rgba(10,20,29,.55) 55%, rgba(10,20,29,.85)); }
+  .hero-logo { position: absolute; right: 4%; top: 50%; transform: translateY(-50%); width: 30%; max-width: 340px; height: auto; object-fit: contain; opacity: .9; z-index: 2; }
+  .hero-inner { position: relative; z-index: 1; display: grid; gap: 24px; }
+  .eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.24em; color: #7793A0; }
+  h1.page-title { font-weight: 700; font-size: clamp(32px, 4.4vw, 60px); line-height: 1.1; letter-spacing: -0.025em; max-width: 22ch; text-wrap: pretty; }
+  p.page-intro { color: #AFC7CD; font-size: clamp(16px, 1.3vw, 18px); line-height: 1.65; max-width: 44ch; text-wrap: pretty; }
+  .cta-btn { justify-self: start; color: #0A141D; background: #18D4E2; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; padding: 14px 28px; border-radius: 999px; transition: background 0.2s ease; }
+  .cta-btn:hover { background: #8FEAF0; color: #0A141D; }
+
+  .content-wrap { position: relative; padding: clamp(48px, 7vh, 80px) clamp(24px, 6vw, 120px) clamp(120px, 16vh, 200px); max-width: 1200px; margin: 0 auto; }
+  .intro-block { display: grid; gap: 32px; max-width: 800px; }
+  .intro-block h2 { margin: 0; font-size: clamp(22px, 2.6vw, 30px); font-weight: 700; letter-spacing: -0.02em; }
+  .intro-block p { margin: 0; color: #AFC7CD; font-size: 16px; line-height: 1.65; }
+  .label { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.2em; color: #7793A0; }
+
+  .pillars-block { display: grid; gap: 24px; margin-top: 40px; }
+  .pillars-carousel { position: relative; height: 380px; display: flex; align-items: center; justify-content: center; perspective: 1400px; }
+  .carousel-nav-btn { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(140, 205, 214, 0.3); background: rgba(10, 20, 29, 0.7); color: #F4FBFC; font-size: 18px; cursor: pointer; z-index: 20; transition: border-color 0.2s ease, color 0.2s ease; }
+  .carousel-nav-btn:hover { border-color: #18D4E2; color: #18D4E2; }
+  .carousel-nav-btn.prev { left: 0; }
+  .carousel-nav-btn.next { right: 0; }
+  .pillar-card { position: absolute; top: 50%; left: 50%; width: min(60vw, 340px); height: 340px; display: flex; flex-direction: column; border-radius: 10px; overflow: hidden; background: #122230; border-top: 2px solid #18D4E2; box-shadow: 0 24px 50px rgba(0, 0, 0, 0.45); transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.5s ease; cursor: pointer; color: #F4FBFC; }
+  .pillar-card .thumb { overflow: hidden; height: 60%; }
+  .pillar-card .thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .pillar-card .body { padding: 24px; display: grid; gap: 8px; }
+  .pillar-card .tag { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.18em; color: #18D4E2; }
+  .pillar-card h3 { margin: 0; font-size: 19px; font-weight: 700; }
+  .pillar-card p { margin: 0; color: #AFC7CD; font-size: 14px; line-height: 1.6; }
+  .carousel-dots { display: flex; gap: 6px; justify-content: center; margin-top: 16px; }
+  .carousel-dots button { width: 7px; height: 7px; border-radius: 4px; border: none; cursor: pointer; background: rgba(140, 205, 214, 0.35); transition: all 0.3s ease; }
+  .carousel-dots button.active { width: 22px; background: #18D4E2; }
+
+  .outcomes-block { display: grid; gap: 24px; margin-top: 56px; }
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 32px; }
+  .info-card { background: #122230; display: grid; grid-template-rows: 130px 1fr; transition: transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s ease; position: relative; z-index: 1; }
+  .info-card:hover { transform: scale(1.04); z-index: 2; box-shadow: 0 20px 44px rgba(0,0,0,.45); }
+  .info-card .thumb { overflow: hidden; height: 130px; }
+  .info-card .thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .info-card .body { padding: 20px 22px; display: grid; gap: 8px; }
+  .info-card .body h3 { margin: 0; font-size: 17px; font-weight: 700; }
+  .info-card .body p { margin: 0; color: #AFC7CD; font-size: 14px; line-height: 1.6; }
+
+  .closing { position: relative; min-height: 50vh; overflow: hidden; background: #0E1B26; color: #F4FBFC; display: flex; align-items: center; padding: clamp(80px, 12vh, 140px) clamp(24px, 6vw, 120px); }
+  .closing-bg { position: absolute; inset: 0; filter: blur(6px); }
+  .closing-bg img { width: 100%; height: 100%; object-fit: cover; }
+  .closing-overlay { position: absolute; inset: 0; background: rgba(10, 20, 29, 0.35); }
+  .closing-inner { position: relative; z-index: 2; max-width: 1200px; margin: 0 auto; display: grid; gap: 32px; }
+  .closing h2 { margin: 0; font-weight: 800; font-size: clamp(32px, 5vw, 80px); line-height: 1.02; letter-spacing: -0.03em; max-width: 18ch; }
+
+  footer { position: relative; background: #0E1B26; border-top: 1px solid rgba(140, 205, 214, 0.22); padding: 24px clamp(24px, 6vw, 120px); display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #567179; }
+</style>
+</head>
+<body>
+<div id="root" dir="ltr">
+  <header>
+    <a class="brand" href="Impact L&amp;D Parallax.dc.html"><img src="assets/logo.png" alt="Impact"></a>
+    <nav class="main-nav">
+      <a data-t="navHome" href="Impact L&amp;D Parallax.dc.html">Home</a>
+      <a data-t="navAbout" href="About Impact.dc.html">About Impact</a>
+      <div class="nav-drop">
+        <a data-t="navSolutions" href="Solutions.dc.html" class="active">Solutions <span class="caret">▼</span></a>
+        <div class="nav-drop-panel">
+          <div class="nav-drop-inner">
+            <a data-t="subLd" href="L&amp;D Solutions.dc.html">L&amp;D Solutions</a>
+            <a data-t="subOd" href="Organizational Development.dc.html">Organizational Development</a>
+            <a href="AIM - AI in Motion.dc.html"><span data-t="subAim">AIM — AI in Motion</span><span class="new-pill">NEW</span></a>
+            <a data-t="subCa" href="Assessments &amp; Coaching.dc.html">Assessments &amp; Coaching</a>
+            <a data-t="subGo" href="Impact GO.dc.html" style="color:#18D4E2">Impact GO</a>
+            <a data-t="subGames" href="In-House Games.dc.html">In-House Games &amp; Simulations</a>
+            <a data-t="subOneDay" href="One Days Program.dc.html">One Day's Program</a>
+            <a data-t="subGamified" href="Gamified Themes.dc.html">Gamified Themes</a>
+          </div>
+        </div>
+      </div>
+      <div class="nav-drop partners">
+        <a data-t="navPartners" href="International Partners.dc.html">International Partners <span class="caret">▼</span></a>
+        <div class="nav-drop-panel">
+          <div class="nav-drop-inner">
+            <a href="Partner Culture Partners.dc.html">Culture Partners</a>
+            <a href="Partner KnolSkape.dc.html">KNOLSKAPE</a>
+            <a href="Partner BCon.dc.html">BCon</a>
+            <a href="Partner Gallup.dc.html">Gallup</a>
+            <a href="Partner ManagementDrive.dc.html">ManagementDrive</a>
+          </div>
+        </div>
+      </div>
+      <a data-t="navContact" href="Contact.dc.html" class="contact-cta">Contact</a>
+      <button class="lang-btn" id="langToggle" data-t="langBtn" type="button">العربية</button>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div class="hero-bg"><img id="heroImg" src="assets/brand-building-ripple.png" alt=""></div>
+    <div class="hero-overlay"></div>
+    <img class="hero-logo" src="assets/impactgo-logo.png" alt="Impact GO">
+    <div class="hero-inner">
+      <div class="eyebrow" data-t="eyebrow">SOLUTIONS — IMPACT GO</div>
+      <h1 class="page-title" data-t="heading">Impact GO</h1>
+      <p class="page-intro" data-t="intro1">Impact designs team building experiences that strengthen collaboration, trust, and team performance through engaging, experiential activities.</p>
+      <p class="page-intro" data-t="intro2">Our approach goes beyond traditional activities to create meaningful experiences that improve how teams communicate, collaborate, and perform together.</p>
+    </div>
+  </section>
+
+  <section class="content-wrap">
+
+    <div class="intro-block">
+      <h2 data-t="teamTitle">Team Building &amp; Events</h2>
+      <p data-t="teamBody">Impact designs experiential team programs that go beyond entertainment to strengthen collaboration and team performance. Each experience is built around real collaboration challenges and structured activities that encourage teams to reflect, align, and improve the way they work together.</p>
+      <p data-t="corpBody1">From alignment workshops to full retreats designed end to end to ensure outcomes, energy, and engagement.</p>
+    </div>
+
+    <div class="pillars-block">
+      <div class="label" data-t="pillarsLabel">HOW IT WORKS</div>
+      <div class="pillars-carousel">
+        <button class="carousel-nav-btn prev" id="pillarPrev" aria-label="Previous" type="button">‹</button>
+        <button class="carousel-nav-btn next" id="pillarNext" aria-label="Next" type="button">›</button>
+        <div id="pillarTrack">
+          <a class="pillar-card" data-index="0" href="Impact GO Theme.dc.html">
+            <div class="thumb"><img src="assets/theme-pirates.png" alt="" style="object-position: 78% center"></div>
+            <div class="body"><div class="tag" data-t="themeTag">THEME</div><h3 data-t="themeTitle">Theme</h3><p data-t="themeBody">Every experience is wrapped in an immersive storyline, chosen to fit the audience and objective.</p></div>
+          </a>
+          <a class="pillar-card" data-index="1" href="Impact GO Fun.dc.html">
+            <div class="thumb"><img src="assets/handshake.png" alt=""></div>
+            <div class="body"><div class="tag" data-t="funTag">FUN</div><h3 data-t="funTitle">Fun</h3><p data-t="funBody">Engaging, high-energy activities that build genuine enjoyment and connection between teams.</p></div>
+          </a>
+          <a class="pillar-card" data-index="2" href="Impact GO Learn.dc.html">
+            <div class="thumb"><img src="assets/brand-boardroom-ripple.jpeg" alt=""></div>
+            <div class="body"><div class="tag" data-t="learnTag">LEARN</div><h3 data-t="learnTitle">Learn</h3><p data-t="learnBody">Structured reflection built into every activity so teams translate the experience into lasting behavior change.</p></div>
+          </a>
+        </div>
+      </div>
+      <div class="carousel-dots" id="pillarDots">
+        <button data-index="0" type="button"></button>
+        <button data-index="1" type="button"></button>
+        <button data-index="2" type="button"></button>
+      </div>
+    </div>
+
+    <div class="outcomes-block">
+      <div class="label" data-t="outcomesLabel">BUSINESS OUTCOMES</div>
+      <div class="cards-grid">
+        <div class="info-card"><div class="thumb"><img src="assets/handshake.png" alt=""></div><div class="body"><h3 data-t="collabTitle">Collaboration</h3><p data-t="collabBody">Activities designed to strengthen trust, cooperation, and problem-solving between team members.</p></div></div>
+        <div class="info-card"><div class="thumb"><img src="assets/meeting.png" alt=""></div><div class="body"><h3 data-t="alignTitle">Alignment</h3><p data-t="alignBody">Experiences that help teams reconnect with shared goals, organizational priorities, and collective responsibility for results.</p></div></div>
+        <div class="info-card"><div class="thumb"><img src="assets/brand-boardroom-ripple.jpeg" alt=""></div><div class="body"><h3 data-t="ownTitle">Ownership</h3><p data-t="ownBody">Programs that encourage individuals and teams to take accountability for outcomes and contribute proactively to team success.</p></div></div>
+        <div class="info-card"><div class="thumb"><img src="assets/brand-boardroom-ripple.jpeg" alt=""></div><div class="body"><h3 data-t="commTitle">Communication</h3><p data-t="commBody">Experiential challenges that strengthen open dialogue, active listening, and effective communication within teams.</p></div></div>
+      </div>
+    </div>
+
+  </section>
+
+  <section class="closing">
+    <div class="closing-bg"><img src="assets/contact-photo.png" alt=""></div>
+    <div class="closing-overlay"></div>
+    <div class="closing-inner">
+      <h2 data-t="closing">Request a Customized Learning Journey</h2>
+      <a class="cta-btn" data-t="cta" href="Contact.dc.html">Book a Discovery Call</a>
+    </div>
+  </section>
+
+  <footer>
+    <span data-t="copyright">© 2026 Impact for Learning &amp; Development. All rights reserved.</span>
+    <button class="lang-btn" id="langToggleFooter" data-t="langBtn" type="button">العربية</button>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var EN = {
+    navHome: 'Home', navAbout: 'About Impact', navSolutions: 'Solutions', navPartners: 'International Partners', navContact: 'Contact', langBtn: 'العربية',
+    subLd: 'L&D Solutions', subOd: 'Organizational Development', subAim: 'AIM — AI in Motion', subCa: 'Assessments & Coaching', subGo: 'Impact GO',
+    eyebrow: 'SOLUTIONS — IMPACT GO', heading: 'Impact GO',
+    intro1: 'Impact designs team building experiences that strengthen collaboration, trust, and team performance through engaging, experiential activities.',
+    intro2: 'Our approach goes beyond traditional activities to create meaningful experiences that improve how teams communicate, collaborate, and perform together.',
+    subGames: 'In-House Games & Simulations', subOneDay: "One Day's Program", subGamified: 'Gamified Themes',
+    pillarsLabel: 'HOW IT WORKS',
+    themeTag: 'THEME', themeTitle: 'Theme', themeBody: 'Every experience is wrapped in an immersive storyline, chosen to fit the audience and objective.',
+    funTag: 'FUN', funTitle: 'Fun', funBody: 'Engaging, high-energy activities that build genuine enjoyment and connection between teams.',
+    learnTag: 'LEARN', learnTitle: 'Learn', learnBody: 'Structured reflection built into every activity so teams translate the experience into lasting behavior change.',
+    teamTitle: 'Team Building & Events',
+    teamBody: 'Impact designs experiential team programs that go beyond entertainment to strengthen collaboration and team performance. Each experience is built around real collaboration challenges and structured activities that encourage teams to reflect, align, and improve the way they work together.',
+    outcomesLabel: 'BUSINESS OUTCOMES',
+    collabTitle: 'Collaboration', collabBody: 'Activities designed to strengthen trust, cooperation, and problem-solving between team members.',
+    alignTitle: 'Alignment', alignBody: 'Experiences that help teams reconnect with shared goals, organizational priorities, and collective responsibility for results.',
+    ownTitle: 'Ownership', ownBody: 'Programs that encourage individuals and teams to take accountability for outcomes and contribute proactively to team success.',
+    commTitle: 'Communication', commBody: 'Experiential challenges that strengthen open dialogue, active listening, and effective communication within teams.',
+    corpBody1: 'From alignment workshops to full retreats designed end to end to ensure outcomes, energy, and engagement.',
+    closing: 'Request a Customized Learning Journey', cta: 'Book a Discovery Call',
+    copyright: '© 2026 Impact for Learning & Development. All rights reserved.'
+  };
+  var AR = {
+    navHome: 'الرئيسية', navAbout: 'عن إمباكت', navSolutions: 'الحلول', navPartners: 'الشركاء الدوليون', navContact: 'تواصل معنا', langBtn: 'English',
+    subLd: 'حلول التعلم والتطوير', subOd: 'التطوير المؤسسي', subAim: 'AIM — الذكاء الاصطناعي في العمل', subCa: 'التقييمات والتدريب', subGo: 'Impact GO',
+    eyebrow: 'الحلول — Impact GO', heading: 'Impact GO',
+    intro1: 'تصمم إمباكت تجارب بناء فرق تعزز التعاون والثقة وأداء الفريق من خلال أنشطة تجريبية جاذبة.',
+    intro2: 'يتجاوز نهجنا الأنشطة التقليدية لخلق تجارب هادفة تحسّن طريقة تواصل الفرق وتعاونها وأدائها معاً.',
+    subGames: 'ألعاب ومحاكاة داخلية', subOneDay: 'برنامج يوم واحد', subGamified: 'ثيمات التلعيب',
+    pillarsLabel: 'كيف تعمل',
+    themeTag: 'الثيمة', themeTitle: 'الثيمة', themeBody: 'كل تجربة تُغلَّف بقصة غامرة تُختار بحسب الجمهور والهدف.',
+    funTag: 'المرح', funTitle: 'المرح', funBody: 'أنشطة تفاعلية عالية الطاقة تبني تواصلاً وانخراطاً حقيقياً بين الفرق.',
+    learnTag: 'التعلم', learnTitle: 'التعلم', learnBody: 'تأمل منظم مدمج في كل نشاط لتحويل التجربة إلى تغيير سلوكي مستدام.',
+    teamTitle: 'بناء الفرق والفعاليات',
+    teamBody: 'تصمم إمباكت برامج فريق تجريبية تتجاوز الترفيه لتعزيز التعاون وأداء الفريق. كل تجربة تُبنى حول تحديات تعاون حقيقية وأنشطة منظمة تشجع الفرق على التفكير والتوافق وتحسين طريقة عملهم معاً.',
+    outcomesLabel: 'نتائج الأعمال',
+    collabTitle: 'التعاون', collabBody: 'أنشطة مصممة لتعزيز الثقة والتعاون وحل المشكلات بين أعضاء الفريق.',
+    alignTitle: 'التوافق', alignBody: 'تجارب تساعد الفرق على إعادة الارتباط بالأهداف المشتركة والأولويات المؤسسية والمسؤولية الجماعية عن النتائج.',
+    ownTitle: 'الملكية', ownBody: 'برامج تشجع الأفراد والفرق على تحمل المسؤولية عن النتائج والمساهمة الفاعلة في نجاح الفريق.',
+    commTitle: 'التواصل', commBody: 'تحديات تجريبية تعزز الحوار المفتوح والاستماع الفعّال والتواصل الفعال داخل الفرق.',
+    corpBody1: 'من ورش التوافق إلى المنتجعات الكاملة المصممة من البداية للنهاية لضمان النتائج والطاقة والانخراط.',
+    closing: 'أخبرنا بما لا يسير بشكل جيد.', cta: 'حجز مكالمة استكشافية',
+    copyright: '© 2026 إمباكت للتعلم والتطوير. جميع الحقوق محفوظة.'
+  };
+
+  var root = document.getElementById('root');
+  var targets = document.querySelectorAll('[data-t]');
+
+  function applyLang(lang) {
+    var t = lang === 'ar' ? AR : EN;
+    var isAr = lang === 'ar';
+    root.setAttribute('dir', isAr ? 'rtl' : 'ltr');
+    root.classList.toggle('lang-ar', isAr);
+    document.documentElement.setAttribute('lang', isAr ? 'ar' : 'en');
+    document.documentElement.setAttribute('dir', isAr ? 'rtl' : 'ltr');
+    targets.forEach(function (el) {
+      var key = el.getAttribute('data-t');
+      if (t[key] !== undefined) el.textContent = t[key];
+    });
+  }
+
+  var savedLang = localStorage.getItem('impactLang');
+  var currentLang = (savedLang === 'ar' || savedLang === 'en') ? savedLang : 'en';
+  applyLang(currentLang);
+
+  function toggleLang() {
+    currentLang = currentLang === 'ar' ? 'en' : 'ar';
+    localStorage.setItem('impactLang', currentLang);
+    applyLang(currentLang);
+  }
+  document.getElementById('langToggle').addEventListener('click', toggleLang);
+  document.getElementById('langToggleFooter').addEventListener('click', toggleLang);
+
+  var heroImg = document.getElementById('heroImg');
+  if (heroImg) {
+    document.addEventListener('mousemove', function (e) {
+      var x = (e.clientX / innerWidth - 0.5) * 24;
+      var y = (e.clientY / innerHeight - 0.5) * 24;
+      heroImg.style.transform = 'scale(1.08) translate(' + x + 'px, ' + y + 'px)';
+    }, { passive: true });
+  }
+
+  (function () {
+    var N = 3, cf = 0;
+    var cards = Array.prototype.slice.call(document.getElementById('pillarTrack').querySelectorAll('.pillar-card'));
+    var dots = Array.prototype.slice.call(document.getElementById('pillarDots').querySelectorAll('button'));
+
+    function render() {
+      cards.forEach(function (card, i) {
+        var off = i - cf;
+        if (off > N / 2) off -= N;
+        if (off < -N / 2) off += N;
+        var isActive = off === 0;
+        var tx = off * 60, rot = off * -22, scale = isActive ? 1 : 0.8, z = 10 - Math.abs(off);
+        card.style.transform = 'translate(-50%, -50%) translateX(' + tx + '%) scale(' + scale + ') rotateY(' + rot + 'deg)';
+        card.style.zIndex = z;
+        card.style.opacity = isActive ? '1' : '.75';
+      });
+      dots.forEach(function (dot, i) { dot.classList.toggle('active', i === cf); });
+    }
+    render();
+
+    var timer;
+    function resetAutoplay() {
+      clearInterval(timer);
+      timer = setInterval(function () { cf = (cf + 1) % N; render(); }, 3400);
+    }
+    function goTo(i) { cf = ((i % N) + N) % N; render(); resetAutoplay(); }
+
+    document.getElementById('pillarPrev').addEventListener('click', function () { goTo(cf - 1); });
+    document.getElementById('pillarNext').addEventListener('click', function () { goTo(cf + 1); });
+    dots.forEach(function (dot) {
+      dot.addEventListener('click', function () { goTo(parseInt(dot.getAttribute('data-index'), 10)); });
+    });
+    resetAutoplay();
+  })();
+})();
+</script>
+</body>
+</html>

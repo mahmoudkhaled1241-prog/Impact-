@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Theme — Impact GO | Impact for Learning &amp; Development</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { color-scheme: dark; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: #0A141D; }
+  body { font-family: 'Inter', Helvetica, Arial, sans-serif; color: #F4FBFC; -webkit-font-smoothing: antialiased; }
+  a { text-decoration: none; }
+  button { font-family: inherit; }
+  img { max-width: 100%; display: block; }
+
+  #root { position: relative; width: 100%; background: #0A141D; }
+  #root.lang-ar { font-family: 'IBM Plex Sans Arabic', 'Inter', sans-serif; }
+
+  header { position: sticky; top: 0; z-index: 50; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 24px; padding: 14px clamp(20px, 6vw, 120px); background: rgba(10, 20, 29, 0.92); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(140, 205, 214, 0.22); }
+  header .brand img { height: clamp(28px, 3vw, 38px); width: auto; }
+  nav.main-nav { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 10px clamp(12px, 2.2vw, 36px); font-family: 'IBM Plex Mono', monospace; font-size: clamp(10px, 1.05vw, 12px); letter-spacing: 0.12em; text-transform: uppercase; }
+  nav.main-nav a { color: #F4FBFC; transition: color 0.2s ease; }
+  nav.main-nav a:hover, nav.main-nav a.active { color: #18D4E2; }
+  nav.main-nav a.contact-cta { color: #18D4E2; border: 1px solid rgba(24, 212, 226, 0.5); padding: 9px 20px; border-radius: 999px; }
+  nav.main-nav a.contact-cta:hover { background: rgba(24, 212, 226, 0.1); }
+  .lang-btn { background: transparent; border: 1px solid rgba(140, 205, 214, 0.4); color: #8FEAF0; padding: 8px 16px; border-radius: 999px; cursor: pointer; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.1em; transition: border-color 0.2s ease, color 0.2s ease; }
+  .lang-btn:hover { border-color: #18D4E2; color: #18D4E2; }
+
+  .hero { position: relative; padding: clamp(80px, 14vh, 160px) clamp(24px, 6vw, 120px) clamp(60px, 8vh, 100px); overflow: hidden; display: grid; gap: 28px; max-width: 900px; margin: 0 auto; }
+  .back-link { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.18em; color: #7793A0; justify-self: start; transition: color 0.2s ease; }
+  .back-link:hover { color: #18D4E2; }
+  .tag { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.18em; color: #18D4E2; }
+  h1.page-title { font-weight: 700; font-size: clamp(30px, 4vw, 54px); line-height: 1.1; letter-spacing: -0.025em; text-wrap: pretty; }
+  p.page-body { color: #AFC7CD; font-size: clamp(16px, 1.3vw, 19px); line-height: 1.65; text-wrap: pretty; }
+
+  .gallery-section { position: relative; padding: 0 clamp(24px, 6vw, 120px) clamp(60px, 8vh, 100px); }
+  .gallery-inner { max-width: 1200px; margin: 0 auto; display: grid; gap: 16px; }
+  .label { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.18em; color: #7793A0; }
+
+  .slideshow { position: relative; height: clamp(320px, 46vw, 560px); overflow: hidden; border-radius: 16px; }
+  .slideshow img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.7s ease; z-index: 1; }
+  .slideshow img.active { opacity: 1; z-index: 2; }
+  .slide-nav-btn { position: absolute; top: 50%; transform: translateY(-50%); width: 48px; height: 48px; border-radius: 50%; border: 1px solid rgba(140, 205, 214, 0.3); background: rgba(10, 20, 29, 0.6); color: #F4FBFC; font-size: 20px; cursor: pointer; z-index: 20; transition: border-color 0.2s ease, color 0.2s ease; }
+  .slide-nav-btn:hover { border-color: #18D4E2; color: #18D4E2; }
+  .slide-nav-btn.prev { left: 20px; }
+  .slide-nav-btn.next { right: 20px; }
+  .slide-dots { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
+  .slide-dots button { width: 7px; height: 7px; border-radius: 4px; border: none; cursor: pointer; background: rgba(140, 205, 214, 0.35); transition: all 0.3s ease; }
+  .slide-dots button.active { width: 22px; background: #18D4E2; }
+
+  .cta-section { position: relative; padding: 0 clamp(24px, 6vw, 120px) clamp(60px, 8vh, 100px); max-width: 900px; margin: 0 auto; }
+  .cta-btn { justify-self: start; color: #0A141D; background: #18D4E2; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; padding: 14px 28px; border-radius: 999px; transition: opacity 0.2s ease; }
+  .cta-btn:hover { opacity: 0.85; }
+
+  footer { position: relative; background: #0E1B26; border-top: 1px solid rgba(140, 205, 214, 0.22); padding: 24px clamp(24px, 6vw, 120px); display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #567179; margin-top: 80px; }
+</style>
+</head>
+<body>
+<div id="root" dir="ltr">
+  <header>
+    <a class="brand" href="Impact L&amp;D Parallax.dc.html"><img src="assets/logo.png" alt="Impact"></a>
+    <nav class="main-nav">
+      <a data-t="navHome" href="Impact L&amp;D Parallax.dc.html">Home</a>
+      <a data-t="navAbout" href="About Impact.dc.html">About Impact</a>
+      <a data-t="navSolutions" href="Solutions.dc.html" class="active">Solutions</a>
+      <a data-t="navPartners" href="International Partners.dc.html">International Partners</a>
+      <a data-t="navContact" href="Contact.dc.html" class="contact-cta">Contact</a>
+      <button class="lang-btn" id="langToggle" data-t="langBtn" type="button">العربية</button>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <a class="back-link" data-t="back" href="Impact GO.dc.html">← Impact GO</a>
+    <div class="tag" data-t="tag">IMPACT GO — THEME</div>
+    <h1 class="page-title" data-t="name">Theme</h1>
+    <p class="page-body" data-t="body">Every experience is wrapped in an immersive storyline, chosen to fit the audience and objective. A library of themed frameworks wraps our core team activities in a narrative that keeps participants engaged from start to finish.</p>
+  </section>
+
+  <section class="gallery-section">
+    <div class="gallery-inner">
+      <div class="label" data-t="themesLabel">THEMES</div>
+      <div class="slideshow" id="themeSlideshow">
+        <img class="active" data-index="0" src="assets/theme-pirates.png" alt="Pirates">
+        <img data-index="1" src="assets/theme-squad.png" alt="The Squad">
+        <img data-index="2" src="assets/theme-tribes.png" alt="The Tribes">
+        <img data-index="3" src="assets/theme-laylaelkabira.png" alt="Layla El Kabira">
+        <img data-index="4" src="assets/theme-olympics.png" alt="Olympics">
+        <img data-index="5" src="assets/theme-survivors.png" alt="Survivors">
+        <img data-index="6" src="assets/theme-funfactory.png" alt="Fun Factory">
+        <img data-index="7" src="assets/theme-neonbuzz.png" alt="Neon Buzz">
+        <button class="slide-nav-btn prev" id="themePrev" aria-label="Previous" type="button">‹</button>
+        <button class="slide-nav-btn next" id="themeNext" aria-label="Next" type="button">›</button>
+      </div>
+      <div class="slide-dots" id="themeDots">
+        <button class="active" data-index="0" type="button"></button>
+        <button data-index="1" type="button"></button>
+        <button data-index="2" type="button"></button>
+        <button data-index="3" type="button"></button>
+        <button data-index="4" type="button"></button>
+        <button data-index="5" type="button"></button>
+        <button data-index="6" type="button"></button>
+        <button data-index="7" type="button"></button>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-section">
+    <a class="cta-btn" data-t="cta" href="Contact.dc.html">Book a Discovery Call</a>
+  </section>
+
+  <footer>
+    <span data-t="copyright">© 2026 Impact for Learning &amp; Development. All rights reserved.</span>
+    <button class="lang-btn" id="langToggleFooter" data-t="langBtn" type="button">العربية</button>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var EN = {
+    navHome: 'Home', navAbout: 'About Impact', navSolutions: 'Solutions', navPartners: 'International Partners', navContact: 'Contact', langBtn: 'العربية',
+    back: '← Impact GO', tag: 'IMPACT GO — THEME', name: 'Theme',
+    body: 'Every experience is wrapped in an immersive storyline, chosen to fit the audience and objective. A library of themed frameworks wraps our core team activities in a narrative that keeps participants engaged from start to finish.',
+    themesLabel: 'THEMES',
+    cta: 'Book a Discovery Call', copyright: '© 2026 Impact for Learning & Development. All rights reserved.'
+  };
+  var AR = {
+    navHome: 'الرئيسية', navAbout: 'عن إمباكت', navSolutions: 'الحلول', navPartners: 'الشركاء الدوليون', navContact: 'تواصل معنا', langBtn: 'English',
+    back: '← Impact GO', tag: 'Impact GO — الثيمة', name: 'الثيمة',
+    body: 'كل تجربة تُغلَّف بقصة غامرة تُختار بحسب الجمهور والهدف. مكتبة من الأطر الموضوعية تُغلّف أنشطة الفريق الأساسية بقصة تحافظ على انخراط المشاركين من البداية للنهاية.',
+    themesLabel: 'الثيمات',
+    cta: 'حجز مكالمة استكشافية', copyright: '© 2026 إمباكت للتعلم والتطوير. جميع الحقوق محفوظة.'
+  };
+
+  var root = document.getElementById('root');
+  var targets = document.querySelectorAll('[data-t]');
+
+  function applyLang(lang) {
+    var t = lang === 'ar' ? AR : EN;
+    var isAr = lang === 'ar';
+    root.setAttribute('dir', isAr ? 'rtl' : 'ltr');
+    root.classList.toggle('lang-ar', isAr);
+    document.documentElement.setAttribute('lang', isAr ? 'ar' : 'en');
+    document.documentElement.setAttribute('dir', isAr ? 'rtl' : 'ltr');
+    targets.forEach(function (el) {
+      var key = el.getAttribute('data-t');
+      if (t[key] !== undefined) el.textContent = t[key];
+    });
+  }
+
+  var savedLang = localStorage.getItem('impactLang');
+  var currentLang = (savedLang === 'ar' || savedLang === 'en') ? savedLang : 'en';
+  applyLang(currentLang);
+
+  function toggleLang() {
+    currentLang = currentLang === 'ar' ? 'en' : 'ar';
+    localStorage.setItem('impactLang', currentLang);
+    applyLang(currentLang);
+  }
+  document.getElementById('langToggle').addEventListener('click', toggleLang);
+  document.getElementById('langToggleFooter').addEventListener('click', toggleLang);
+
+  (function () {
+    var N = 8, slide = 0;
+    var slides = Array.prototype.slice.call(document.getElementById('themeSlideshow').querySelectorAll('img'));
+    var dots = Array.prototype.slice.call(document.getElementById('themeDots').querySelectorAll('button'));
+
+    function render() {
+      slides.forEach(function (s, i) { s.classList.toggle('active', i === slide); });
+      dots.forEach(function (d, i) { d.classList.toggle('active', i === slide); });
+    }
+
+    var timer;
+    function resetAutoplay() {
+      clearInterval(timer);
+      timer = setInterval(function () { slide = (slide + 1) % N; render(); }, 3200);
+    }
+    function goTo(i) { slide = ((i % N) + N) % N; render(); resetAutoplay(); }
+
+    document.getElementById('themePrev').addEventListener('click', function () { goTo(slide - 1); });
+    document.getElementById('themeNext').addEventListener('click', function () { goTo(slide + 1); });
+    dots.forEach(function (dot) {
+      dot.addEventListener('click', function () { goTo(parseInt(dot.getAttribute('data-index'), 10)); });
+    });
+    resetAutoplay();
+  })();
+})();
+</script>
+</body>
+</html>

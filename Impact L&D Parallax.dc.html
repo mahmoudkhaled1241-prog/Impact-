@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Impact for Learning &amp; Development — Transforming Capability into Measurable Business Performance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;600;700&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root { color-scheme: dark; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  html, body { background: #0A141D; }
+  body {
+    font-family: 'Inter', Helvetica, Arial, sans-serif;
+    color: #F4FBFC;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  a { text-decoration: none; color: #18D4E2; }
+  a:hover { color: #8FEAF0; }
+  button { font-family: inherit; }
+  img { max-width: 100%; display: block; }
+  ::selection { background: #18D4E2; color: #0A141D; }
+
+  #root { position: relative; width: 100%; background: #0A141D; }
+  #root.lang-ar { font-family: 'IBM Plex Sans Arabic', 'Inter', sans-serif; }
+
+  /* Header */
+  header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 50;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px 24px;
+    padding: 14px clamp(20px, 6vw, 120px);
+    background: transparent;
+    border-bottom: 1px solid rgba(140, 205, 214, 0);
+    transition: background .35s ease, border-color .35s ease, backdrop-filter .35s ease;
+  }
+  header.solid { background: rgba(10, 20, 29, .92); backdrop-filter: blur(10px); border-bottom-color: rgba(140, 205, 214, .22); }
+  header .brand { display: flex; align-items: center; }
+  header .brand img { height: clamp(28px, 3vw, 38px); width: auto; }
+  nav.main-nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px clamp(12px, 2.2vw, 36px);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: clamp(10px, 1.05vw, 12px);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+  nav.main-nav a { color: #F4FBFC; transition: color .2s ease; }
+  nav.main-nav a:hover { color: #18D4E2; }
+  nav.main-nav a.contact-cta { color: #18D4E2; border: 1px solid rgba(24, 212, 226, .5); padding: 9px 20px; border-radius: 999px; }
+  nav.main-nav a.contact-cta:hover { background: rgba(24, 212, 226, .1); }
+  .lang-btn {
+    background: transparent;
+    border: 1px solid rgba(140, 205, 214, .4);
+    color: #8FEAF0;
+    padding: 8px 16px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .1em;
+    transition: border-color .2s ease, color .2s ease;
+  }
+  .lang-btn:hover { border-color: #18D4E2; color: #18D4E2; }
+  .nav-drop { position: relative; }
+  .nav-drop > a { display: flex; align-items: center; gap: 7px; }
+  .nav-drop .caret { font-size: 9px; opacity: .7; }
+  .nav-drop-panel {
+    position: absolute;
+    top: 100%; left: -12px;
+    padding-top: 14px;
+    opacity: 0;
+    transform: translateY(-8px);
+    pointer-events: none;
+    transition: opacity .22s ease, transform .22s ease;
+  }
+  .nav-drop.partners .nav-drop-panel { left: auto; right: -12px; }
+  .nav-drop:hover .nav-drop-panel, .nav-drop:focus-within .nav-drop-panel { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  .nav-drop-inner { min-width: 280px; background: #0E1B26; border: 1px solid rgba(140, 205, 214, .22); padding: 8px; display: grid; }
+  .nav-drop-inner a { padding: 12px 16px; color: #F4FBFC; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; text-transform: none; display: flex; align-items: center; gap: 8px; transition: background .2s ease; }
+  .nav-drop-inner a:hover { background: #162835; color: #F4FBFC; }
+  .new-pill { background: #18D4E2; color: #0A141D; font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: .06em; padding: 2px 6px; border-radius: 4px; }
+
+  section { position: relative; }
+  .eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: .22em; text-transform: uppercase; color: #3FDDE8; }
+  .label-mono { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: .24em; color: #7793A0; }
+
+  /* Hero */
+  @keyframes heroPhotoPan { 0% { transform: scale(1.1) translate(0,0) } 50% { transform: scale(1.18) translate(-2%,-1%) } 100% { transform: scale(1.1) translate(0,0) } }
+  @keyframes heroGlowShift { 0%,100% { transform: translate(0,0) scale(1) } 50% { transform: translate(-4%,3%) scale(1.08) } }
+  .hero {
+    padding: clamp(120px, 16vh, 180px) clamp(24px, 6vw, 120px) clamp(60px, 8vh, 90px);
+    max-width: 1300px;
+    margin: 0 auto;
+    display: grid;
+    gap: 24px;
+    text-align: center;
+    justify-items: center;
+    overflow: hidden;
+  }
+  .hero-photo { position: absolute; inset: -10%; overflow: hidden; z-index: 0; }
+  .hero-photo img { width: 100%; height: 100%; object-fit: cover; filter: blur(10px) saturate(1.3) brightness(.9); animation: heroPhotoPan 22s ease-in-out infinite; }
+  .hero-glow { position: absolute; inset: -10%; z-index: 1; background: radial-gradient(circle at 30% 20%, rgba(24,212,226,.28), transparent 55%), radial-gradient(circle at 75% 60%, rgba(63,221,232,.2), transparent 50%); mix-blend-mode: screen; animation: heroGlowShift 14s ease-in-out infinite; }
+  .hero-scrim { position: absolute; inset: 0; z-index: 2; background: linear-gradient(180deg, rgba(10,20,29,.15), rgba(10,20,29,.3) 60%, rgba(14,27,38,.85)); }
+  .hero > * { position: relative; z-index: 3; }
+  .hero h1 { font-weight: 800; font-size: clamp(38px, 6vw, 84px); line-height: 1.04; letter-spacing: -.03em; max-width: 20ch; }
+  .hero p { color: #AFC7CD; font-size: clamp(17px, 1.5vw, 21px); line-height: 1.6; max-width: 62ch; }
+  .hero-tagline { color: #18D4E2 !important; font-size: 15px !important; font-weight: 600; letter-spacing: .02em; max-width: 56ch !important; }
+  @keyframes cue { 0%,100% { transform: translateX(-50%) translateY(0); opacity: .5 } 50% { transform: translateX(-50%) translateY(10px); opacity: 1 } }
+  .scroll-cue { position: absolute; bottom: 34px; left: 50%; transform: translateX(-50%); font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .28em; color: #7793A0; animation: cue 2.4s ease-in-out infinite; }
+
+  /* International Partners marquee banner */
+  @keyframes marqueeReverse { 0% { transform: translate3d(-50%,0,0) } 100% { transform: translate3d(0,0,0) } }
+  .partners-banner { min-height: 460px; overflow: hidden; background: #0A141D; border-top: 1px solid rgba(140, 205, 214, .22); display: flex; align-items: center; }
+  .partners-bg { position: absolute; inset: 0; overflow: hidden; }
+  .partners-bg img { width: 100%; height: 100%; object-fit: cover; opacity: .18; }
+  .partners-scrim { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(10,20,29,.75), rgba(10,20,29,.94)); }
+  .partners-glow { position: absolute; left: -8%; bottom: -18%; width: 30vw; height: 30vw; background: radial-gradient(circle at 50% 50%, rgba(24,212,226,.10), transparent 62%); pointer-events: none; }
+  .partners-inner { position: relative; z-index: 2; width: 100%; padding: clamp(60px, 8vh, 100px) clamp(24px, 6vw, 120px); display: grid; gap: 44px; }
+  .partners-inner .label-mono { text-align: center; letter-spacing: .28em; }
+  .pw-mask { width: 100%; overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+  .pw-track { display: flex; align-items: center; gap: 28px; width: max-content; animation: marqueeReverse 34s linear infinite; }
+  .pw-track .pw-word { font-weight: 800; font-size: clamp(24px, 3.2vw, 42px); letter-spacing: -.02em; color: #F4FBFC; white-space: nowrap; flex: none; }
+  .pw-track .pw-word.alt { color: #8FEAF0; }
+  .pw-track .pw-logo { width: 190px; height: 86px; border-radius: 999px; overflow: hidden; flex: none; background: #FFFFFF; display: flex; align-items: center; justify-content: center; padding: 14px 26px; }
+  .pw-track .pw-logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
+  .pw-track .pw-logo.gallup { display: flex; flex-direction: column; gap: 4px; }
+  .pw-track .pw-logo.gallup img { max-width: 100%; max-height: 40px; }
+  .pw-track .pw-logo.gallup img.badge { max-height: 18px; }
+
+  /* Numbered services */
+  .services { padding: clamp(80px, 12vh, 140px) clamp(24px, 6vw, 120px); border-top: 1px solid rgba(140, 205, 214, .22); max-width: 1400px; margin: 0 auto; }
+  .services .label-mono { margin-bottom: 40px; }
+  .services-grid { display: grid; grid-template-columns: minmax(0,1.2fr) minmax(0,1fr); gap: 48px; align-items: start; }
+  .service-row {
+    display: flex; align-items: baseline; gap: 20px; padding: 16px 0;
+    border-top: 1px solid rgba(140, 205, 214, .18);
+    cursor: pointer; color: #F4FBFC; transition: color .3s ease;
+  }
+  .service-row:hover, .service-row.active { color: #18D4E2; }
+  .service-row .idx { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #7793A0; }
+  .service-row .name { font-size: clamp(16px, 1.8vw, 22px); font-weight: 700; letter-spacing: -.01em; display: flex; align-items: center; gap: 10px; }
+  .services-panel { position: relative; aspect-ratio: 1/1; border-radius: 16px; overflow: hidden; background: #101E2B; box-shadow: 0 30px 70px rgba(0,0,0,.4); }
+  .services-panel .tile { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transform: scale(1); transition: opacity .8s ease, transform 6s ease; }
+  .services-panel .tile.active { opacity: 1; transform: scale(1.08); }
+  .services-panel .tile.logo-tile { display: flex; align-items: center; justify-content: center; background: #0E1B26; }
+  .services-panel .tile.logo-tile img { width: 55%; max-width: 260px; height: auto; object-fit: contain; }
+  .services-panel .tile.cycle { background: #101E2B; }
+  .services-panel .tile.cycle img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; animation: innerCycle3 12s infinite; }
+  .services-panel .tile.cycle img:nth-child(1) { animation-delay: 0s; }
+  .services-panel .tile.cycle img:nth-child(2) { animation-delay: -4s; }
+  .services-panel .tile.cycle img:nth-child(3) { animation-delay: -8s; }
+  @keyframes innerCycle3 { 0%, 4% { opacity: 0 } 8%, 29% { opacity: 1 } 33%, 100% { opacity: 0 } }
+
+  /* Trusted by */
+  @keyframes marquee { 0% { transform: translate3d(0,0,0) } 100% { transform: translate3d(-50%,0,0) } }
+  .trusted { min-height: 460px; overflow: hidden; background: #0E1B26; border-top: 1px solid rgba(140, 205, 214, .22); display: flex; align-items: center; }
+  .trusted-bg { position: absolute; inset: 0; overflow: hidden; }
+  .trusted-bg img { width: 100%; height: 100%; object-fit: cover; opacity: .18; }
+  .trusted-scrim { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(14,27,38,.75), rgba(14,27,38,.94)); }
+  .trusted-ring { position: absolute; right: -10%; top: -20%; width: 34vw; height: 34vw; border: 1px solid rgba(140, 205, 214, .18); border-radius: 50%; }
+  .trusted-inner { position: relative; z-index: 2; width: 100%; max-width: 1400px; margin: 0 auto; padding: clamp(60px, 8vh, 100px) clamp(24px, 6vw, 120px); display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.3fr); gap: 48px; align-items: center; }
+  .trusted-copy { display: grid; gap: 18px; }
+  .trusted-pill { display: inline-flex; align-items: center; gap: 8px; border: 1px solid rgba(140, 205, 214, .3); border-radius: 999px; padding: 6px 14px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .1em; color: #8FEAF0; justify-self: start; }
+  .trusted-pill .dot { width: 6px; height: 6px; border-radius: 50%; background: #18D4E2; }
+  .trusted-copy h2 { margin: 0; font-weight: 800; font-size: clamp(28px, 3.4vw, 46px); line-height: 1.1; letter-spacing: -.02em; max-width: 14ch; }
+  .marquee-mask { position: relative; width: 100%; overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent); -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent); }
+  .marquee-track { display: flex; align-items: center; gap: 24px; width: max-content; animation: marquee 22s linear infinite; }
+  .marquee-track .logo-pill { width: 168px; height: 76px; border-radius: 999px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; padding: 12px 22px; flex: none; }
+  .marquee-track .logo-pill img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+  /* Impact in numbers */
+  @keyframes spin3d { 0% { transform: rotateX(62deg) rotateZ(0deg) } 100% { transform: rotateX(62deg) rotateZ(360deg) } }
+  @keyframes drawWave { to { stroke-dashoffset: 0 } }
+  @keyframes fadeInWave { to { opacity: 1 } }
+  .stats { padding: clamp(80px, 12vh, 140px) clamp(24px, 6vw, 120px); border-top: 1px solid rgba(140, 205, 214, .22); max-width: 1400px; margin: 0 auto; overflow: hidden; }
+  .stats-glow { position: absolute; left: -6vw; top: -8vh; width: 32vw; height: 32vw; background: radial-gradient(circle at 50% 50%, rgba(24,212,226,.08), transparent 65%); pointer-events: none; }
+  .stats-rings { position: absolute; right: 2vw; top: 10%; width: 220px; height: 220px; pointer-events: none; perspective: 800px; }
+  .stats-rings .r1 { position: absolute; inset: 0; border: 1.5px solid rgba(24,212,226,.35); border-radius: 50%; transform: rotateX(62deg); animation: spin3d 18s linear infinite; }
+  .stats-rings .r2 { position: absolute; inset: 24px; border: 1px solid rgba(24,212,226,.22); border-radius: 50%; transform: rotateX(62deg) rotateZ(40deg); animation: spin3d 24s linear infinite reverse; }
+  .stats-grid { position: relative; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 32px 40px; }
+  .stats-wave { position: absolute; left: 0; right: 0; bottom: -40px; width: 100%; height: 160px; z-index: 0; opacity: .35; pointer-events: none; }
+  .stats-wave path.line { stroke-dasharray: 1600; stroke-dashoffset: 1600; animation: drawWave 3.2s ease-out forwards; }
+  .stats-wave path.fill { opacity: 0; animation: fadeInWave 1.5s ease-out 2.6s forwards; }
+  .stat { display: grid; gap: 8px; }
+  .stat .ring-icon circle:last-child { stroke-dasharray: 150.8; }
+  .stat .count-up { font-weight: 800; font-size: clamp(30px, 3.4vw, 46px); letter-spacing: -.02em; color: #F4FBFC; }
+  .stat p { margin: 0; color: #AFC7CD; font-size: 14px; line-height: 1.55; }
+
+  /* Why impact */
+  .why { padding: clamp(120px, 18vh, 220px) clamp(24px, 6vw, 120px); overflow: hidden; border-top: 1px solid rgba(140, 205, 214, .22); }
+  .why-glow { position: absolute; right: -8vw; bottom: -10vh; width: 34vw; height: 34vw; background: radial-gradient(circle at 50% 50%, rgba(24,212,226,.08), transparent 65%); pointer-events: none; }
+  .why-rings { position: absolute; left: 4vw; bottom: 6%; width: 180px; height: 180px; pointer-events: none; perspective: 800px; }
+  .why-rings .r1 { position: absolute; inset: 0; border: 1.5px solid rgba(24,212,226,.3); border-radius: 50%; transform: rotateX(65deg); animation: spin3d 20s linear infinite reverse; }
+  .why-rings .r2 { position: absolute; inset: 20px; border: 1px solid rgba(24,212,226,.18); border-radius: 50%; transform: rotateX(65deg) rotateZ(70deg); animation: spin3d 26s linear infinite; }
+  .why-inner { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); gap: 56px; max-width: 1400px; margin: 0 auto; }
+  .why-head { display: grid; gap: 20px; max-width: 900px; }
+  .why-head h2 { margin: 0; font-weight: 800; font-size: clamp(28px, 3.6vw, 48px); line-height: 1.1; letter-spacing: -.02em; }
+  .why-head p { margin: 0; color: #AFC7CD; font-size: clamp(15px, 1.3vw, 18px); line-height: 1.6; max-width: 62ch; }
+  .why-highlight { display: inline-block; background: #18D4E2; color: #0A141D; padding: 0 .18em; transition: transform .35s cubic-bezier(.34,1.56,.64,1), background .3s ease; }
+  .why-highlight:hover { transform: skewX(-6deg) scale(1.05); background: #8FEAF0; }
+  .why-cards { position: relative; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; max-width: 1000px; }
+  .why-line { position: absolute; top: 32px; left: 16.6%; right: 16.6%; height: 1px; background: linear-gradient(90deg, rgba(24,212,226,.5), rgba(24,212,226,.15), rgba(24,212,226,.5)); z-index: 0; }
+  .why-card { position: relative; z-index: 1; display: grid; gap: 14px; padding: 24px 22px; border-radius: 12px; border: 1px solid rgba(140, 205, 214, .16); background: #0E1B26; transition: transform .35s cubic-bezier(.2,.8,.2,1), border-color .35s ease; }
+  .why-card:hover { transform: translateY(-8px); border-color: rgba(24, 212, 226, .5); }
+  .why-card .top { display: flex; align-items: center; gap: 12px; }
+  .why-card .num { width: 22px; height: 22px; border-radius: 50%; background: #18D4E2; color: #0A141D; font-family: 'IBM Plex Mono', monospace; font-size: 11px; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+  .why-card .bar { width: 24px; height: 3px; background: #18D4E2; transition: width .35s ease; }
+  .why-card:hover .bar { width: 40px; }
+  .why-card h3 { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -.01em; }
+  .why-card p { margin: 0; color: #AFC7CD; font-size: 15px; line-height: 1.6; }
+
+  /* Statement */
+  .statement { padding: clamp(120px, 18vh, 220px) clamp(24px, 6vw, 120px); overflow: hidden; border-top: 1px solid rgba(140, 205, 214, .22); background: #0E1B26; }
+  .statement-bg { position: absolute; inset: -10% -5%; overflow: hidden; }
+  .statement-bg img { width: 100%; height: 100%; object-fit: cover; opacity: .13; }
+  .statement-scrim { position: absolute; inset: 0; background: linear-gradient(180deg, #0E1B26, rgba(14,27,38,.8) 40%, #0E1B26); }
+  .statement-glow { position: absolute; right: -10vw; top: -10vh; width: 40vw; height: 40vw; background: radial-gradient(circle at 50% 50%, rgba(24,212,226,.10), transparent 62%); pointer-events: none; }
+  .statement-inner { position: relative; display: grid; gap: 56px; max-width: 1400px; margin: 0 auto; }
+  .statement-inner p.headline { margin: 0; font-weight: 700; font-size: clamp(30px, 4.6vw, 74px); line-height: 1.1; letter-spacing: -.025em; max-width: 26ch; text-wrap: pretty; }
+  .statement-inner p.headline .hl { background: #18D4E2; color: #0A141D; padding: 0 .18em; }
+  .statement-bullets { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 40px; max-width: 1000px; }
+  .statement-bullet { display: grid; gap: 12px; }
+  .statement-bullet .bar { width: 28px; height: 3px; background: #18D4E2; }
+  .statement-bullet p { margin: 0; color: #AFC7CD; font-size: 16px; line-height: 1.6; }
+
+  /* Pinned method panel */
+  .method-pinned { height: 240vh; background: #0E1B26; }
+  .method-sticky { position: sticky; top: 0; height: 100vh; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+  .method-bg { position: absolute; inset: 0; overflow: hidden; }
+  .method-bg img { width: 100%; height: 100%; object-fit: cover; }
+  .method-scrim { position: absolute; inset: 0; background: linear-gradient(to right, rgba(10,20,29,.94), rgba(10,20,29,.45) 62%, rgba(10,20,29,.88)); }
+  .method-inner { position: relative; z-index: 2; width: 100%; padding: 0 clamp(24px, 6vw, 120px); }
+  .method-inner .grid { max-width: 1400px; margin: 0 auto; display: grid; gap: 24px; }
+  .method-inner h2 { margin: 0; font-weight: 800; font-size: clamp(34px, 5.4vw, 92px); line-height: 1.02; letter-spacing: -.03em; max-width: 20ch; }
+  .method-inner .label-mono { color: #3FDDE8; }
+
+  /* Reveal on scroll */
+  [data-reveal] { opacity: 0; transform: translate3d(0, 34px, 0); transition: opacity .7s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1); }
+  [data-reveal].in-view { opacity: 1; transform: translate3d(0,0,0); }
+
+  /* Contact */
+  .contact { min-height: 92vh; background: #0E1B26; color: #F4FBFC; display: flex; align-items: center; overflow: hidden; }
+  .contact-bg { position: absolute; inset: 0; filter: blur(6px); }
+  .contact-bg img { width: 100%; height: 100%; object-fit: cover; }
+  .contact-scrim { position: absolute; inset: 0; background: rgba(10, 20, 29, .35); }
+  .contact-inner { position: relative; z-index: 2; width: 100%; padding: clamp(80px, 12vh, 160px) clamp(24px, 6vw, 120px); }
+  .contact-inner .grid { max-width: 1400px; margin: 0 auto; display: grid; gap: 40px; }
+  .contact-inner h2 { margin: 0; font-weight: 800; font-size: clamp(38px, 6.4vw, 108px); line-height: 1; letter-spacing: -.035em; max-width: 20ch; }
+  .contact-meta { display: flex; flex-wrap: wrap; gap: 16px 48px; align-items: center; font-family: 'IBM Plex Mono', monospace; font-size: 14px; letter-spacing: .06em; }
+  .contact-email { color: #F4FBFC; border-bottom: 2px solid #F4FBFC; padding-bottom: 2px; }
+  .contact-email:hover { opacity: .7; }
+  .contact-meta span { color: rgba(244, 251, 252, .7); }
+  .contact-cta-btn { justify-self: start; color: #0A141D; background: #18D4E2; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: .08em; padding: 14px 28px; border-radius: 999px; transition: background .2s ease; }
+  .contact-cta-btn:hover { background: #8FEAF0; color: #0A141D; }
+
+  footer { background: #0E1B26; border-top: 1px solid rgba(140, 205, 214, .22); padding: clamp(56px, 8vh, 88px) clamp(24px, 6vw, 120px) 32px; }
+  .footer-grid { max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: minmax(240px, 1.4fr) repeat(3, minmax(160px, 1fr)); gap: 48px; }
+  .footer-col { display: grid; gap: 14px; align-content: start; }
+  .footer-col.brand-col { gap: 16px; }
+  .footer-col.brand-col img { height: 32px; width: auto; }
+  .footer-col.brand-col p { margin: 0; color: #7793A0; font-size: 14px; line-height: 1.65; max-width: 34ch; }
+  .footer-col .col-label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .18em; color: #18D4E2; }
+  .footer-col a { color: #AFC7CD; font-size: 15px; }
+  .footer-col a:hover { color: #18D4E2; }
+  .footer-col span { color: #AFC7CD; font-size: 15px; }
+  .footer-bottom { max-width: 1400px; margin: 40px auto 0; padding-top: 24px; border-top: 1px solid rgba(140, 205, 214, .14); display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #567179; }
+
+  @media (max-width: 900px) {
+    .trusted-inner { grid-template-columns: 1fr; }
+    .services-grid { grid-template-columns: 1fr; }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 560px) {
+    .footer-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div id="root" dir="ltr">
+
+  <header id="siteHeader">
+    <a class="brand" href="Impact L&amp;D Parallax.dc.html">
+      <img src="assets/logo.png" alt="Impact">
+    </a>
+    <nav class="main-nav">
+      <a data-t="navHome" href="#top">Home</a>
+      <a data-t="navAbout" href="About Impact.dc.html">About Impact</a>
+      <div class="nav-drop">
+        <a data-t="navSolutions" href="Solutions.dc.html">Solutions <span class="caret">▼</span></a>
+        <div class="nav-drop-panel">
+          <div class="nav-drop-inner">
+            <a data-t="subLd" href="L&amp;D Solutions.dc.html">L&amp;D Solutions</a>
+            <a data-t="subOd" href="Organizational Development.dc.html">Organizational Development</a>
+            <a href="AIM - AI in Motion.dc.html"><span data-t="subAim">AIM — AI in Motion</span><span class="new-pill">NEW</span></a>
+            <a data-t="subCa" href="Assessments &amp; Coaching.dc.html">Assessments &amp; Coaching</a>
+            <a data-t="subGo" href="Impact GO.dc.html">Impact GO</a>
+            <a data-t="subGames" href="In-House Games.dc.html">In-House Games &amp; Simulations</a>
+            <a data-t="subOneDay" href="One Days Program.dc.html">One Day's Program</a>
+            <a data-t="subGamified" href="Gamified Themes.dc.html">Gamified Themes</a>
+          </div>
+        </div>
+      </div>
+      <div class="nav-drop partners">
+        <a data-t="navPartners" href="International Partners.dc.html">International Partners <span class="caret">▼</span></a>
+        <div class="nav-drop-panel">
+          <div class="nav-drop-inner">
+            <a href="Partner Culture Partners.dc.html">Culture Partners</a>
+            <a href="Partner KnolSkape.dc.html">KNOLSKAPE</a>
+            <a href="Partner BCon.dc.html">BCon</a>
+            <a href="Partner Gallup.dc.html">Gallup</a>
+            <a href="Partner ManagementDrive.dc.html">ManagementDrive</a>
+          </div>
+        </div>
+      </div>
+      <a data-t="navContact" href="Contact.dc.html" class="contact-cta">Contact</a>
+      <button class="lang-btn" id="langToggle" data-t="langBtn" type="button">العربية</button>
+    </nav>
+  </header>
+
+  <span id="top"></span>
+
+  <section class="hero">
+    <div class="hero-photo"><img src="assets/meeting.png" alt=""></div>
+    <div class="hero-glow"></div>
+    <div class="hero-scrim"></div>
+    <div class="eyebrow" data-t="heroEyebrow">Learning &amp; Development</div>
+    <h1 data-t="heroHeadline">Transforming Capability into Measurable Business Performance</h1>
+    <p data-t="heroSub">Impact designs experiential learning journeys and business simulations that translate capability into real-world results. Our solutions are tailored to each organization, combining innovation, relevance, and practical application to create lasting behavioral change.</p>
+    <p class="hero-tagline" data-t="heroTagline">Simulation led learning, tailored leadership journeys, and regional delivery across Egypt and KSA.</p>
+    <a href="Contact.dc.html" class="contact-cta-btn" data-t="heroCta">Book a Discovery Call</a>
+    <div class="scroll-cue" data-t="scroll">SCROLL</div>
+  </section>
+
+  <section class="trusted" data-screen-label="Trusted by">
+    <div class="trusted-bg"><img src="assets/brand-boardroom-ripple.jpeg" alt="" data-px="0.12"></div>
+    <div class="trusted-scrim"></div>
+    <div class="trusted-ring" data-px="-0.3"></div>
+    <div class="trusted-inner">
+      <div class="trusted-copy">
+        <div class="trusted-pill"><span class="dot"></span><span data-t="trustedBy">OUR CLIENTS</span></div>
+        <h2 data-t="trustedHeading">Trusted by leading organizations</h2>
+      </div>
+      <div class="marquee-mask">
+        <div class="marquee-track">
+          <div class="logo-pill"><img src="assets/c-vodafone.png" alt="Vodafone"></div>
+          <div class="logo-pill"><img src="assets/c-orange.png" alt="Orange"></div>
+          <div class="logo-pill"><img src="assets/c-pepsico.png" alt="PepsiCo"></div>
+          <div class="logo-pill"><img src="assets/c-nissan.png" alt="Nissan"></div>
+          <div class="logo-pill"><img src="assets/c-vodafone.png" alt="Vodafone"></div>
+          <div class="logo-pill"><img src="assets/c-orange.png" alt="Orange"></div>
+          <div class="logo-pill"><img src="assets/c-pepsico.png" alt="PepsiCo"></div>
+          <div class="logo-pill"><img src="assets/c-nissan.png" alt="Nissan"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="partners" class="partners-banner" data-screen-label="International partners banner">
+    <div class="partners-bg"><img src="assets/meeting.png" alt=""></div>
+    <div class="partners-scrim"></div>
+    <div class="partners-glow" data-px="0.35"></div>
+    <div class="partners-inner">
+      <div class="label-mono" data-t="intlPartners">INTERNATIONAL PARTNERS</div>
+      <div class="pw-mask">
+        <div class="pw-track">
+          <span class="pw-word" data-t="pw1">EXPERTISE</span>
+          <a class="pw-logo" href="Partner Culture Partners.dc.html"><img src="assets/partner-culture.png" alt="Culture Partners"></a>
+          <span class="pw-word alt" data-t="pw2">REACH</span>
+          <a class="pw-logo" href="Partner KnolSkape.dc.html"><img src="assets/partner-knolskape-dark.png" alt="KnolSkape"></a>
+          <span class="pw-word" data-t="pw3">PARTNERSHIP</span>
+          <a class="pw-logo" href="Partner BCon.dc.html"><img src="assets/partner-bcon.png" alt="BCon"></a>
+          <span class="pw-word alt" data-t="pw4">IMPACT</span>
+          <a class="pw-logo gallup" href="Partner Gallup.dc.html"><img src="assets/partner-gallup.png" alt="Gallup"><img class="badge" src="assets/gallup-certified-badge.png" alt="Gallup Certified Strengths Coach"></a>
+          <span class="pw-word" data-t="pw1">EXPERTISE</span>
+          <a class="pw-logo" href="Partner Culture Partners.dc.html"><img src="assets/partner-culture.png" alt="Culture Partners"></a>
+          <span class="pw-word alt" data-t="pw2">REACH</span>
+          <a class="pw-logo" href="Partner KnolSkape.dc.html"><img src="assets/partner-knolskape-dark.png" alt="KnolSkape"></a>
+          <span class="pw-word" data-t="pw3">PARTNERSHIP</span>
+          <a class="pw-logo" href="Partner BCon.dc.html"><img src="assets/partner-bcon.png" alt="BCon"></a>
+          <span class="pw-word alt" data-t="pw4">IMPACT</span>
+          <a class="pw-logo gallup" href="Partner Gallup.dc.html"><img src="assets/partner-gallup.png" alt="Gallup"><img class="badge" src="assets/gallup-certified-badge.png" alt="Gallup Certified Strengths Coach"></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="stats" data-screen-label="Impact in numbers">
+    <div class="stats-glow"></div>
+    <div class="stats-rings"><div class="r1"></div><div class="r2"></div></div>
+    <div class="stats-grid">
+      <svg class="stats-wave" viewBox="0 0 1200 200" preserveAspectRatio="none">
+        <path class="line" d="M0,140 C100,90 180,170 280,120 C380,70 460,150 560,100 C660,50 740,130 840,90 C940,50 1020,110 1120,70 C1160,55 1180,60 1200,50" fill="none" stroke="#18D4E2" stroke-width="3" stroke-linecap="round"/>
+        <path class="fill" d="M0,140 C100,90 180,170 280,120 C380,70 460,150 560,100 C660,50 740,130 840,90 C940,50 1020,110 1120,70 C1160,55 1180,60 1200,50 L1200,200 L0,200 Z" fill="url(#waveFade)"/>
+        <defs><linearGradient id="waveFade" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#18D4E2" stop-opacity=".25"/><stop offset="100%" stop-color="#18D4E2" stop-opacity="0"/></linearGradient></defs>
+      </svg>
+      <div class="stat">
+        <svg class="ring-icon" viewBox="0 0 60 60" width="44" height="44"><circle cx="30" cy="30" r="24" fill="none" stroke="rgba(140,205,214,.18)" stroke-width="5"/><circle cx="30" cy="30" r="24" fill="none" stroke="#18D4E2" stroke-width="5" stroke-linecap="round" stroke-dashoffset="30" transform="rotate(-90 30 30)"/></svg>
+        <div class="count-up" data-target="150000" data-suffix="+">0</div>
+        <p data-t="stat1">Participants developed across leadership and professional development programs.</p>
+      </div>
+      <div class="stat">
+        <svg class="ring-icon" viewBox="0 0 60 60" width="44" height="44"><circle cx="30" cy="30" r="24" fill="none" stroke="rgba(140,205,214,.18)" stroke-width="5"/><circle cx="30" cy="30" r="24" fill="none" stroke="#18D4E2" stroke-width="5" stroke-linecap="round" stroke-dashoffset="60" transform="rotate(-90 30 30)"/></svg>
+        <div class="count-up" data-target="60000" data-suffix="+">0</div>
+        <p data-t="stat2">Learning hours delivered through experiential learning and business simulations.</p>
+      </div>
+      <div class="stat">
+        <svg class="ring-icon" viewBox="0 0 60 60" width="44" height="44"><circle cx="30" cy="30" r="24" fill="none" stroke="rgba(140,205,214,.18)" stroke-width="5"/><circle cx="30" cy="30" r="24" fill="none" stroke="#18D4E2" stroke-width="5" stroke-linecap="round" stroke-dashoffset="95" transform="rotate(-90 30 30)"/></svg>
+        <div class="count-up" data-target="7000" data-suffix="+">0</div>
+        <p data-t="stat3">Coaching sessions supporting leadership growth and capability development.</p>
+      </div>
+      <div class="stat">
+        <svg class="ring-icon" viewBox="0 0 60 60" width="44" height="44"><circle cx="30" cy="30" r="24" fill="none" stroke="rgba(140,205,214,.18)" stroke-width="5"/><circle cx="30" cy="30" r="24" fill="none" stroke="#18D4E2" stroke-width="5" stroke-linecap="round" stroke-dashoffset="8" transform="rotate(-90 30 30)"/></svg>
+        <div class="count-up" data-target="95" data-suffix="%">0</div>
+        <p data-t="stat4">Participant satisfaction across development programs.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="services" data-screen-label="Numbered services">
+    <div class="label-mono" data-t="servicesLabel">WHAT WE DO</div>
+    <div class="services-grid">
+      <div id="servicesList">
+        <a class="service-row active" data-index="0" href="L&amp;D Solutions.dc.html"><span class="idx">01</span><span class="name" data-t="svc1">L&amp;D Solutions</span></a>
+        <a class="service-row" data-index="1" href="Organizational Development.dc.html"><span class="idx">02</span><span class="name" data-t="svc2">Organizational Development</span></a>
+        <a class="service-row" data-index="2" href="AIM - AI in Motion.dc.html"><span class="idx">03</span><span class="name"><span data-t="svc3">AIM — AI in Motion</span><span class="new-pill">NEW</span></span></a>
+        <a class="service-row" data-index="3" href="Assessments &amp; Coaching.dc.html"><span class="idx">04</span><span class="name" data-t="svc4">Assessments &amp; Coaching</span></a>
+        <a class="service-row" data-index="4" href="Impact GO.dc.html"><span class="idx">05</span><span class="name" data-t="svc5">Impact GO</span></a>
+        <a class="service-row" data-index="5" href="In-House Games.dc.html"><span class="idx">06</span><span class="name" data-t="svc6">In-House Games &amp; Simulations</span></a>
+        <a class="service-row" data-index="6" href="One Days Program.dc.html"><span class="idx">07</span><span class="name" data-t="svc7">One Day's Program</span></a>
+        <a class="service-row" data-index="7" href="Gamified Themes.dc.html"><span class="idx">08</span><span class="name" data-t="svc8">Gamified Themes</span></a>
+      </div>
+      <div class="services-panel" id="servicesPanel">
+        <img class="tile active" data-index="0" src="assets/meeting.png" alt="">
+        <img class="tile" data-index="1" src="assets/handshake.png" alt="">
+        <div class="tile logo-tile" data-index="2"><img src="assets/aim-logo-gradient.png" alt="AIM"></div>
+        <img class="tile" data-index="3" src="assets/meeting.png" alt="">
+        <div class="tile logo-tile" data-index="4"><img src="assets/impactgo-logo.png" alt="Impact GO"></div>
+        <div class="tile cycle" data-index="5">
+          <img src="assets/brand-skyline-ripple.jpeg" alt="">
+          <img src="assets/tower.png" alt="">
+          <img src="assets/meeting.png" alt="">
+        </div>
+        <div class="tile cycle" data-index="6">
+          <img src="assets/handshake.png" alt="">
+          <img src="assets/brand-boardroom-ripple.jpeg" alt="">
+          <img src="assets/brand-meeting-ripple.jpeg" alt="">
+        </div>
+        <img class="tile" data-index="7" src="assets/theme-pirates.png" alt="" style="object-position: 78% center;">
+      </div>
+    </div>
+  </section>
+
+  <section class="why" data-screen-label="Why Impact">
+    <div class="why-glow"></div>
+    <div class="why-rings"><div class="r1"></div><div class="r2"></div></div>
+    <div class="why-inner">
+      <div class="label-mono" data-reveal="1" data-t="whyLabel">WHY IMPACT?</div>
+      <div class="why-head" data-reveal="2">
+        <h2 data-t="whyHeading">Why Impact?</h2>
+        <p><span data-t="whyBodyPre">We combine immersive simulations, tailored learning journeys, and global expertise with regional insight to deliver</span> <span class="why-highlight" data-t="whyBodyHighlight">lasting organizational impact</span><span data-t="whyBodyPost">.</span></p>
+      </div>
+      <div class="why-cards">
+        <div class="why-line"></div>
+        <div class="why-card" data-reveal="3">
+          <div class="top"><span class="num">1</span><div class="bar"></div></div>
+          <h3 data-t="why1Title">Experiential Simulations</h3>
+          <p data-t="why1Body">Immersive business simulations that recreate real organizational challenges and accelerate applied learning.</p>
+        </div>
+        <div class="why-card" data-reveal="4">
+          <div class="top"><span class="num">2</span><div class="bar"></div></div>
+          <h3 data-t="why2Title">Tailored Learning Journeys</h3>
+          <p data-t="why2Body">Structured programs that combine assessments, experiential learning, and coaching to drive sustained leadership growth.</p>
+        </div>
+        <div class="why-card" data-reveal="5">
+          <div class="top"><span class="num">3</span><div class="bar"></div></div>
+          <h3 data-t="why3Title">Regional Expertise with Global Methodologies</h3>
+          <p data-t="why3Body">Globally informed learning solutions delivered with a deep understanding of the MENA business environment.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="about" class="statement" data-screen-label="Statement">
+    <div class="statement-bg" data-px="-0.35"><img src="assets/brand-boardroom-ripple.jpeg" alt=""></div>
+    <div class="statement-scrim"></div>
+    <div class="statement-glow" data-px="-0.4"></div>
+    <div class="statement-inner">
+      <div class="label-mono" data-reveal="1" data-t="positionLabel">01 — POSITION</div>
+      <p class="headline" data-reveal="2"><span data-t="statementPre">Training is easy to buy and hard to feel. We build the</span> <span class="hl" data-t="statementHighlight">second kind</span><span data-t="statementPost">.</span></p>
+      <div class="statement-bullets">
+        <div class="statement-bullet" data-reveal="3">
+          <div class="bar"></div>
+          <p data-t="bullet1">Diagnose before design. We start in the workflow, not the catalogue.</p>
+        </div>
+        <div class="statement-bullet" data-reveal="4">
+          <div class="bar"></div>
+          <p data-t="bullet2">Facilitation in Arabic and English, on site or remote.</p>
+        </div>
+        <div class="statement-bullet" data-reveal="5">
+          <div class="bar"></div>
+          <p data-t="bullet3">Measured after the room empties — behaviour, not smile sheets.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="method-pinned" data-screen-label="Pinned panel">
+    <div class="method-sticky">
+      <div class="method-bg"><img src="assets/brand-boardroom-ripple.jpeg" alt=""></div>
+      <div class="method-scrim"></div>
+      <div class="method-inner" data-px="0.5">
+        <div style="max-width: 1400px; margin: 0 auto; display: grid; gap: 24px;">
+          <div class="label-mono" data-t="methodLabel" style="color: #3FDDE8;">02 — METHOD</div>
+          <h2 style="margin: 0; font-weight: 800; font-size: clamp(34px, 5.4vw, 92px); line-height: 1.02; letter-spacing: -.03em; max-width: 20ch;" data-t="methodHeading">Four moves, run in order, every engagement.</h2>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" class="contact" data-screen-label="Contact">
+    <div class="contact-bg"><img src="assets/contact-photo.png" alt=""></div>
+    <div class="contact-scrim"></div>
+    <div class="contact-inner">
+      <div class="grid">
+        <div class="label-mono" data-t="startLabel">04 — START</div>
+        <h2 data-t="contactHeading">Tell us what isn't working.</h2>
+        <div class="contact-meta">
+          <a href="mailto:hello@impactegypt.com" class="contact-email">hello@impactegypt.com</a>
+          <span data-t="cairo">Cairo, Egypt</span>
+        </div>
+        <a class="contact-cta-btn" data-t="goContact" href="Contact.dc.html">Go to Contact page</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-col brand-col">
+        <img src="assets/logo.png" alt="Impact">
+        <p data-t="footerTagline">Experiential learning, business simulations, and organizational development for organizations across Egypt, the UAE, and Saudi Arabia.</p>
+      </div>
+      <div class="footer-col">
+        <div class="col-label" data-t="footerSolutions">SOLUTIONS</div>
+        <a data-t="subLd" href="L&amp;D Solutions.dc.html">L&amp;D Solutions</a>
+        <a data-t="subOd" href="Organizational Development.dc.html">Organizational Development</a>
+        <a data-t="subAim" href="AIM - AI in Motion.dc.html">AIM — AI in Motion</a>
+        <a data-t="subCa" href="Assessments &amp; Coaching.dc.html">Assessments &amp; Coaching</a>
+        <a data-t="subGo" href="Impact GO.dc.html">Impact GO</a>
+        <a data-t="subGames" href="In-House Games.dc.html">In-House Games &amp; Simulations</a>
+        <a data-t="subOneDay" href="One Days Program.dc.html">One Day's Program</a>
+        <a data-t="subGamified" href="Gamified Themes.dc.html">Gamified Themes</a>
+      </div>
+      <div class="footer-col">
+        <div class="col-label" data-t="footerCompany">COMPANY</div>
+        <a data-t="navAbout" href="About Impact.dc.html">About Impact</a>
+        <a data-t="navSolutions" href="Solutions.dc.html">Solutions</a>
+        <a data-t="navContact" href="Contact.dc.html">Contact</a>
+      </div>
+      <div class="footer-col">
+        <div class="col-label" data-t="footerOffices">OFFICES</div>
+        <span data-t="officeDubai">Dubai (HQ)</span>
+        <span data-t="officeCairo">Giza, Egypt</span>
+        <span data-t="officeRiyadh">Riyadh, KSA</span>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span data-t="copyright">© 2026 Impact for Learning &amp; Development. All rights reserved.</span>
+      <button class="lang-btn" id="langToggleFooter" data-t="langBtn" type="button">العربية</button>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var EN = {
+    navHome: 'Home', navAbout: 'About Impact', navSolutions: 'Solutions', navPartners: 'International Partners', navContact: 'Contact', langBtn: 'العربية',
+    subLd: 'L&D Solutions', subOd: 'Organizational Development', subAim: 'AIM — AI in Motion', subCa: 'Assessments & Coaching', subGo: 'Impact GO',
+    subGames: 'In-House Games & Simulations', subOneDay: "One Day's Program", subGamified: 'Gamified Themes',
+    heroEyebrow: 'Learning & Development',
+    heroHeadline: 'Transforming Capability into Measurable Business Performance',
+    heroSub: 'Impact designs experiential learning journeys and business simulations that translate capability into real-world results. Our solutions are tailored to each organization, combining innovation, relevance, and practical application to create lasting behavioral change.',
+    heroTagline: 'Simulation led learning, tailored leadership journeys, and regional delivery across Egypt and KSA.',
+    heroCta: 'Book a Discovery Call', scroll: 'SCROLL',
+    intlPartners: 'INTERNATIONAL PARTNERS', pw1: 'EXPERTISE', pw2: 'REACH', pw3: 'PARTNERSHIP', pw4: 'IMPACT',
+    servicesLabel: 'WHAT WE DO',
+    svc1: 'L&D Solutions', svc2: 'Organizational Development', svc3: 'AIM — AI in Motion', svc4: 'Assessments & Coaching', svc5: 'Impact GO',
+    svc6: 'In-House Games & Simulations', svc7: "One Day's Program", svc8: 'Gamified Themes',
+    trustedBy: 'OUR CLIENTS', trustedHeading: 'Trusted by leading organizations',
+    stat1: 'Participants developed across leadership and professional development programs.',
+    stat2: 'Learning hours delivered through experiential learning and business simulations.',
+    stat3: 'Coaching sessions supporting leadership growth and capability development.',
+    stat4: 'Participant satisfaction across development programs.',
+    whyLabel: 'WHY IMPACT?', whyHeading: 'Why Impact?',
+    whyBodyPre: 'We combine immersive simulations, tailored learning journeys, and global expertise with regional insight to deliver',
+    whyBodyHighlight: 'lasting organizational impact', whyBodyPost: '.',
+    why1Title: 'Experiential Simulations', why1Body: 'Immersive business simulations that recreate real organizational challenges and accelerate applied learning.',
+    why2Title: 'Tailored Learning Journeys', why2Body: 'Structured programs that combine assessments, experiential learning, and coaching to drive sustained leadership growth.',
+    why3Title: 'Regional Expertise with Global Methodologies', why3Body: 'Globally informed learning solutions delivered with a deep understanding of the MENA business environment.',
+    positionLabel: '01 — POSITION',
+    statementPre: 'Training is easy to buy and hard to feel. We build the',
+    statementHighlight: 'second kind', statementPost: '.',
+    bullet1: 'Diagnose before design. We start in the workflow, not the catalogue.',
+    bullet2: 'Facilitation in Arabic and English, on site or remote.',
+    bullet3: 'Measured after the room empties — behaviour, not smile sheets.',
+    methodLabel: '02 — METHOD', methodHeading: 'Four moves, run in order, every engagement.',
+    startLabel: '04 — START', contactHeading: "Tell us what isn't working.", cairo: 'Cairo, Egypt', goContact: 'Go to Contact page',
+    footerTagline: 'Experiential learning, business simulations, and organizational development for organizations across Egypt, the UAE, and Saudi Arabia.',
+    footerSolutions: 'SOLUTIONS', footerCompany: 'COMPANY', footerOffices: 'OFFICES',
+    officeDubai: 'Dubai (HQ)', officeCairo: 'Giza, Egypt', officeRiyadh: 'Riyadh, KSA',
+    copyright: '© 2026 Impact for Learning & Development. All rights reserved.'
+  };
+  var AR = {
+    navHome: 'الرئيسية', navAbout: 'عن إمباكت', navSolutions: 'الحلول', navPartners: 'الشركاء الدوليون', navContact: 'تواصل معنا', langBtn: 'English',
+    subLd: 'حلول التعلم والتطوير', subOd: 'التطوير المؤسسي', subAim: 'AIM — الذكاء الاصطناعي في العمل', subCa: 'التقييمات والتدريب', subGo: 'Impact GO',
+    subGames: 'ألعاب ومحاكاة داخلية', subOneDay: 'برنامج يوم واحد', subGamified: 'ثيمات التلعيب',
+    heroEyebrow: 'التعلم والتطوير',
+    heroHeadline: 'تحويل القدرات إلى أداء أعمال قابل للقياس',
+    heroSub: 'تصمم إمباكت رحلات تعلم تجريبية ومحاكاة أعمال تترجم القدرات إلى نتائج حقيقية. حلولنا مصممة خصيصاً لكل مؤسسة، تجمع بين الابتكار والملاءمة والتطبيق العملي لإحداث تغيير سلوكي مستمر.',
+    heroTagline: 'تعلم قائم على المحاكاة، رحلات قيادية مصممة خصيصاً، وتنفيذ إقليمي في مصر والسعودية.',
+    heroCta: 'حجز مكالمة استكشافية', scroll: 'تصفح',
+    intlPartners: 'الشركاء الدوليون', pw1: 'الخبرة', pw2: 'الانتشار', pw3: 'الشراكة', pw4: 'الأثر',
+    servicesLabel: 'ماذا نقدم',
+    svc1: 'حلول التعلم والتطوير', svc2: 'التطوير المؤسسي', svc3: 'AIM — الذكاء الاصطناعي في العمل', svc4: 'التقييمات والتدريب', svc5: 'Impact GO',
+    svc6: 'ألعاب ومحاكاة داخلية', svc7: 'برنامج يوم واحد', svc8: 'ثيمات التلعيب',
+    trustedBy: 'عملاؤنا', trustedHeading: 'موثوق به من مؤسسات رائدة',
+    stat1: 'مشارك تم تطويره عبر برامج القيادة والتطوير المهني.',
+    stat2: 'ساعة تعلم قُدّمت من خلال التعلم التجريبي ومحاكاة الأعمال.',
+    stat3: 'جلسة تدريب دعمت نمو القيادة وتطوير القدرات.',
+    stat4: 'نسبة رضا المشاركين عبر برامج التطوير.',
+    whyLabel: 'لماذا إمباكت؟', whyHeading: 'لماذا إمباكت؟',
+    whyBodyPre: 'نجمع بين المحاكاة الغامرة ورحلات التعلم المصممة خصيصاً والخبرة العالمية مع رؤية إقليمية لتحقيق',
+    whyBodyHighlight: 'أثر مؤسسي مستدام', whyBodyPost: '.',
+    why1Title: 'محاكاة تجريبية', why1Body: 'محاكاة أعمال غامرة تعيد إنتاج تحديات مؤسسية حقيقية وتسرّع التعلم التطبيقي.',
+    why2Title: 'رحلات تعلم مصممة خصيصاً', why2Body: 'برامج منظمة تجمع بين التقييمات والتعلم التجريبي والتدريب لتحقيق نمو قيادي مستمر.',
+    why3Title: 'خبرة إقليمية ومنهجيات عالمية', why3Body: 'حلول تعلم مستندة إلى منهجيات عالمية مع فهم عميق لبيئة الأعمال في منطقة الشرق الأوسط وشمال أفريقيا.',
+    positionLabel: '01 — الموقف',
+    statementPre: 'التدريب سهل الشراء وصعب الإحساس به. نحن نبني',
+    statementHighlight: 'النوع الثاني', statementPost: '.',
+    bullet1: 'التشخيص قبل التصميم. نبدأ من واقع العمل، لا من الكتالوج.',
+    bullet2: 'تيسير بالعربية والإنجليزية، حضورياً أو عن بُعد.',
+    bullet3: 'يُقاس الأثر بعد انتهاء الجلسة — السلوك، لا استطلاعات الرضا.',
+    methodLabel: '02 — المنهجية', methodHeading: 'أربع خطوات، بترتيب ثابت، في كل مشروع.',
+    startLabel: '04 — الانطلاق', contactHeading: 'أخبرنا بما لا يسير بشكل جيد.', cairo: 'القاهرة، مصر', goContact: 'انتقل إلى صفحة التواصل',
+    footerTagline: 'تعلم تجريبي، محاكاة أعمال، وتطوير مؤسسي للمؤسسات في مصر والإمارات والسعودية.',
+    footerSolutions: 'الحلول', footerCompany: 'الشركة', footerOffices: 'المكاتب',
+    officeDubai: 'دبي (المقر الرئيسي)', officeCairo: 'الجيزة، مصر', officeRiyadh: 'الرياض، السعودية',
+    copyright: '© 2026 إمباكت للتعلم والتطوير. جميع الحقوق محفوظة.'
+  };
+
+  var root = document.getElementById('root');
+  var targets = document.querySelectorAll('[data-t]');
+  var currentLang = 'en';
+
+  function applyLang(lang) {
+    currentLang = lang;
+    var t = lang === 'ar' ? AR : EN;
+    var isAr = lang === 'ar';
+    root.setAttribute('dir', isAr ? 'rtl' : 'ltr');
+    root.classList.toggle('lang-ar', isAr);
+    document.documentElement.setAttribute('lang', isAr ? 'ar' : 'en');
+    document.documentElement.setAttribute('dir', isAr ? 'rtl' : 'ltr');
+    targets.forEach(function (el) {
+      var key = el.getAttribute('data-t');
+      if (t[key] !== undefined) el.textContent = t[key];
+    });
+  }
+
+  var savedLang = localStorage.getItem('impactLang');
+  var initialLang = (savedLang === 'ar' || savedLang === 'en') ? savedLang : 'en';
+
+  function toggleLang() {
+    var next = currentLang === 'ar' ? 'en' : 'ar';
+    localStorage.setItem('impactLang', next);
+    applyLang(next);
+  }
+  document.getElementById('langToggle').addEventListener('click', toggleLang);
+  document.getElementById('langToggleFooter').addEventListener('click', toggleLang);
+
+  // Header solid-on-scroll
+  var header = document.getElementById('siteHeader');
+  function onScrollHeader() {
+    header.classList.toggle('solid', window.scrollY > window.innerHeight * 0.6);
+  }
+  window.addEventListener('scroll', onScrollHeader, { passive: true });
+  onScrollHeader();
+
+  // data-px parallax (mouse + scroll)
+  var pxEls = Array.prototype.slice.call(document.querySelectorAll('[data-px]')).map(function (el) {
+    return { el: el, speed: parseFloat(el.getAttribute('data-px')) || 0 };
+  });
+  var mouseX = 0, mouseY = 0, pxRaf = null;
+  function tickParallax() {
+    pxRaf = null;
+    var vh = window.innerHeight;
+    pxEls.forEach(function (item) {
+      var r = item.el.getBoundingClientRect();
+      if (r.bottom < -vh * 0.5 || r.top > vh * 1.5) return;
+      var p = (r.top + r.height / 2 - vh / 2) / vh;
+      var mx = mouseX * item.speed * 40;
+      var my = mouseY * item.speed * 40;
+      item.el.style.transform = 'translate3d(' + mx.toFixed(2) + 'px, ' + (p * item.speed * 120 + my).toFixed(2) + 'px, 0)';
+    });
+  }
+  function queueParallax() { if (!pxRaf) pxRaf = requestAnimationFrame(tickParallax); }
+  window.addEventListener('scroll', queueParallax, { passive: true });
+  window.addEventListener('resize', queueParallax);
+  document.addEventListener('mousemove', function (e) {
+    mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+    mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+    queueParallax();
+  }, { passive: true });
+  tickParallax();
+
+  // Reveal on scroll
+  var reveals = Array.prototype.slice.call(document.querySelectorAll('[data-reveal]'));
+  reveals.forEach(function (el) {
+    var delay = (Math.min(parseInt(el.getAttribute('data-reveal'), 10) || 1, 6) - 1) * 90;
+    el.style.transitionDelay = delay + 'ms';
+  });
+  var revealIo = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in-view');
+        revealIo.unobserve(entry.target);
+      }
+    });
+  }, { rootMargin: '0px 0px -12% 0px', threshold: 0.15 });
+  reveals.forEach(function (el) { revealIo.observe(el); });
+
+  // Count-up stats
+  var countEls = Array.prototype.slice.call(document.querySelectorAll('.count-up'));
+  var countIo = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      countIo.unobserve(entry.target);
+      var target = parseFloat(entry.target.getAttribute('data-target')) || 0;
+      var suffix = entry.target.getAttribute('data-suffix') || '';
+      var dur = 1400, start = performance.now(), node = entry.target;
+      function step(now) {
+        var p = Math.min(1, (now - start) / dur);
+        var eased = 1 - Math.pow(1 - p, 3);
+        node.textContent = Math.round(target * eased).toLocaleString('en-US') + suffix;
+        if (p < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    });
+  }, { threshold: 0.4 });
+  countEls.forEach(function (el) { countIo.observe(el); });
+
+  // Numbered services hover-swap
+  var serviceRows = Array.prototype.slice.call(document.querySelectorAll('.service-row'));
+  var serviceTiles = Array.prototype.slice.call(document.querySelectorAll('.services-panel .tile'));
+  function activateService(i) {
+    serviceRows.forEach(function (row) { row.classList.toggle('active', row.getAttribute('data-index') === String(i)); });
+    serviceTiles.forEach(function (tile) { tile.classList.toggle('active', tile.getAttribute('data-index') === String(i)); });
+  }
+  serviceRows.forEach(function (row) {
+    row.addEventListener('mouseenter', function () { activateService(row.getAttribute('data-index')); });
+  });
+
+  applyLang(initialLang);
+})();
+</script>
+</body>
+</html>

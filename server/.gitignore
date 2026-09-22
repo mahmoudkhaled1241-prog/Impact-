@@ -1,0 +1,4 @@
+node_modules/
+.env
+db/cms.sqlite3
+db/cms.sqlite3-*

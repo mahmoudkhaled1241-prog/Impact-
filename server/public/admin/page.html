@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Edit Page | Impact CMS</title>
+<link rel="stylesheet" href="/admin/static/admin.css">
+</head>
+<body>
+<header class="admin-header" id="adminHeader"></header>
+<main class="admin-main">
+  <p class="sub"><a href="/admin">&larr; All pages</a></p>
+  <h1 id="pageTitle">Loading…</h1>
+  <p class="sub">Every <code>data-t</code> field on this page, in English and Arabic. Edits save immediately and appear on the live page on next load.</p>
+
+  <div class="toolbar">
+    <input type="text" id="searchBox" placeholder="Filter fields by key or text…">
+    <a class="btn secondary" id="viewLiveLink" href="#" target="_blank">View live page ↗</a>
+    <button class="btn" id="addFieldBtn">+ Add field</button>
+  </div>
+
+  <div class="card">
+    <div class="field-row" style="border-bottom:2px solid rgba(140,205,214,.25)">
+      <div></div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#7793A0">EN</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#7793A0">AR</div>
+      <div></div>
+    </div>
+    <div id="fieldsList"></div>
+    <div class="empty" id="emptyState" style="display:none">No fields match your filter.</div>
+  </div>
+</main>
+
+<script src="/admin/static/admin.js"></script>
+<script>
+var slug = new URLSearchParams(location.search).get('slug');
+if (!slug) document.body.innerHTML = '<p style="padding:40px;color:#F26E6E">Missing ?slug= parameter.</p>';
+
+renderAdminHeader('/admin');
+
+var allFields = [];
+
+function fieldRowHtml(f) {
+  return '<div class="field-row" data-id="' + f.id + '">' +
+    '<label>' + escapeHtml(f.field_key) + '</label>' +
+    '<div class="en"><textarea data-lang="en">' + escapeHtml(f.en_value) + '</textarea></div>' +
+    '<div class="ar"><textarea data-lang="ar">' + escapeHtml(f.ar_value) + '</textarea></div>' +
+    '<div class="actions">' +
+      '<button class="btn secondary save-btn">Save</button>' +
+      '<button class="btn danger delete-btn">Delete</button>' +
+      '<span class="saved-tag" style="display:none">Saved ✓</span>' +
+    '</div>' +
+  '</div>';
+}
+
+function wireRow(row, field) {
+  var enBox = row.querySelector('[data-lang=en]');
+  var arBox = row.querySelector('[data-lang=ar]');
+  var savedTag = row.querySelector('.saved-tag');
+  function markDirty() { row.classList.add('dirty'); savedTag.style.display = 'none'; }
+  enBox.addEventListener('input', markDirty);
+  arBox.addEventListener('input', markDirty);
+
+  row.querySelector('.save-btn').addEventListener('click', async function () {
+    await api('/pages/' + encodeURIComponent(slug) + '/fields/' + field.id, {
+      method: 'PUT',
+      body: { en_value: enBox.value, ar_value: arBox.value }
+    });
+    row.classList.remove('dirty');
+    savedTag.style.display = 'inline';
+  });
+
+  row.querySelector('.delete-btn').addEventListener('click', async function () {
+    if (!confirm('Delete field "' + field.field_key + '"? This removes it from both languages.')) return;
+    await api('/pages/' + encodeURIComponent(slug) + '/fields/' + field.id, { method: 'DELETE' });
+    row.remove();
+  });
+}
+
+function renderFields(fields) {
+  var list = document.getElementById('fieldsList');
+  var empty = document.getElementById('emptyState');
+  if (fields.length === 0) {
+    list.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  list.innerHTML = fields.map(fieldRowHtml).join('');
+  fields.forEach(function (f) {
+    wireRow(list.querySelector('[data-id="' + f.id + '"]'), f);
+  });
+}
+
+document.getElementById('searchBox').addEventListener('input', function (e) {
+  var q = e.target.value.toLowerCase();
+  renderFields(allFields.filter(function (f) {
+    return f.field_key.toLowerCase().includes(q) || f.en_value.toLowerCase().includes(q) || f.ar_value.includes(q);
+  }));
+});
+
+document.getElementById('addFieldBtn').addEventListener('click', async function () {
+  var key = prompt('New field key (letters, numbers, underscore only — must match a data-t="…" attribute in the page HTML to actually appear on the page):');
+  if (!key) return;
+  try {
+    await api('/pages/' + encodeURIComponent(slug) + '/fields', { method: 'POST', body: { field_key: key, en_value: '', ar_value: '' } });
+    load();
+  } catch (err) {
+    alert(err.message);
+  }
+});
+
+async function load() {
+  var data = await api('/pages/' + encodeURIComponent(slug) + '/fields');
+  document.getElementById('pageTitle').textContent = data.page.title || slug;
+  document.getElementById('viewLiveLink').href = '/' + encodeURIComponent(slug) + '.dc.html';
+  allFields = data.fields;
+  renderFields(allFields);
+}
+
+if (slug) load();
+</script>
+</body>
+</html>
