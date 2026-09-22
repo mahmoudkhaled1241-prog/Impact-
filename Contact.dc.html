@@ -71,6 +71,10 @@
   .submit-btn { justify-self: start; color: #0A141D; background: #18D4E2; border: none; font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0.08em; padding: 15px 32px; border-radius: 999px; cursor: pointer; margin-top: 8px; transition: background 0.2s ease; }
   .submit-btn:hover { background: #8FEAF0; }
   .footnote { margin: 4px 0 0; color: #567179; font-size: 13px; }
+  .form-status { margin: 0; font-size: 14px; min-height: 20px; }
+  .form-status.success { color: #4ADE80; }
+  .form-status.error { color: #F26E6E; }
+  .submit-btn:disabled { opacity: .6; cursor: not-allowed; }
 
   footer { position: relative; background: #0E1B26; border-top: 1px solid rgba(140, 205, 214, 0.22); padding: 24px clamp(24px, 6vw, 120px); display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #567179; }
 </style>
@@ -138,11 +142,15 @@
     <form id="contactForm">
       <div class="field-row">
         <div class="field"><label data-t="fName">NAME *</label><input required name="name" type="text"></div>
-        <div class="field"><label data-t="fCompany">COMPANY *</label><input required name="company" type="text"></div>
+        <div class="field"><label data-t="fEmail">EMAIL *</label><input required name="email" type="email"></div>
       </div>
       <div class="field-row">
+        <div class="field"><label data-t="fCompany">COMPANY *</label><input required name="company" type="text"></div>
         <div class="field"><label data-t="fRole">ROLE</label><input name="role" type="text"></div>
+      </div>
+      <div class="field-row">
         <div class="field"><label data-t="fCountry">COUNTRY *</label><input required name="country" type="text"></div>
+        <div></div>
       </div>
       <div class="field">
         <label data-t="fService">SERVICE INTEREST</label>
@@ -162,7 +170,8 @@
       </div>
       <div class="field"><label data-t="fMessage">MESSAGE *</label><textarea required name="message" rows="5"></textarea></div>
       <button class="submit-btn" data-t="send" type="submit">Send Message</button>
-      <p class="footnote" data-t="footnote">Submitting opens your email client addressed to our team with your details prefilled.</p>
+      <p class="form-status" id="formStatus" role="status" aria-live="polite"></p>
+      <p class="footnote" data-t="footnote">We route your message to the right regional team and reply within one business day.</p>
     </form>
   </section>
 
@@ -183,10 +192,12 @@
     pathCorporate: 'Corporate Inquiry', pathTrainer: 'Trainer / Consultant',
     pathCorporateDesc: 'For organizations seeking learning, leadership, or transformation solutions.',
     pathTrainerDesc: 'For trainers and consultants interested in partnering with Impact.',
-    fName: 'NAME *', fCompany: 'COMPANY *', fRole: 'ROLE', fCountry: 'COUNTRY *', fService: 'SERVICE INTEREST',
+    fName: 'NAME *', fEmail: 'EMAIL *', fCompany: 'COMPANY *', fRole: 'ROLE', fCountry: 'COUNTRY *', fService: 'SERVICE INTEREST',
     selectService: 'Select a service', notSure: 'Not sure yet',
     fBudget: 'BUDGET (OPTIONAL)', fTimeline: 'TIMELINE (OPTIONAL)', fMessage: 'MESSAGE *', send: 'Send Message',
-    footnote: 'Submitting opens your email client addressed to our team with your details prefilled.',
+    sending: 'Sending…', sentOk: "Thanks — we've received your message and will be in touch shortly.",
+    sendError: "Something went wrong sending your message. Please email us directly or try again.",
+    footnote: 'We route your message to the right regional team and reply within one business day.',
     copyright: '© 2026 Impact for Learning & Development. All rights reserved.'
   };
   var AR = {
@@ -198,10 +209,12 @@
     pathCorporate: 'استفسار مؤسسي', pathTrainer: 'مدرب / مستشار',
     pathCorporateDesc: 'للمؤسسات الباحثة عن حلول تعلم أو قيادة أو تحول مؤسسي.',
     pathTrainerDesc: 'للمدربين والمستشارين المهتمين بالشراكة مع إمباكت.',
-    fName: 'الاسم *', fCompany: 'الشركة *', fRole: 'المسمى الوظيفي', fCountry: 'الدولة *', fService: 'الاهتمام بالخدمة',
+    fName: 'الاسم *', fEmail: 'البريد الإلكتروني *', fCompany: 'الشركة *', fRole: 'المسمى الوظيفي', fCountry: 'الدولة *', fService: 'الاهتمام بالخدمة',
     selectService: 'اختر خدمة', notSure: 'غير متأكد بعد',
     fBudget: 'الموازنة (اختياري)', fTimeline: 'الجدول الزمني (اختياري)', fMessage: 'الرسالة *', send: 'إرسال الرسالة',
-    footnote: 'سيفتح الإرسال برنامج البريد الإلكتروني لديك موجهاً إلى فريقنا مع تعبئة تفاصيلك مسبقاً.',
+    sending: 'جارٍ الإرسال…', sentOk: 'شكراً لك — تم استلام رسالتك وسنتواصل معك قريباً.',
+    sendError: 'حدث خطأ أثناء إرسال رسالتك. يرجى مراسلتنا مباشرة أو المحاولة مرة أخرى.',
+    footnote: 'نوجّه رسالتك إلى الفريق الإقليمي المناسب ونرد خلال يوم عمل واحد.',
     copyright: '© 2026 إمباكت للتعلم والتطوير. جميع الحقوق محفوظة.'
   };
 
@@ -257,28 +270,79 @@
     });
   });
 
+  // Country-based routing mirrors server/routes/contact.js: Egypt goes to
+  // the Egypt mailbox, every other country (UAE, KSA, elsewhere) goes to
+  // the regional mailbox. Used here only as a mailto: fallback if the
+  // backend request itself fails (e.g. this page opened without the
+  // server running) — the real routing decision is made server-side.
+  function routeByCountry(country) {
+    var normalized = (country || '').trim().toLowerCase();
+    var isEgypt = normalized === 'eg' || normalized === 'egy' || normalized.indexOf('egypt') !== -1 || normalized.indexOf('مصر') !== -1;
+    return isEgypt ? 'info@impactegypt.com' : 'info@impact-ld.me';
+  }
+
   document.getElementById('contactForm').addEventListener('submit', function (e) {
     e.preventDefault();
     var f = e.target;
+    var submitBtn = f.querySelector('.submit-btn');
+    var statusEl = document.getElementById('formStatus');
     function get(n) { return f[n] && f[n].value ? f[n].value.trim() : ''; }
     var activeBtn = document.querySelector('.path-btn.active');
     var path = activeBtn && activeBtn.getAttribute('data-path') === 'trainer' ? 'Trainer / Consultant Inquiry' : 'Corporate Inquiry';
-    var lines = [
-      'Inquiry type: ' + path,
-      'Name: ' + get('name'),
-      'Company: ' + get('company'),
-      'Role: ' + get('role'),
-      'Country: ' + get('country'),
-      'Service interest: ' + get('serviceInterest'),
-      'Budget: ' + get('budget'),
-      'Timeline: ' + get('timeline'),
-      '',
-      'Message:',
-      get('message')
-    ];
-    var subject = encodeURIComponent('New inquiry — ' + path + (get('company') ? ' — ' + get('company') : ''));
-    var body = encodeURIComponent(lines.join('\n'));
-    window.location.href = 'mailto:mahmoud.khaled1241@gmail.com?subject=' + subject + '&body=' + body;
+    var t = currentLang === 'ar' ? AR : EN;
+
+    var payload = {
+      inquiryType: path,
+      name: get('name'),
+      email: get('email'),
+      company: get('company'),
+      role: get('role'),
+      country: get('country'),
+      serviceInterest: get('serviceInterest'),
+      budget: get('budget'),
+      timeline: get('timeline'),
+      message: get('message')
+    };
+
+    submitBtn.disabled = true;
+    statusEl.className = 'form-status';
+    statusEl.textContent = t.sending;
+
+    fetch('/api/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).then(function (res) {
+      if (!res.ok) throw new Error('Request failed');
+      statusEl.className = 'form-status success';
+      statusEl.textContent = t.sentOk;
+      f.reset();
+      submitBtn.disabled = false;
+    }).catch(function () {
+      // Backend unreachable (e.g. static preview with no server running) —
+      // fall back to a mailto: link routed the same way the backend would.
+      var lines = [
+        'Inquiry type: ' + payload.inquiryType,
+        'Name: ' + payload.name,
+        'Email: ' + payload.email,
+        'Company: ' + payload.company,
+        'Role: ' + payload.role,
+        'Country: ' + payload.country,
+        'Service interest: ' + payload.serviceInterest,
+        'Budget: ' + payload.budget,
+        'Timeline: ' + payload.timeline,
+        '',
+        'Message:',
+        payload.message
+      ];
+      var subject = encodeURIComponent('New inquiry — ' + payload.inquiryType + (payload.company ? ' — ' + payload.company : ''));
+      var body = encodeURIComponent(lines.join('\n'));
+      var to = routeByCountry(payload.country);
+      statusEl.className = 'form-status error';
+      statusEl.textContent = t.sendError;
+      submitBtn.disabled = false;
+      window.location.href = 'mailto:' + to + '?subject=' + subject + '&body=' + body;
+    });
   });
 })();
 </script>

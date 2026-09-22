@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contact Submissions | Impact CMS</title>
+<link rel="stylesheet" href="/admin/static/admin.css">
+</head>
+<body>
+<header class="admin-header" id="adminHeader"></header>
+<main class="admin-main">
+  <h1>Contact submissions</h1>
+  <p class="sub">The last 200 messages sent through the contact form, and which mailbox each was routed to.</p>
+
+  <div class="card">
+    <table>
+      <thead>
+        <tr><th>When</th><th>Name / Company</th><th>Country</th><th>Routed to</th><th>Email</th><th>Message</th></tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <div class="empty" id="emptyState" style="display:none">No submissions yet.</div>
+  </div>
+</main>
+
+<script src="/admin/static/admin.js"></script>
+<script>
+renderAdminHeader('/admin/submissions');
+
+async function load() {
+  var data = await api('/contact-submissions');
+  var body = document.getElementById('rows');
+  var empty = document.getElementById('emptyState');
+  if (data.submissions.length === 0) {
+    empty.style.display = 'block';
+    return;
+  }
+  body.innerHTML = data.submissions.map(function (s) {
+    var status = s.email_sent ? '<span class="tag">Sent</span>' : '<span class="tag deleted">Failed</span>';
+    return '<tr>' +
+      '<td style="color:#7793A0;white-space:nowrap">' + escapeHtml(s.created_at) + '</td>' +
+      '<td>' + escapeHtml(s.name || '') + '<br><span style="color:#7793A0">' + escapeHtml(s.company || '') + '</span></td>' +
+      '<td>' + escapeHtml(s.country || '') + '</td>' +
+      '<td>' + escapeHtml(s.routed_to || '') + ' ' + status + '</td>' +
+      '<td>' + escapeHtml(s.email || '') + '</td>' +
+      '<td style="max-width:320px;white-space:pre-wrap">' + escapeHtml(s.message || '') + '</td>' +
+      '</tr>';
+  }).join('');
+}
+
+load();
+</script>
+</body>
+</html>

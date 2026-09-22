@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pages | Impact CMS</title>
+<link rel="stylesheet" href="/admin/static/admin.css">
+</head>
+<body>
+<header class="admin-header" id="adminHeader"></header>
+<main class="admin-main">
+  <h1>Pages</h1>
+  <p class="sub">Every page on the site. Click one to edit its text content.</p>
+
+  <div class="toolbar">
+    <input type="text" id="searchBox" placeholder="Filter pages…">
+    <button class="btn" id="newPageBtn">+ New page</button>
+  </div>
+
+  <div class="card">
+    <table id="pagesTable">
+      <thead>
+        <tr><th>Page</th><th>Slug</th><th>Status</th><th>Last updated</th><th></th></tr>
+      </thead>
+      <tbody id="pagesBody"></tbody>
+    </table>
+    <div class="empty" id="emptyState" style="display:none">No pages match your filter.</div>
+  </div>
+</main>
+
+<dialog id="newPageDialog" style="background:#101E29;color:#F4FBFC;border:1px solid rgba(140,205,214,.25);border-radius:10px;padding:24px;min-width:340px">
+  <form id="newPageForm" style="display:grid;gap:14px">
+    <h2 style="font-size:16px">New page</h2>
+    <div style="display:grid;gap:6px">
+      <label style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#7793A0">Page name (becomes the filename, e.g. "Success Stories")</label>
+      <input type="text" name="slug" required style="background:#0A141D;border:1px solid rgba(140,205,214,.25);color:#F4FBFC;padding:10px;border-radius:6px">
+    </div>
+    <div id="newPageError" style="color:#F26E6E;font-size:13px;min-height:16px"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button type="button" class="btn secondary" id="cancelNewPage">Cancel</button>
+      <button type="submit" class="btn">Create</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="/admin/static/admin.js"></script>
+<script>
+renderAdminHeader('/admin');
+
+var allPages = [];
+
+function statusTag(p) {
+  return p.deleted ? '<span class="tag deleted">Deleted</span>' : '<span class="tag">Live</span>';
+}
+
+function renderRows(pages) {
+  var body = document.getElementById('pagesBody');
+  var empty = document.getElementById('emptyState');
+  if (pages.length === 0) {
+    body.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  body.innerHTML = pages.map(function (p) {
+    return '<tr>' +
+      '<td><a href="/admin/page?slug=' + encodeURIComponent(p.slug) + '">' + escapeHtml(p.title || p.slug) + '</a></td>' +
+      '<td style="color:#7793A0">' + escapeHtml(p.slug) + '.dc.html</td>' +
+      '<td>' + statusTag(p) + '</td>' +
+      '<td style="color:#7793A0">' + escapeHtml(p.updated_at || '') + '</td>' +
+      '<td>' + (p.deleted
+        ? '<button class="btn secondary" data-restore="' + escapeHtml(p.slug) + '">Restore</button>'
+        : '<button class="btn secondary" data-delete="' + escapeHtml(p.slug) + '">Delete</button>') + '</td>' +
+      '</tr>';
+  }).join('');
+
+  body.querySelectorAll('[data-delete]').forEach(function (btn) {
+    btn.addEventListener('click', async function () {
+      if (!confirm('Delete "' + btn.getAttribute('data-delete') + '"? It will stop being served, but its content is kept and can be restored.')) return;
+      await api('/pages/' + encodeURIComponent(btn.getAttribute('data-delete')), { method: 'DELETE' });
+      load();
+    });
+  });
+  body.querySelectorAll('[data-restore]').forEach(function (btn) {
+    btn.addEventListener('click', async function () {
+      await api('/pages/' + encodeURIComponent(btn.getAttribute('data-restore')) + '/restore', { method: 'POST' });
+      load();
+    });
+  });
+}
+
+async function load() {
+  var data = await api('/pages');
+  allPages = data.pages;
+  renderRows(allPages);
+}
+
+document.getElementById('searchBox').addEventListener('input', function (e) {
+  var q = e.target.value.toLowerCase();
+  renderRows(allPages.filter(function (p) {
+    return (p.title || '').toLowerCase().includes(q) || p.slug.toLowerCase().includes(q);
+  }));
+});
+
+var dialog = document.getElementById('newPageDialog');
+document.getElementById('newPageBtn').addEventListener('click', function () { dialog.showModal(); });
+document.getElementById('cancelNewPage').addEventListener('click', function () { dialog.close(); });
+document.getElementById('newPageForm').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  var errEl = document.getElementById('newPageError');
+  errEl.textContent = '';
+  try {
+    var slug = e.target.slug.value.trim();
+    var data = await api('/pages', { method: 'POST', body: { slug: slug, title: slug } });
+    dialog.close();
+    window.location.href = '/admin/page?slug=' + encodeURIComponent(data.slug);
+  } catch (err) {
+    errEl.textContent = err.message;
+  }
+});
+
+load();
+</script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin Login | Impact CMS</title>
+<link rel="stylesheet" href="/admin/static/admin.css">
+</head>
+<body>
+<div class="login-wrap">
+  <form class="login-card" id="loginForm">
+    <h1>Impact CMS</h1>
+    <div class="field">
+      <label>Username</label>
+      <input type="text" name="username" autocomplete="username" required>
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" name="password" autocomplete="current-password" required>
+    </div>
+    <div class="error" id="loginError"></div>
+    <button class="btn" type="submit" id="loginBtn">Log in</button>
+  </form>
+</div>
+<script>
+document.getElementById('loginForm').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  var form = e.target;
+  var errEl = document.getElementById('loginError');
+  var btn = document.getElementById('loginBtn');
+  errEl.textContent = '';
+  btn.disabled = true;
+  try {
+    var res = await fetch('/api/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: form.username.value, password: form.password.value })
+    });
+    var data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Login failed');
+    window.location.href = '/admin';
+  } catch (err) {
+    errEl.textContent = err.message;
+    btn.disabled = false;
+  }
+});
+</script>
+</body>
+</html>
