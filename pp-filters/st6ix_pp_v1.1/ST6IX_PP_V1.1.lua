@@ -266,7 +266,7 @@ end
 -- ============================================================================
 -- ST6IX EXTRA FX: skydomes and film grain
 -- ============================================================================
--- Skydome Preset: 1 Off, 2-6 ST6IX textures (brightness and exponent tuned per texture).
+-- Skydome Preset: 1 Off, 2-7 ST6IX textures (brightness and exponent tuned per texture).
 local SKYDOME_PATH = 'system/cfg/ppfilters/pure_scripts/textures/'
 local SKYDOMES = {
     [2] = { texture = 'ST6IX Nebula.dds', brightness = 10, exponent = 1.5, height = 1.00 },
@@ -274,6 +274,7 @@ local SKYDOMES = {
     [4] = { texture = 'ST6IX blackhole.dds', brightness = 12, exponent = 2.0, height = 1.00 },
     [5] = { texture = 'ST6IX black-matter.dds', brightness = 11, exponent = 1.9, height = 1.10 },
     [6] = { texture = 'Black matter Colored.dds', brightness = 9, exponent = 1.7, height = 0.95 },
+    [7] = { texture = 'ST6IX Pure Sky.dds', brightness = 10, exponent = 1.5, height = 1.00 },
 }
 if type(ac.SkyCloudsCover) == 'function' then
     cover = cover or ac.SkyCloudsCover()
@@ -291,7 +292,7 @@ local function applyExtraFX(day)
 
     -- Skydomes.
     if cover then
-        local index = math.floor(number('Skydome Preset', 1, 1, 6))
+        local index = math.floor(number('Skydome Preset', 1, 1, 7))
         local dome = SKYDOMES[index]
         if index ~= activeSkydome then
             if dome then cover:setTexture(SKYDOME_PATH .. dome.texture) else cover:setTexture() end
@@ -423,7 +424,7 @@ function init_pure_script()
 
     pure.script.ui.addPage('🌌Skydomes')
     header('🌌 CUSTOM SKYDOMES', 'Replace the sky with ST6IX cosmic backgrounds')
-    pure.script.ui.addRadioButtons('Skydome Preset', 1, 'Off🌍,ST6IX Nebula🌌,ST6IX Madara🔴,ST6IX Black Hole🕳️,ST6IX Black Matter⚫,ST6IX Black Matter Colour🟣')
+    pure.script.ui.addRadioButtons('Skydome Preset', 1, 'Off🌍,ST6IX Nebula🌌,ST6IX Madara🔴,ST6IX Black Hole🕳️,ST6IX Black Matter⚫,ST6IX Black Matter Colour🟣,Pure Sky🌤️')
     pure.script.ui.addText('↳ Off: normal sky | Others: ST6IX skydome textures')
     header('🎨 SKYDOME APPEARANCE')
     slider('Skydome Brightness', 1.00, 0.10, 5.00, 'Skydome luminosity')

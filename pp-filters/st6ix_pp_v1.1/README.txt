@@ -14,7 +14,7 @@ REQUIREMENTS
 - Skydomes: the ST6IX skydome textures in
   system/cfg/ppfilters/pure_scripts/textures/
     ST6IX Nebula.dds, ST6IX MADARA.dds, ST6IX blackhole.dds,
-    ST6IX black-matter.dds, Black matter Colored.dds
+    ST6IX black-matter.dds, Black matter Colored.dds, ST6IX Pure Sky.dds
 - HDR version: an HDR display (see HDR SETUP)
 
 INSTALLATION
@@ -33,8 +33,8 @@ THE TABS
                   white balance, car lights and screens
   🌙Night         night looks, light pollution, moon and stars, colour
   🌤️Sky&Clouds    sky looks, sky colour, clouds, sun and moon size
-  🌌Skydomes      ST6IX cosmic skies: Nebula, Madara, Black Hole, Black
-                  Matter, Black Matter Colour
+  🌌Skydomes      ST6IX skies: Nebula, Madara, Black Hole, Black Matter,
+                  Black Matter Colour, Pure Sky
   🌫️Fog           fog fine tuning, fog colour, backlight and horizon
   ✴️Bloom         bloom
   💫Glare         glare styles, reactive glare, sun blinding, star glare,

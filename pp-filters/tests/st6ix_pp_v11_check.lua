@@ -106,9 +106,15 @@ for _, b in ipairs(BUILDS) do
     end
     local g = last({ ['Film Grain'] = true, ['Film Grain Strength'] = 2 }, 'pp:spice.SensorNoise.strength')
     if not (g and g > 1) then fail(b.name .. ' Film Grain has no effect') end
-    local _, dome = last({ ['Skydome Preset'] = 2 }, 'cover.colorMultiplier')
-    if not (dome.accum['cover.setTexture'] and dome.last['cover.colorMultiplier'][1] > 5) then
-        fail(b.name .. ' Skydome does not load')
+    local textures = {}
+    for index = 2, 7 do
+        local _, dome = last({ ['Skydome Preset'] = index }, 'cover.colorMultiplier')
+        if not (dome.accum['cover.setTexture'] and dome.last['cover.colorMultiplier'][1] > 5) then
+            fail(b.name .. ' skydome ' .. index .. ' does not load')
+        end
+        local tex = dome.last['cover.setTexture'] and dome.last['cover.setTexture'][1]
+        if textures[tex] then fail(b.name .. ' skydomes ' .. textures[tex] .. ' and ' .. index .. ' share a texture') end
+        textures[tex] = index
     end
     print(b.name .. ': skydomes and film grain' .. (b.hdr and ', clarity, sharpness and recovery' or '') .. ' checked')
 end
