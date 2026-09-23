@@ -1,11 +1,16 @@
--- ST6IX HAT-TRICK V1.0
+-- ST6IX HAT-TRICK V2.0 HDR
+-- HDR build: CSP performs the final HDR display mapping, so YEBIS runs a
+-- linear tone function and the scene-aware HDR response works through
+-- exposure, contrast and saturation (HDR Tone Mapping page).
+-- V2: Exposure and Bloom/Glare run on the V1.2 engine, Sky on the V1.5
+-- engine; fog offers both systems as ST6IX FOG 1 (V1.2) and FOG 2 (V1.5).
 -- One filter, two engines: ST6IX V1.2 (Gamma V1.8 photographic engine) and
 -- ST6IX V1.5 (Professional Edition). Each page chooses which engine drives it;
 -- only the selected engine may write to the game, so the two never fight.
 -- Pure radio buttons are 1-based throughout this file.
 
-local BUILD = { name = 'ST6IX HAT-TRICK V1.0', hdr = false }
-local VERSION = 5.00
+local BUILD = { name = 'ST6IX HAT-TRICK V2.0 HDR', hdr = true }
+local VERSION = 6.00
 
 -- ============================================================================
 -- ENGINE ROUTING
@@ -17,7 +22,7 @@ local VERSION = 5.00
 local E = { lighting = 1, sky = 1, fog = 1, reflections = 1, bloom = 2,
     exposure = 2, color = 1, tone = 6, sunblindManual = true }
 -- Areas this build fixes to one engine (none in the full build).
-local FIXED_ENGINES = {}
+local FIXED_ENGINES = { sky = 2, exposure = 1, bloom = 1 }
 -- Values of controls this build does not show, read in place of the UI.
 local FIXED_VALUES = {}
 
@@ -1113,50 +1118,6 @@ V12.update = function(dt)
     end
     lastLock = lock
 
-    local tonemapper = math.floor(number('Tone Curve',1,1,3))
-    local toneStrength = check('Scene Aware Tone Mapping', true)
-        and number('Tone Adaptation Strength',0.45,0,1) or 0
-    local toneHighlight = highlightSignal * number('Dynamic Highlight Rolloff',0.55,0,1) * toneStrength
-    local toneShadow = darknessSignal * number('Dynamic Shadow Detail',0.35,0,1) * toneStrength
-    local toneFogContrast = math.max(worldFog, mist) * number('Fog Contrast Protection',0.40,0,1)
-        * toneStrength
-    if tonemapper == 1 then
-        agxTonemap.values.exposure = number('AgX Exposure',1,0.5,2)
-            * clamp(1 + toneShadow * 0.10 - toneHighlight * 0.08, 0.90, 1.10)
-        agxTonemap.values.slope = number('AgX Slope',1.05,0.7,1.4)
-            * clamp(1 + toneFogContrast * 0.08 - toneShadow * 0.04, 0.94, 1.10)
-        agxTonemap.values.power = number('AgX Power',1.05,0.7,1.6)
-            * clamp(1 + toneHighlight * 0.07 - toneShadow * 0.04, 0.94, 1.10)
-        agxTonemap.values.saturation = number('AgX Saturation',0.96,0.6,1.3)
-        pure.pp.setCustomRGBTonemapping(agxTonemap)
-    elseif tonemapper == 2 then
-        pure.pp.setTonemapping(ac.TonemapFunction.Uchimura)
-        pure.config.set('ppTonemapUchimura.maxDisplayBrightness', number('Uchimura Peak',1.05,0.5,3)
-            * (1 + toneHighlight * 0.20))
-        pure.config.set('ppTonemapUchimura.contrast', number('Uchimura Contrast',1.45,0.6,2)
-            * clamp(1 + toneFogContrast * 0.08 - toneShadow * 0.04, 0.94, 1.10))
-        pure.config.set('ppTonemapUchimura.linearSectionStart', number('Uchimura Linear Start',0.18,0.01,0.6))
-        pure.config.set('ppTonemapUchimura.linearSectionLength', number('Uchimura Linear Length',0.42,0.1,0.8)
-            * (1 + toneHighlight * 0.16))
-        pure.config.set('ppTonemapUchimura.black', number('Uchimura Black',1,0.5,1.5)
-            * clamp(1 - toneShadow * 0.10, 0.88, 1))
-        pure.config.set('ppTonemapUchimura.pedestal', 0)
-        pure.config.set('ppTonemapUchimura.gain', number('Uchimura Gain',0.9,0.4,1.5))
-    else
-        pure.pp.setTonemapping(ac.TonemapFunction.Lottes)
-        pure.config.set('ppTonemapLottes.contrast', number('Lottes Contrast',0.82,0.4,1.5)
-            * clamp(1 + toneFogContrast * 0.08 - toneShadow * 0.04, 0.94, 1.10))
-        pure.config.set('ppTonemapLottes.gamma', number('Lottes Gamma',1,0.6,1.4))
-        pure.config.set('ppTonemapLottes.hdrMax', number('Lottes HDR Max',1.2,0.1,3)
-            * (1 + toneHighlight * 0.24))
-        pure.config.set('ppTonemapLottes.midIn', number('Lottes Mid In',0.25,0.05,0.8))
-        pure.config.set('ppTonemapLottes.midOut', number('Lottes Mid Out',0.18,0.05,0.8)
-            * (1 + toneShadow * 0.10))
-        pure.config.set('ppTonemapLottes.gain', number('Lottes Gain',0.95,0.4,1.5))
-    end
-    local gamma = number('Tonemap Gamma',1.1,0.8,1.4) * pure.pp.getGammaModulator()
-    if math.abs(gamma - 1) < 0.0001 then gamma = 0.9999 end
-    ac.setPpTonemapGamma(gamma)
 
     do
         local adaptiveGodrays = check('Adaptive Godrays', true)
@@ -1214,7 +1175,6 @@ V12.update = function(dt)
     pure.yebis.set('lensDistortionRoundness', clamp(number('Lens Roundness',0.05,0,1)
         + lensDistortionAddition, 0, 1))
     pure.yebis.set('lensDistortionSmoothness', number('Lens Smoothness',1,0.1,2))
-    pure.yebis.set('filmicContrast', number('Filmic Contrast',0.35,0,1))
 
     do
         local dofOn = check('Depth of Field', false)
@@ -2843,7 +2803,55 @@ end
 -- ============================================================================
 
 -- Defaults of controls this build does not show (none in the full build).
-
+FIXED_VALUES['lighting_affects_bloom'] = false
+FIXED_VALUES['Sky Preset'] = 1
+FIXED_VALUES['Sky Preset Strength'] = 0.85
+FIXED_VALUES['Sky Weather Response'] = 0.55
+FIXED_VALUES['Sky Transition Speed'] = 1.00
+FIXED_VALUES['Day Sky Brightness'] = 1.00
+FIXED_VALUES['Day Sky Saturation'] = 1.00
+FIXED_VALUES['Twilight Sky Brightness'] = 1.00
+FIXED_VALUES['Twilight Sky Saturation'] = 1.00
+FIXED_VALUES['Night Sky Brightness'] = 1.00
+FIXED_VALUES['Night Sky Saturation'] = 1.00
+FIXED_VALUES['Day Cloud Brightness'] = 1.00
+FIXED_VALUES['Day Cloud Contrast'] = 1.00
+FIXED_VALUES['Day Cloud Softness'] = 1.00
+FIXED_VALUES['Twilight Cloud Brightness'] = 1.00
+FIXED_VALUES['Twilight Cloud Contrast'] = 1.00
+FIXED_VALUES['Twilight Cloud Softness'] = 1.00
+FIXED_VALUES['Night Cloud Brightness'] = 1.00
+FIXED_VALUES['Night Cloud Contrast'] = 1.00
+FIXED_VALUES['Night Cloud Softness'] = 1.00
+FIXED_VALUES['Sun Apparent Size'] = 1.00
+FIXED_VALUES['Moon Apparent Size'] = 1.00
+FIXED_VALUES['ini_eye_preset_v2'] = 1
+FIXED_VALUES['ini_eye_bloom_enabled_v2'] = true
+FIXED_VALUES['ini_eye_bloom_strength_v2'] = 1
+FIXED_VALUES['ini_eye_bloom_threshold_v2'] = 0
+FIXED_VALUES['ini_eye_bloom_radius_v2'] = 1
+FIXED_VALUES['ini_eye_bloom_levels_v2'] = 0
+FIXED_VALUES['ini_eye_bloom_gamma_v2'] = 1
+FIXED_VALUES['ini_eye_glare_enabled_v2'] = true
+FIXED_VALUES['ini_eye_glare_brightness_v2'] = 0.12
+FIXED_VALUES['ini_eye_glare_length_v2'] = 0.07
+FIXED_VALUES['ini_eye_glare_streaks_v2'] = 4
+FIXED_VALUES['ini_eye_glare_threshold_v2'] = 0.42
+FIXED_VALUES['ini_eye_glare_softness_v2'] = 0.80
+FIXED_VALUES['Day Target Exposure'] = 0.08
+FIXED_VALUES['Day Exposure Sensitivity'] = 2
+FIXED_VALUES['AE Day Target'] = 4
+FIXED_VALUES['Day AE Mix'] = 0.75
+FIXED_VALUES['Night Target Exposure'] = 0.75
+FIXED_VALUES['Night Exposure Sensitivity'] = 1
+FIXED_VALUES['AE Night Target'] = 6
+FIXED_VALUES['Night AE Mix'] = 0.95
+FIXED_VALUES['Day Interior Exposure'] = 0.08
+FIXED_VALUES['Night Interior Exposure'] = 0.75
+FIXED_VALUES['AE Interior Day Target'] = 4
+FIXED_VALUES['AE Interior Night Target'] = 6
+FIXED_VALUES['Tunnel Blinding Presets'] = 2
+FIXED_VALUES['Tunnel Blinding Strength'] = 1.35
 
 local function slider(name, default, minimum, maximum, tooltip)
     pure.script.ui.addSliderFloat(name, default, minimum, maximum, tooltip)
@@ -2871,36 +2879,33 @@ function init_pure_script()
     end
 
     pure.script.ui.addPage('🎯Guide')
-    pure.script.ui.addText('ST6IX HAT-TRICK V1.0 - two ST6IX engines in one filter.')
-    pure.script.ui.addText('Engines page: pick which engine drives each area. Only the selected one')
-    pure.script.ui.addText('writes to the game, so the two never fight. Controls are grouped by engine.')
+    pure.script.ui.addText('ST6IX HAT-TRICK V2.0 HDR - two ST6IX engines in one filter.')
+    pure.script.ui.addText('HDR build: CSP performs the final HDR tone mapping for your display.')
+    pure.script.ui.addText('Setup: Windows HDR on; CSP DXGI flip model + HDR support; AC windowed/borderless.')
+    pure.script.ui.addText('V2 line-up: Exposure and Bloom/Glare = V1.2 | Sky = V1.5 sky presets')
+    pure.script.ui.addText('(V1.5 = the ST6IX_PP_V1.1 file) | Fog: ST6IX FOG 1 or 2 on the Fog page.')
+    pure.script.ui.addText('Engines page: choose V1.2 or V1.5 for lighting, reflections and colour.')
     pure.script.ui.addSeparator()
-    pure.script.ui.addText('Recipes: "Sky V1.5: Natural" = Sky Engine V1.5 + sky preset Natural.')
-    pure.script.ui.addText('🌅 MORNING CLEAR - Tone Curve: Hyperchrome | Sky: V1.5 Natural')
-    pure.script.ui.addText('   Daytime V1.5: Crisp Clear | Bloom V1.5: Crisp Clear | Fog V1.5: None')
-    pure.script.ui.addText('🌫️ MORNING HAZY - Fog V1.5: Realistic (amount 0.08, thickness 0.02)')
-    pure.script.ui.addText('   Sky V1.5: Overcast Soft | Bloom V1.5: Subtle')
-    pure.script.ui.addText('🌇 DUSK / DAWN - Daytime V1.5: Golden Hour | Sky V1.5: Golden Hour')
-    pure.script.ui.addText('   Tone Curve: Retrograde | Reflections V1.5: Cinematic')
-    pure.script.ui.addText('🌙 NIGHT CLEAR - Night V1.5: Bright Night | Bloom V1.5: Subtle')
-    pure.script.ui.addText('🌃 NIGHT CITY - Night V1.5: Neon City | Bloom V1.5: City Lights')
-    pure.script.ui.addText('   Sky V1.5: Smog / City Haze | Reflections V1.5: Magical Shimmer')
-    pure.script.ui.addText('🌧️ WET DAY / NIGHT - V1.2 engines: Lighting, Reflections and Fog adapt')
-    pure.script.ui.addText('   to rain, wet roads and standing water automatically.')
-    pure.script.ui.addSeparator()
-    pure.script.ui.addText('Mix freely: e.g. V1.5 Hyperchrome look with V1.2 adaptive sky and fog.')
+    pure.script.ui.addText('🌅 MORNING CLEAR - Sky: Natural | Glare Style: Gentle | ST6IX FOG 2: None')
+    pure.script.ui.addText('   Daytime V1.5: Crisp Clear')
+    pure.script.ui.addText('🌫️ MORNING HAZY - ST6IX FOG 2: Realistic (amount 0.08, thickness 0.02)')
+    pure.script.ui.addText('   Sky: Overcast Soft | Glare Style: Gentle')
+    pure.script.ui.addText('🌇 DUSK / DAWN - Sky: Golden Hour | Glare Style: Golden Hour')
+    pure.script.ui.addText('   Daytime V1.5: Golden Hour | HDR Saturation 1.05')
+    pure.script.ui.addText('🌙 NIGHT CLEAR - Night V1.5: Bright Night | Glare Style: Gentle')
+    pure.script.ui.addText('🌃 NIGHT CITY - Night V1.5: Neon City | Sky: Smog/City Haze | Glare Style: Cinematic')
+    pure.script.ui.addText('🌧️ WET DAY / NIGHT - ST6IX FOG 1 | Glare Style: Wet Night | V1.2 Lighting')
+    pure.script.ui.addText('   and Reflections adapt to rain, wet roads and standing water automatically.')
 
     pure.script.ui.addPage('⚙️Engines')
     pure.script.ui.addText('Choose the engine for each area. Pages show both engines\' controls;')
     pure.script.ui.addText('only the controls of the selected engine are active.')
     pure.script.ui.addRadioButtons('Lighting Engine', 1, 'V1.2 Photographic,V1.5 Presets')
-    pure.script.ui.addRadioButtons('Sky Engine', 1, 'V1.2 Adaptive Sky,V1.5 Sky Presets')
-    pure.script.ui.addRadioButtons('Fog Engine', 1, 'V1.2 Pure Weather Tuning,V1.5 Atmospheric')
     pure.script.ui.addRadioButtons('Reflection Engine', 1, 'V1.2 Adaptive,V1.5 Presets')
-    pure.script.ui.addRadioButtons('Bloom Engine', 2, 'V1.2 Reactive,V1.5 INI-Matched')
-    pure.script.ui.addRadioButtons('Exposure Engine', 2, 'V1.2 Adaptive,V1.5 ST6IX Custom,Pure Native')
     pure.script.ui.addRadioButtons('Color Engine', 1, 'V1.2 Adaptive White Balance,V1.5 Day-Dusk-Night')
-    pure.script.ui.addText('Tone Curve (Tone Mapping page) picks a V1.2 or a V1.5 curve.')
+    pure.script.ui.addText('Fixed in V2: Sky = V1.5 sky presets | Exposure, Bloom and Glare = V1.2')
+    pure.script.ui.addText('Fog: choose ST6IX FOG 1 or ST6IX FOG 2 on the Fog page.')
+    pure.script.ui.addText('Tone mapping: CSP HDR output (HDR Tone Mapping page shapes the scene).')
     pure.script.ui.addText('After switching an engine, restart the session for a fully clean state.')
     pure.script.ui.addSeparator()
     pure.script.ui.addText('Overall look (V1.2)')
@@ -2936,7 +2941,6 @@ function init_pure_script()
     pure.script.ui.addSeparator()
     pure.script.ui.addText('V1.5 PRESETS ENGINE')
     pure.script.ui.addRadioButtons("lighting_preset", 7, "Pure Default,Sunrise/Sunset🌅,Midday☀,Natural🌿,Golden Hour🌇,Crisp Clear❄,Manual")
-    pure.script.ui.addCheckbox("lighting_affects_bloom", false)
     pure.script.ui.addSliderFloat("daylight_multiplier", 1.0, 0.1, 10.0, "Overall daylight brightness multiplier")
     pure.script.ui.addSliderFloat("sun_level", 1.0, 0, 10.0, "Direct sunlight intensity")
     pure.script.ui.addSliderFloat("sun_speculars", 1.0, 0, 10.0, "Specular highlights from sun (reflections & shine)")
@@ -2990,30 +2994,7 @@ function init_pure_script()
     slider('Night Contrast', 0.98, 0.85, 1.15, 'Final nighttime contrast')
 
     pure.script.ui.addPage('🌤️Sky & Clouds')
-    pure.script.ui.addText('V1.2 ADAPTIVE SKY ENGINE')
-    pure.script.ui.addRadioButtons('Sky Preset', 1, 'Natural,Golden Hour,Overcast Soft,Pastel Dawn,City Haze,Storm,Custom')
-    slider('Sky Preset Strength', 0.85, 0.00, 1.00, 'Blend the selected look with the time-specific controls')
-    slider('Sky Weather Response', 0.55, 0.00, 1.00, 'Allow cloud, fog and rain to refine the selected look')
-    slider('Sky Transition Speed', 1.00, 0.25, 3.00, 'Speed of smooth time, weather and preset transitions')
-    slider('Day Sky Brightness', 1.00, 0.50, 1.60, 'Additional daylight sky brightness')
-    slider('Day Sky Saturation', 1.00, 0.50, 1.40, 'Daylight sky color strength')
-    slider('Twilight Sky Brightness', 1.00, 0.50, 1.60, 'Dawn and dusk sky brightness')
-    slider('Twilight Sky Saturation', 1.00, 0.50, 1.40, 'Dawn and dusk sky color strength')
-    slider('Night Sky Brightness', 1.00, 0.40, 1.60, 'Night sky brightness')
-    slider('Night Sky Saturation', 1.00, 0.40, 1.40, 'Night sky color strength')
-    slider('Day Cloud Brightness', 1.00, 0.40, 1.80, 'Cloud brightness in daylight')
-    slider('Day Cloud Contrast', 1.00, 0.50, 1.60, 'Cloud contrast in daylight')
-    slider('Day Cloud Softness', 1.00, 0.50, 1.50, 'Raymarched cloud softness in daylight')
-    slider('Twilight Cloud Brightness', 1.00, 0.40, 1.80, 'Cloud brightness at dawn and dusk')
-    slider('Twilight Cloud Contrast', 1.00, 0.50, 1.60, 'Cloud contrast at dawn and dusk')
-    slider('Twilight Cloud Softness', 1.00, 0.50, 1.50, 'Raymarched cloud softness at dawn and dusk')
-    slider('Night Cloud Brightness', 1.00, 0.40, 1.80, 'Cloud brightness at night')
-    slider('Night Cloud Contrast', 1.00, 0.50, 1.60, 'Cloud contrast at night')
-    slider('Night Cloud Softness', 1.00, 0.50, 1.50, 'Raymarched cloud softness at night')
-    slider('Sun Apparent Size', 1.00, 0.50, 1.60, 'Apparent sun size during daylight')
-    slider('Moon Apparent Size', 1.00, 0.50, 1.60, 'Apparent moon size at night')
-    pure.script.ui.addSeparator()
-    pure.script.ui.addText('V1.5 SKY PRESETS ENGINE')
+    pure.script.ui.addText('ST6IX SKY (V1.5 sky presets)')
     pure.script.ui.addRadioButtons("sky_preset", 4, "Pure Default,Vivid🌈,Cinematic🎥,Natural🌿,Golden Hour🌇,Overcast Soft☁️,Pastel Dawn🌅,Smog/City Haze🏙️,Storm Incoming⛈️,Manual")
     pure.script.ui.addSliderFloat("sky_light_level", 1.125, 0, 2.0, "Overall sky contribution to scene lighting")
     pure.script.ui.addSliderFloat("sun.sun_moon_size", 1.5, 0.5, 30.0, "Larger = more dramatic sun/moon appearance")
@@ -3027,7 +3008,10 @@ function init_pure_script()
     pure.script.ui.addSliderFloat("sunset_sun_sat", 1.4, 1.0, 3.0, "Sun disc saturation at sunset/dawn (peaks at twilight, neutral at midday/night)")
 
     pure.script.ui.addPage('🌫️Fog')
-    pure.script.ui.addText('V1.2 PURE WEATHER TUNING ENGINE (scales Pure\'s live weather fog)')
+    pure.script.ui.addRadioButtons('ST6IX Fog', 1, 'ST6IX FOG 1,ST6IX FOG 2')
+    pure.script.ui.addText('Only the selected fog system drives the game.')
+    pure.script.ui.addSeparator()
+    pure.script.ui.addText('ST6IX FOG 1 - Pure weather tuning (scales Pure\'s live weather fog)')
     pure.script.ui.addCheckbox('Enable Fog Fine Tuning', true, 'Scale Pure Gamma live fog; weather transitions are preserved')
     pure.script.ui.addCheckbox('Custom Fog Color', false, 'Blend a chosen fog tint with Pure weather fog')
     pure.script.ui.addRadioButtons('Fog Color Preset', 1, 'Weather Adaptive,Neutral,Cold Morning,Warm Sunset,Storm,Night')
@@ -3045,7 +3029,7 @@ function init_pure_script()
     slider('Horizon Fog', 1.00, 0.00, 2.00, 'Horizon fog multiplier')
     slider('Fog Cubemap Visibility', 1.00, 0.00, 1.00, 'Fog contribution in reflections')
     pure.script.ui.addSeparator()
-    pure.script.ui.addText('V1.5 ATMOSPHERIC ENGINE (None / Immersive / Realistic + ground fog)')
+    pure.script.ui.addText('ST6IX FOG 2 - Atmospheric (None / Immersive / Realistic + ground fog)')
     pure.script.ui.addRadioButtons("FOG Type", 3, "None,Immersive,Realistic")
     pure.script.ui.addSliderFloat("Fog amount", 0.025, 0, 5, "Overall fog density")
     pure.script.ui.addSliderFloat("Fog Thickness", 0.005, -0.01, 0.09, "Fog layer thickness/vertical distribution")
@@ -3053,7 +3037,7 @@ function init_pure_script()
 
     pure.script.ui.addPage('✴️Bloom & Glare')
     pure.script.ui.addRadioButtons('Render Quality', 3, 'Performance,Balanced,High,Ultra')
-    pure.script.ui.addText('Render Quality refines bloom and glare sampling in both engines.')
+    pure.script.ui.addText('Render Quality refines bloom and glare sampling.')
     pure.script.ui.addSeparator()
     pure.script.ui.addText('V1.2 REACTIVE ENGINE')
     pure.script.ui.addCheckbox('Bloom Enabled', true, 'Enable YEBIS bloom')
@@ -3083,21 +3067,6 @@ function init_pure_script()
     slider('Afterimage Strength', 0.00, 0.00, 0.40, 'Lens afterimage luminance')
     slider('Afterimage Length', 0.20, 0.00, 1.00, 'Afterimage trail length')
     pure.script.ui.addCheckbox('Anamorphic Glare', false, 'Use anamorphic glare shape')
-    pure.script.ui.addSeparator()
-    pure.script.ui.addText('V1.5 INI-MATCHED ENGINE')
-    pure.script.ui.addRadioButtons("ini_eye_preset_v2", 1, "Natural,Subtle,Soft Night,Bright Sources,City Lights,Wet Night,Golden Hour,Crisp Clear,Manual")
-    pure.script.ui.addCheckbox("ini_eye_bloom_enabled_v2", true)
-    pure.script.ui.addSliderFloat("ini_eye_bloom_strength_v2", 1, 0, 2.0, "Visible bloom strength; 0 disables bloom only")
-    pure.script.ui.addSliderFloat("ini_eye_bloom_threshold_v2", 0, -0.18, 0.20, "Bright-source cutoff offset; lower affects more pixels")
-    pure.script.ui.addSliderFloat("ini_eye_bloom_radius_v2", 1, 0.45, 1.60, "Halo radius; 1 is the preset default")
-    pure.script.ui.addSliderFloat("ini_eye_bloom_levels_v2", 0, -2, 2, "Bloom pass offset; kept within 2-6 passes")
-    pure.script.ui.addSliderFloat("ini_eye_bloom_gamma_v2", 1, 0.85, 1.15, "Bloom response; 1 is neutral")
-    pure.script.ui.addCheckbox("ini_eye_glare_enabled_v2", true)
-    pure.script.ui.addSliderFloat("ini_eye_glare_brightness_v2", 0.12, 0, 0.60, "Star brightness; 0 disables the star component")
-    pure.script.ui.addSliderFloat("ini_eye_glare_length_v2", 0.07, 0, 0.30, "Streak length; 0 removes streaks")
-    pure.script.ui.addSliderFloat("ini_eye_glare_streaks_v2", 4, 2, 8, "Number of streaks; rounded to a whole number")
-    pure.script.ui.addSliderFloat("ini_eye_glare_threshold_v2", 0.42, 0.10, 0.80, "Bright-source cutoff; higher restricts glare to brighter lights")
-    pure.script.ui.addSliderFloat("ini_eye_glare_softness_v2", 0.80, 0.20, 1.50, "Star softness; matches the INI at 0.80")
 
     pure.script.ui.addPage('🌞Sun Effects')
     pure.script.ui.addText('Works when sun blinding is enabled in CSP settings.')
@@ -3144,76 +3113,21 @@ function init_pure_script()
     slider('Exposure Compensation EV', 0.00, -1.50, 1.50, 'Exposure compensation in stops')
     slider('Cockpit Compensation EV', 0.10, -0.75, 0.75, 'Additional cockpit exposure in stops')
     pure.script.ui.addCheckbox('Lock Exposure', false, 'Capture and hold current exposure for photography')
-    pure.script.ui.addSeparator()
-    pure.script.ui.addText('V1.5 ST6IX CUSTOM ENGINE')
-    pure.script.ui.addStateFloat("Final Exposure", 0)
-    pure.script.ui.addStateFloat("Occlusion", 0)
-    pure.script.ui.addSliderFloat("Day Target Exposure", 0.08, 0.001, 0.25, "target for final exposure for day")
-    pure.script.ui.addSliderFloat("Day Exposure Sensitivity", 2, 0.01, 10, "raise higher for more sensitive day exposure")
-    pure.script.ui.addSliderFloat("AE Day Target", 4, 1.0, 16.0, "adjusts auto exposure target for day")
-    pure.script.ui.addSliderFloat("Day AE Mix", 0.75, 0.01, 1.0, "adjusts auto exposure mix for day")
-    pure.script.ui.addSliderFloat("Night Target Exposure", 0.75, 0.01, 2, "target for final exposure for night")
-    pure.script.ui.addSliderFloat("Night Exposure Sensitivity", 1, 0.01, 10, "raise higher for more sensitive night exposure")
-    pure.script.ui.addSliderFloat("AE Night Target", 6, 1.0, 16.0, "adjusts auto exposure target for night")
-    pure.script.ui.addSliderFloat("Night AE Mix", 0.95, 0.01, 1.0, "adjusts auto exposure mix for night")
-    pure.script.ui.addSliderFloat("Day Interior Exposure", 0.08, 0.01, 0.25, "day final exposure target")
-    pure.script.ui.addSliderFloat("Night Interior Exposure", 0.75, 0.01, 3, "night final exposure target")
-    pure.script.ui.addSliderFloat("AE Interior Day Target", 4, 1.0, 16.0, "adjusts auto exposure target for day")
-    pure.script.ui.addSliderFloat("AE Interior Night Target", 6, 1.0, 16.0, "adjusts auto exposure target for night")
-    pure.script.ui.addRadioButtons("Tunnel Blinding Presets", 2, "Flash⚡,Blinding☀️,Normal")
-    pure.script.ui.addSliderFloat("Tunnel Blinding Strength", 1.35, 1, 2, "adjusts the strength of the tunnel blinding")
 
-    pure.script.ui.addPage('🎨Tone Mapping')
-    pure.script.ui.addRadioButtons('Tone Curve', 6, 'AgX,Uchimura,Lottes,Neon Noir,ST6IX Dusk,Hyperchrome,Retrograde,BABAYAGA,ST6IX Lottes')
-    pure.script.ui.addText('AgX, Uchimura, Lottes: V1.2 scene-aware curves. Neon Noir to ST6IX Lottes: V1.5 dynamic curves.')
-    slider('Tonemap Gamma', 1.10, 0.80, 1.40, 'Final display gamma')
+    pure.script.ui.addPage('🎨HDR Tone Mapping')
+    pure.script.ui.addText('CSP performs the final HDR tone mapping for your display.')
+    pure.script.ui.addText('In CSP video settings enable DXGI flip model and HDR support; run AC windowed or borderless.')
+    pure.script.ui.addCheckbox('Scene Aware HDR', true, 'Adapt exposure and contrast to highlights, darkness and fog')
+    slider('HDR Adaptation Strength', 0.45, 0.00, 1.00, 'Strength of the scene-aware HDR response')
+    slider('HDR Highlight Protection', 0.55, 0.00, 1.00, 'Hold exposure back when bright sky, sun and reflections dominate')
+    slider('HDR Shadow Lift', 0.35, 0.00, 1.00, 'Open up detail in dark scenes')
+    slider('HDR Fog Contrast', 0.40, 0.00, 1.00, 'Keep dense fog from flattening the image')
+    slider('HDR Brightness', 0.00, -1.50, 1.50, 'Overall HDR scene brightness in stops')
+    slider('HDR Contrast', 1.00, 0.85, 1.20, 'Overall HDR contrast')
+    slider('HDR Saturation', 1.00, 0.80, 1.20, 'Overall HDR colour intensity')
+    pure.script.ui.addText('Drives the V1.2 exposure engine.')
     pure.script.ui.addSeparator()
-    pure.script.ui.addText('V1.2 CURVES')
-    pure.script.ui.addCheckbox('Scene Aware Tone Mapping', true, 'Refine the selected curve using highlights, darkness and fog')
-    slider('Tone Adaptation Strength', 0.45, 0.00, 1.00, 'Strength of scene-aware curve refinement')
-    slider('Dynamic Highlight Rolloff', 0.55, 0.00, 1.00, 'Protect bright sky, sun and reflective highlights')
-    slider('Dynamic Shadow Detail', 0.35, 0.00, 1.00, 'Retain restrained detail in dark scenes')
-    slider('Fog Contrast Protection', 0.40, 0.00, 1.00, 'Prevent dense fog from flattening the complete image')
-    pure.script.ui.addText('AgX')
-    slider('AgX Exposure', 1.00, 0.50, 2.00, 'Input exposure before AgX')
-    slider('AgX Slope', 1.05, 0.70, 1.40, 'AgX contrast slope')
-    slider('AgX Power', 1.05, 0.70, 1.60, 'AgX contrast power')
-    slider('AgX Saturation', 0.96, 0.60, 1.30, 'AgX output saturation')
-    pure.script.ui.addText('Uchimura')
-    slider('Uchimura Peak', 1.05, 0.50, 3.00, 'Maximum display brightness')
-    slider('Uchimura Contrast', 1.45, 0.60, 2.00, 'Tone curve contrast')
-    slider('Uchimura Linear Start', 0.18, 0.01, 0.60, 'Linear section start')
-    slider('Uchimura Linear Length', 0.42, 0.10, 0.80, 'Highlight shoulder length')
-    slider('Uchimura Black', 1.00, 0.50, 1.50, 'Shadow toe strength')
-    slider('Uchimura Gain', 0.90, 0.40, 1.50, 'Tone curve output gain')
-    pure.script.ui.addText('Lottes')
-    slider('Lottes Contrast', 0.82, 0.40, 1.50, 'Lottes contrast')
-    slider('Lottes Gamma', 1.00, 0.60, 1.40, 'Lottes curve gamma')
-    slider('Lottes HDR Max', 1.20, 0.10, 3.00, 'Highlight range')
-    slider('Lottes Mid In', 0.25, 0.05, 0.80, 'Input middle gray')
-    slider('Lottes Mid Out', 0.18, 0.05, 0.80, 'Output middle gray')
-    slider('Lottes Gain', 0.95, 0.40, 1.50, 'Lottes output gain')
-    pure.script.ui.addSeparator()
-    pure.script.ui.addText('V1.5 CURVES')
-    pure.script.ui.addSliderFloat("photo_realistic", 0.9, 0.0, 1.0, "Photo-realistic vs stylized (0=stylized, 1=realistic)")
-    pure.script.ui.addSliderFloat("sun_blinding", 0.5, 0, 1.0, "Sun blinding influence on tonemapping")
-    pure.script.ui.addText('Hyperchrome / Retrograde curve controls')
-    pure.script.ui.addSliderFloat("TONEMAPPING__maxDisplayBrightness", 2.00, 0, 5, "Peak white point")
-    pure.script.ui.addSliderFloat("TONEMAPPING__contrast", 1.00, 0, 2, "Overall contrast")
-    pure.script.ui.addSliderFloat("TONEMAPPING__linearSectionStart", 0.29, 0.001, 1.00, "Linear region start (mid-gray point)")
-    pure.script.ui.addSliderFloat("TONEMAPPING__linearSectionLength", 0.40, 0, 0.98, "Linear region length")
-    pure.script.ui.addSliderFloat("TONEMAPPING__black", 1.00, 0, 2, "Black level/lift")
-    pure.script.ui.addSliderFloat("TONEMAPPING__pedestal", 0.00, -0.1, 0.1, "Black point offset")
-    pure.script.ui.addSliderFloat("TONEMAPPING__gain", 1.00, 0, 10, "Overall brightness gain")
-    pure.script.ui.addText('AgX film emulation (Hyperchrome / Retrograde)')
-    pure.script.ui.addSliderFloat("TONEMAPPING__agx_mix", 0.85, 0, 1, "AGX blend amount")
-    pure.script.ui.addSliderFloat("TONEMAPPING__agx_mix_luma_exp", 0.40, 0, 1, "AGX luminance exponent")
-    pure.script.ui.addSliderFloat("TONEMAPPING__agx_slope", 1.25, 0, 2, "AGX slope (brightness)")
-    pure.script.ui.addSliderFloat("TONEMAPPING__agx_power", 1.75, 0, 10, "AGX power (gamma)")
-    pure.script.ui.addSliderFloat("TONEMAPPING__agx_sat", 0.99, 0, 2, "AGX saturation")
-    pure.script.ui.addText('BABAYAGA')
-    pure.script.ui.addSliderFloat("TONEMAPPING__aces_exposure", 1.0, 0.1, 10.0, "ACES exposure compensation")
-    pure.script.ui.addText('Monitor black level (V1.5 finishing, all curves)')
+    pure.script.ui.addText('Monitor black level (V1.5 finishing)')
     pure.script.ui.addSliderFloat("black_limit_low_exposure", 0.0, 0, 1, "Black crush prevention (bright scenes)")
     pure.script.ui.addSliderFloat("black_limit_high_exposure", 0.0, 0, 1, "Black crush prevention (dark scenes)")
 
@@ -3259,7 +3173,6 @@ function init_pure_script()
     pure.script.ui.addCheckbox("Dashcam", false)
     pure.script.ui.addSliderFloat("Lens Distortion Roundness", 0, 0, 1.5, "Amount of barrel/pincushion distortion")
     pure.script.ui.addSliderFloat("Lens Distortion Smoothness", 0, 0, 1, "Edge smoothness of distortion")
-    slider('Filmic Contrast', 0.35, 0.00, 1.00, 'YEBIS filmic contrast')
     pure.script.ui.addCheckbox('Depth of Field', false, 'Photographic depth of field for replays and screenshots')
     slider('DOF Focus Distance', 8.0, 0.5, 100.0, 'Focus distance in metres')
     slider('DOF Aperture', 2.8, 1.2, 22.0, 'Lens f-number; lower values give a shallower focus')
@@ -3337,7 +3250,7 @@ function init_pure_script()
     pure.script.ui.addStateFloat("Status: Wetness", 0)
     pure.script.ui.addStateFloat("Status: Rain", 0)
     pure.script.ui.addStateFloat("Status: Weather Adaptation", 0)
-    pure.script.ui.addText('Tonemap = Tone Curve index | Exposure Mode 1 = V1.5 Custom active')
+    pure.script.ui.addText('Tonemap 0 = CSP HDR output')
 
     pure.config.set('light.ambient_model_V2', true, true)
     pure.config.set('AI_headlights.ambient_light', 0.5, true)
@@ -3353,7 +3266,7 @@ local lastExposureEngine = nil
 local function readEngines()
     E.lighting = uiChoice('Lighting Engine', 1, 2)
     E.sky = FIXED_ENGINES.sky or uiChoice('Sky Engine', 1, 2)
-    E.fog = uiChoice('Fog Engine', 1, 2)
+    E.fog = uiChoice('ST6IX Fog', 1, 2)
     E.reflections = uiChoice('Reflection Engine', 1, 2)
     E.bloom = FIXED_ENGINES.bloom or uiChoice('Bloom Engine', 2, 2)
     E.exposure = FIXED_ENGINES.exposure or uiChoice('Exposure Engine', 2, 3)

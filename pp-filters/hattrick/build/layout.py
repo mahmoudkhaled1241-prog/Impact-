@@ -31,11 +31,15 @@ TONEMAP_LITERALS = {
     'tonemap__custom.values.agx_power': '1.75', 'tonemap__custom.values.agx_sat': '0.99',
 }
 
-def build_main(v12_lines, v15_lines, hdr=False):
+def build_main(v12_lines, v15_lines, hdr=False, v2=False):
     c12 = index_controls(v12_lines)
     c15 = index_controls(v15_lines)
     used = set()
     body = []
+    fixed = []  # (name, lua default) for controls a variant replaces
+    drop12 = set(V2_DROP_V12) if v2 else set()
+    drop15 = set(V2_DROP_V15) if v2 else set()
+    version = 'V2.0' if v2 else 'V1.0'
 
     def add(raw):
         body.append('    ' + raw)
@@ -53,7 +57,11 @@ def build_main(v12_lines, v15_lines, hdr=False):
     def v12(*names):
         for n in names:
             assert n in c12, ('missing V1.2 control', n)
-            add(c12[n]); used.add(('12', n))
+            used.add(('12', n))
+            if n in drop12:
+                fixed.append((n, default_of(c12[n], n)))
+                continue
+            add(c12[n])
 
     def v15(*names):
         for n in names:
@@ -64,45 +72,70 @@ def build_main(v12_lines, v15_lines, hdr=False):
                               lambda m: m.group(1) + str(V15_RADIO_DEFAULTS[n]) + ',', line, count=1)
             for k in sorted(TONEMAP_LITERALS, key=len, reverse=True):
                 line = re.sub(re.escape(k) + r'\b', TONEMAP_LITERALS[k], line)
-            add(line); used.add(('15', n))
+            used.add(('15', n))
+            if n in drop15:
+                fixed.append((n, default_of(line, n)))
+                continue
+            add(line)
 
     def radio(name, default, options, tip=None):
         add("pure.script.ui.addRadioButtons(%s, %d, %s)" % (lua_str(name), default, lua_str(options)))
 
     # ------------------------------------------------------------- pages
     page('🎯Guide')
-    t('ST6IX HAT-TRICK V1.0%s - two ST6IX engines in one filter.' % (' HDR' if hdr else ''))
+    t('ST6IX HAT-TRICK %s%s - two ST6IX engines in one filter.' % (version, ' HDR' if hdr else ''))
     if hdr:
         t('HDR build: CSP performs the final HDR tone mapping for your display.')
         t('Setup: Windows HDR on; CSP DXGI flip model + HDR support; AC windowed/borderless.')
-    t('Engines page: pick which engine drives each area. Only the selected one')
-    t('writes to the game, so the two never fight. Controls are grouped by engine.')
-    sep()
-    t('Recipes: "Sky V1.5: Natural" = Sky Engine V1.5 + sky preset Natural.')
-    t('🌅 MORNING CLEAR - Tone Curve: Hyperchrome | Sky: V1.5 Natural' if not hdr else '🌅 MORNING CLEAR - Sky: V1.5 Natural | HDR Brightness 0')
-    t('   Daytime V1.5: Crisp Clear | Bloom V1.5: Crisp Clear | Fog V1.5: None')
-    t('🌫️ MORNING HAZY - Fog V1.5: Realistic (amount 0.08, thickness 0.02)')
-    t('   Sky V1.5: Overcast Soft | Bloom V1.5: Subtle')
-    t('🌇 DUSK / DAWN - Daytime V1.5: Golden Hour | Sky V1.5: Golden Hour')
-    t('   Tone Curve: Retrograde | Reflections V1.5: Cinematic' if not hdr else '   Reflections V1.5: Cinematic | HDR Saturation 1.05')
-    t('🌙 NIGHT CLEAR - Night V1.5: Bright Night | Bloom V1.5: Subtle')
-    t('🌃 NIGHT CITY - Night V1.5: Neon City | Bloom V1.5: City Lights')
-    t('   Sky V1.5: Smog / City Haze | Reflections V1.5: Magical Shimmer')
-    t('🌧️ WET DAY / NIGHT - V1.2 engines: Lighting, Reflections and Fog adapt')
-    t('   to rain, wet roads and standing water automatically.')
-    sep()
-    t('Mix freely: e.g. V1.5 Hyperchrome look with V1.2 adaptive sky and fog.' if not hdr else 'Mix freely: e.g. V1.5 lighting presets with V1.2 adaptive sky and fog.')
+    if v2:
+        t('V2 line-up: Exposure and Bloom/Glare = V1.2 | Sky = V1.5 sky presets')
+        t('(V1.5 = the ST6IX_PP_V1.1 file) | Fog: ST6IX FOG 1 or 2 on the Fog page.')
+        t('Engines page: choose V1.2 or V1.5 for lighting, reflections and colour.')
+        sep()
+        t('🌅 MORNING CLEAR - Sky: Natural | Glare Style: Gentle | ST6IX FOG 2: None')
+        t('   Daytime V1.5: Crisp Clear' + ('' if hdr else ' | Tone Curve: Hyperchrome'))
+        t('🌫️ MORNING HAZY - ST6IX FOG 2: Realistic (amount 0.08, thickness 0.02)')
+        t('   Sky: Overcast Soft | Glare Style: Gentle')
+        t('🌇 DUSK / DAWN - Sky: Golden Hour | Glare Style: Golden Hour')
+        t('   Daytime V1.5: Golden Hour' + (' | HDR Saturation 1.05' if hdr else ' | Tone Curve: Retrograde'))
+        t('🌙 NIGHT CLEAR - Night V1.5: Bright Night | Glare Style: Gentle')
+        t('🌃 NIGHT CITY - Night V1.5: Neon City | Sky: Smog/City Haze | Glare Style: Cinematic')
+        t('🌧️ WET DAY / NIGHT - ST6IX FOG 1 | Glare Style: Wet Night | V1.2 Lighting')
+        t('   and Reflections adapt to rain, wet roads and standing water automatically.')
+    else:
+        t('Engines page: pick which engine drives each area. Only the selected one')
+        t('writes to the game, so the two never fight. Controls are grouped by engine.')
+        sep()
+        t('Recipes: "Sky V1.5: Natural" = Sky Engine V1.5 + sky preset Natural.')
+        t('🌅 MORNING CLEAR - Tone Curve: Hyperchrome | Sky: V1.5 Natural' if not hdr else '🌅 MORNING CLEAR - Sky: V1.5 Natural | HDR Brightness 0')
+        t('   Daytime V1.5: Crisp Clear | Bloom V1.5: Crisp Clear | Fog V1.5: None')
+        t('🌫️ MORNING HAZY - Fog V1.5: Realistic (amount 0.08, thickness 0.02)')
+        t('   Sky V1.5: Overcast Soft | Bloom V1.5: Subtle')
+        t('🌇 DUSK / DAWN - Daytime V1.5: Golden Hour | Sky V1.5: Golden Hour')
+        t('   Tone Curve: Retrograde | Reflections V1.5: Cinematic' if not hdr else '   Reflections V1.5: Cinematic | HDR Saturation 1.05')
+        t('🌙 NIGHT CLEAR - Night V1.5: Bright Night | Bloom V1.5: Subtle')
+        t('🌃 NIGHT CITY - Night V1.5: Neon City | Bloom V1.5: City Lights')
+        t('   Sky V1.5: Smog / City Haze | Reflections V1.5: Magical Shimmer')
+        t('🌧️ WET DAY / NIGHT - V1.2 engines: Lighting, Reflections and Fog adapt')
+        t('   to rain, wet roads and standing water automatically.')
+        sep()
+        t('Mix freely: e.g. V1.5 Hyperchrome look with V1.2 adaptive sky and fog.' if not hdr else 'Mix freely: e.g. V1.5 lighting presets with V1.2 adaptive sky and fog.')
 
     page('⚙️Engines')
     t('Choose the engine for each area. Pages show both engines\' controls;')
     t('only the controls of the selected engine are active.')
     radio('Lighting Engine', 1, 'V1.2 Photographic,V1.5 Presets')
-    radio('Sky Engine', 1, 'V1.2 Adaptive Sky,V1.5 Sky Presets')
-    radio('Fog Engine', 1, 'V1.2 Pure Weather Tuning,V1.5 Atmospheric')
+    if not v2:
+        radio('Sky Engine', 1, 'V1.2 Adaptive Sky,V1.5 Sky Presets')
+        radio('Fog Engine', 1, 'V1.2 Pure Weather Tuning,V1.5 Atmospheric')
     radio('Reflection Engine', 1, 'V1.2 Adaptive,V1.5 Presets')
-    radio('Bloom Engine', 2, 'V1.2 Reactive,V1.5 INI-Matched')
-    radio('Exposure Engine', 2, 'V1.2 Adaptive,V1.5 ST6IX Custom,Pure Native')
+    if not v2:
+        radio('Bloom Engine', 2, 'V1.2 Reactive,V1.5 INI-Matched')
+        radio('Exposure Engine', 2, 'V1.2 Adaptive,V1.5 ST6IX Custom,Pure Native')
     radio('Color Engine', 1, 'V1.2 Adaptive White Balance,V1.5 Day-Dusk-Night')
+    if v2:
+        t('Fixed in V2: Sky = V1.5 sky presets | Exposure, Bloom and Glare = V1.2')
+        t('Fog: choose ST6IX FOG 1 or ST6IX FOG 2 on the Fog page.')
     t('Tone Curve (Tone Mapping page) picks a V1.2 or a V1.5 curve.' if not hdr else 'Tone mapping: CSP HDR output (HDR Tone Mapping page shapes the scene).')
     t('After switching an engine, restart the session for a fully clean state.')
     sep()
@@ -150,7 +183,8 @@ def build_main(v12_lines, v15_lines, hdr=False):
     v12('Night Color Saturation', 'Night Contrast')
 
     page('🌤️Sky & Clouds')
-    t('V1.2 ADAPTIVE SKY ENGINE')
+    if not v2:
+        t('V1.2 ADAPTIVE SKY ENGINE')
     v12('Sky Preset', 'Sky Preset Strength', 'Sky Weather Response', 'Sky Transition Speed',
         'Day Sky Brightness', 'Day Sky Saturation', 'Twilight Sky Brightness',
         'Twilight Sky Saturation', 'Night Sky Brightness', 'Night Sky Saturation',
@@ -158,25 +192,34 @@ def build_main(v12_lines, v15_lines, hdr=False):
         'Twilight Cloud Brightness', 'Twilight Cloud Contrast', 'Twilight Cloud Softness',
         'Night Cloud Brightness', 'Night Cloud Contrast', 'Night Cloud Softness',
         'Sun Apparent Size', 'Moon Apparent Size')
-    sep()
-    t('V1.5 SKY PRESETS ENGINE')
+    if not v2:
+        sep()
+    t('V1.5 SKY PRESETS ENGINE' if not v2 else 'ST6IX SKY (V1.5 sky presets)')
     v15('sky_preset', 'sky_light_level', 'sun.sun_moon_size', 'Daytime Clouds Brightness',
         'Daytime Clouds Contrast', 'Nighttime Clouds Brightness', 'Nighttime Clouds Contrast',
         'Daytime Sky Level', 'Duskdawn Sky Level', 'Daytime Sky Saturation', 'sunset_sun_sat')
 
     page('🌫️Fog')
-    t('V1.2 PURE WEATHER TUNING ENGINE (scales Pure\'s live weather fog)')
+    if v2:
+        radio('ST6IX Fog', 1, 'ST6IX FOG 1,ST6IX FOG 2')
+        t('Only the selected fog system drives the game.')
+        sep()
+        t('ST6IX FOG 1 - Pure weather tuning (scales Pure\'s live weather fog)')
+    else:
+        t('V1.2 PURE WEATHER TUNING ENGINE (scales Pure\'s live weather fog)')
     v12('Enable Fog Fine Tuning', 'Custom Fog Color', 'Fog Color Preset',
         'Adaptive Fog Color Strength', 'Fog Color Red', 'Fog Color Green', 'Fog Color Blue',
         'Fog Color Mix', 'Fog Density', 'Fog Distance', 'Fog Blend', 'Fog Height', 'Fog Exponent',
         'Fog Backlight', 'Horizon Fog', 'Fog Cubemap Visibility')
     sep()
-    t('V1.5 ATMOSPHERIC ENGINE (None / Immersive / Realistic + ground fog)')
+    t('V1.5 ATMOSPHERIC ENGINE (None / Immersive / Realistic + ground fog)' if not v2
+      else 'ST6IX FOG 2 - Atmospheric (None / Immersive / Realistic + ground fog)')
     v15('FOG Type', 'Fog amount', 'Fog Thickness', 'Fog Color mixer')
 
     page('✴️Bloom & Glare')
     v12('Render Quality')
-    t('Render Quality refines bloom and glare sampling in both engines.')
+    t('Render Quality refines bloom and glare sampling in both engines.' if not v2
+      else 'Render Quality refines bloom and glare sampling.')
     sep()
     t('V1.2 REACTIVE ENGINE')
     v12('Bloom Enabled', 'Bloom Strength', 'Bloom Threshold', 'Bloom Radius', 'Bloom Levels',
@@ -186,8 +229,9 @@ def build_main(v12_lines, v15_lines, hdr=False):
         'Emissive Color Protection', 'Glare Master', 'Star Strength', 'Star Length', 'Star Streaks',
         'Star Softness', 'Star Filter Threshold', 'Ghost Strength', 'Afterimage Strength',
         'Afterimage Length', 'Anamorphic Glare')
-    sep()
-    t('V1.5 INI-MATCHED ENGINE')
+    if not v2:
+        sep()
+        t('V1.5 INI-MATCHED ENGINE')
     v15('ini_eye_preset_v2', 'ini_eye_bloom_enabled_v2', 'ini_eye_bloom_strength_v2',
         'ini_eye_bloom_threshold_v2', 'ini_eye_bloom_radius_v2', 'ini_eye_bloom_levels_v2',
         'ini_eye_bloom_gamma_v2', 'ini_eye_glare_enabled_v2', 'ini_eye_glare_brightness_v2',
@@ -215,10 +259,11 @@ def build_main(v12_lines, v15_lines, hdr=False):
         'Maximum Target Shift', 'Camera Style Response', 'CBE Mix', 'CBE Target', 'CBE Sensitivity',
         'Minimum Exposure', 'Maximum Exposure', 'Dark Adaptation Speed', 'Bright Adaptation Speed',
         'YEBIS Target', 'Exposure Compensation EV', 'Cockpit Compensation EV', 'Lock Exposure')
-    sep()
-    t('V1.5 ST6IX CUSTOM ENGINE')
-    add('pure.script.ui.addStateFloat("Final Exposure", 0)')
-    add('pure.script.ui.addStateFloat("Occlusion", 0)')
+    if not v2:
+        sep()
+        t('V1.5 ST6IX CUSTOM ENGINE')
+        add('pure.script.ui.addStateFloat("Final Exposure", 0)')
+        add('pure.script.ui.addStateFloat("Occlusion", 0)')
     v15('Day Target Exposure', 'Day Exposure Sensitivity', 'AE Day Target', 'Day AE Mix',
         'Night Target Exposure', 'Night Exposure Sensitivity', 'AE Night Target', 'Night AE Mix',
         'Day Interior Exposure', 'Night Interior Exposure', 'AE Interior Day Target',
@@ -236,7 +281,7 @@ def build_main(v12_lines, v15_lines, hdr=False):
         add("slider('HDR Brightness', 0.00, -1.50, 1.50, 'Overall HDR scene brightness in stops')")
         add("slider('HDR Contrast', 1.00, 0.85, 1.20, 'Overall HDR contrast')")
         add("slider('HDR Saturation', 1.00, 0.80, 1.20, 'Overall HDR colour intensity')")
-        t('Works with every Exposure Engine.')
+        t('Works with every Exposure Engine.' if not v2 else 'Drives the V1.2 exposure engine.')
         sep()
         t('Monitor black level (V1.5 finishing)')
         v15('black_limit_low_exposure', 'black_limit_high_exposure')
@@ -332,7 +377,8 @@ def build_main(v12_lines, v15_lines, hdr=False):
               'Status: Exposure', 'Status: Interior', 'Status: Wetness', 'Status: Rain',
               'Status: Weather Adaptation']:
         add('pure.script.ui.addStateFloat("%s", 0)' % s)
-    t(('Tonemap 0 = CSP HDR output' if hdr else 'Tonemap = Tone Curve index') + ' | Exposure Mode 1 = V1.5 Custom active')
+    t(('Tonemap 0 = CSP HDR output' if hdr else 'Tonemap = Tone Curve index')
+      + (' | Exposure Mode 1 = V1.5 Custom active' if not v2 else ''))
 
     # Every source control must be placed exactly once, except the ones the
     # merge replaces on purpose.
@@ -343,7 +389,37 @@ def build_main(v12_lines, v15_lines, hdr=False):
     missing = [m for m in missing if m not in replaced]
     assert not missing, ('controls not placed', missing)
 
-    return MAIN_TEMPLATE.replace('--UI--', '\n'.join(body))
+    fixed_lua = '\n'.join('FIXED_VALUES[%s] = %s' % (lua_str(n), v) for n, v in fixed)
+    main = MAIN_TEMPLATE.replace('--UI--', '\n'.join(body)).replace('--FIXED--', fixed_lua)
+    if v2:
+        main = main.replace("uiChoice('Fog Engine', 1, 2)", "uiChoice('ST6IX Fog', 1, 2)")
+    return main
+
+def default_of(line, name):
+    m = re.search(re.escape(name) + r'["\']\s*,\s*([^,\)]+)', line)
+    assert m, ('no default', name, line)
+    v = m.group(1).strip()
+    assert re.fullmatch(r'-?[0-9.]+|true|false', v), ('odd default', name, v)
+    return v
+
+# V2 fixes Exposure and Bloom/Glare to V1.2 and Sky to V1.5: the other
+# engine's controls for those areas are not shown and read their defaults.
+V2_DROP_V12 = ['Sky Preset', 'Sky Preset Strength', 'Sky Weather Response', 'Sky Transition Speed',
+    'Day Sky Brightness', 'Day Sky Saturation', 'Twilight Sky Brightness', 'Twilight Sky Saturation',
+    'Night Sky Brightness', 'Night Sky Saturation', 'Day Cloud Brightness', 'Day Cloud Contrast',
+    'Day Cloud Softness', 'Twilight Cloud Brightness', 'Twilight Cloud Contrast', 'Twilight Cloud Softness',
+    'Night Cloud Brightness', 'Night Cloud Contrast', 'Night Cloud Softness',
+    'Sun Apparent Size', 'Moon Apparent Size']
+V2_DROP_V15 = ['lighting_affects_bloom',
+    'ini_eye_preset_v2', 'ini_eye_bloom_enabled_v2', 'ini_eye_bloom_strength_v2',
+    'ini_eye_bloom_threshold_v2', 'ini_eye_bloom_radius_v2', 'ini_eye_bloom_levels_v2',
+    'ini_eye_bloom_gamma_v2', 'ini_eye_glare_enabled_v2', 'ini_eye_glare_brightness_v2',
+    'ini_eye_glare_length_v2', 'ini_eye_glare_streaks_v2', 'ini_eye_glare_threshold_v2',
+    'ini_eye_glare_softness_v2',
+    'Day Target Exposure', 'Day Exposure Sensitivity', 'AE Day Target', 'Day AE Mix',
+    'Night Target Exposure', 'Night Exposure Sensitivity', 'AE Night Target', 'Night AE Mix',
+    'Day Interior Exposure', 'Night Interior Exposure', 'AE Interior Day Target',
+    'AE Interior Night Target', 'Tunnel Blinding Presets', 'Tunnel Blinding Strength']
 
 # SDR tone controls the HDR build replaces with the HDR Tone Mapping page.
 HDR_REMOVED_V12 = ['Tone Curve', 'Tonemap Gamma', 'Scene Aware Tone Mapping', 'Tone Adaptation Strength',
@@ -365,6 +441,9 @@ MAIN_TEMPLATE = r'''
 -- ============================================================================
 -- USER INTERFACE AND FRAME LOOP
 -- ============================================================================
+
+-- Defaults of controls this build does not show (none in the full build).
+--FIXED--
 
 local function slider(name, default, minimum, maximum, tooltip)
     pure.script.ui.addSliderFloat(name, default, minimum, maximum, tooltip)
@@ -405,11 +484,11 @@ end
 local lastExposureEngine = nil
 local function readEngines()
     E.lighting = uiChoice('Lighting Engine', 1, 2)
-    E.sky = uiChoice('Sky Engine', 1, 2)
+    E.sky = FIXED_ENGINES.sky or uiChoice('Sky Engine', 1, 2)
     E.fog = uiChoice('Fog Engine', 1, 2)
     E.reflections = uiChoice('Reflection Engine', 1, 2)
-    E.bloom = uiChoice('Bloom Engine', 2, 2)
-    E.exposure = uiChoice('Exposure Engine', 2, 3)
+    E.bloom = FIXED_ENGINES.bloom or uiChoice('Bloom Engine', 2, 2)
+    E.exposure = FIXED_ENGINES.exposure or uiChoice('Exposure Engine', 2, 3)
     E.color = uiChoice('Color Engine', 1, 2)
     E.tone = BUILD.hdr and 0 or uiChoice('Tone Curve', DEFAULT_TONE, 9)
     E.sunblindManual = uiCheck('sunblinding_allow_control', true)

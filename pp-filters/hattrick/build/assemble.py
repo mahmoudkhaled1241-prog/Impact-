@@ -10,7 +10,9 @@ import sys, os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 HDR = '--hdr' in sys.argv[1:]
-ARGS = [a for a in sys.argv[1:] if a != '--hdr']
+V2 = '--v2' in sys.argv[1:]
+ARGS = [a for a in sys.argv[1:] if a not in ('--hdr', '--v2')]
+VERSION_TAG = 'V2.0' if V2 else 'V1.0'
 
 def load(name):
     text = open(os.path.join(HERE, name), encoding='utf-8-sig').read()
@@ -31,10 +33,18 @@ def replace_once(text, old, new):
 
 out = []
 core = open(os.path.join(HERE, 'part_core.lua'), encoding='utf-8').read().rstrip('\n')
-if HDR:
+if V2:
     core = replace_once(core, "local BUILD = { name = 'ST6IX HAT-TRICK V1.0', hdr = false }",
-                        "local BUILD = { name = 'ST6IX HAT-TRICK V1.0 HDR', hdr = true }")
-    core = replace_once(core, "-- ST6IX HAT-TRICK V1.0\n", "-- ST6IX HAT-TRICK V1.0 HDR\n"
+                        "local BUILD = { name = 'ST6IX HAT-TRICK V2.0', hdr = false }")
+    core = replace_once(core, "local VERSION = 5.00", "local VERSION = 6.00")
+    core = replace_once(core, "-- ST6IX HAT-TRICK V1.0\n", "-- ST6IX HAT-TRICK V2.0\n"
+        "-- V2: Exposure and Bloom/Glare run on the V1.2 engine, Sky on the V1.5\n"
+        "-- engine; fog offers both systems as ST6IX FOG 1 (V1.2) and FOG 2 (V1.5).\n")
+    core = replace_once(core, "local FIXED_ENGINES = {}", "local FIXED_ENGINES = { sky = 2, exposure = 1, bloom = 1 }")
+if HDR:
+    core = replace_once(core, "local BUILD = { name = 'ST6IX HAT-TRICK %s', hdr = false }" % VERSION_TAG,
+                        "local BUILD = { name = 'ST6IX HAT-TRICK %s HDR', hdr = true }" % VERSION_TAG)
+    core = replace_once(core, "-- ST6IX HAT-TRICK %s\n" % VERSION_TAG, "-- ST6IX HAT-TRICK %s HDR\n" % VERSION_TAG +
         "-- HDR build: CSP performs the final HDR display mapping, so YEBIS runs a\n"
         "-- linear tone function and the scene-aware HDR response works through\n"
         "-- exposure, contrast and saturation (HDR Tone Mapping page).\n")
@@ -85,7 +95,7 @@ out.append('''
 -- ============================================================================
 local V12 = {}
 do
-local pure, ac = makeGatedApi(12, OUT12)
+local pure, ac = makeGatedApi(12, OUT12, v12GetValue)
 ''')
 out.append(v12_top)
 out.append('''
@@ -228,9 +238,9 @@ out.append('end')
 
 sys.path.insert(0, HERE)
 import layout
-out.append(layout.build_main(v12, v15, HDR).rstrip('\n'))
+out.append(layout.build_main(v12, v15, HDR, V2).rstrip('\n'))
 
 target = ARGS[0] if ARGS else os.path.join(os.path.dirname(HERE),
-    'ST6IX_HatTrick_V1.0_HDR.lua' if HDR else 'ST6IX_HatTrick_V1.0.lua')
+    'ST6IX_HatTrick_%s%s.lua' % (VERSION_TAG, '_HDR' if HDR else ''))
 open(target, 'w', encoding='utf-8').write('\n'.join(out) + '\n')
 print('written', target)

@@ -5,6 +5,7 @@
 --     original ST6IX V1.2 / V1.5 (radios read 1-based) write for that engine
 --   * the HDR build keeps YEBIS linear with neutral gamma and matches ST6IX
 --     V1.2 HDR when every engine is V1.2
+--   * V2 matches V1.0 run with V2's fixed engine choices
 
 local here = arg[0]:gsub('[^/\\]+$', '')
 package.path = here .. '?.lua;' .. package.path
@@ -182,6 +183,38 @@ for ex = 1, 3 do
     end
 end
 print('HDR pipeline checked')
+
+-- 4. V2 (Exposure and Bloom/Glare on V1.2, Sky on V1.5, fog as ST6IX FOG 1/2)
+--    writes exactly what V1.0 writes with the same engine choices.
+local V2 = { SDR = root .. 'hattrick/ST6IX_HatTrick_V2.0.lua', HDR = root .. 'hattrick/ST6IX_HatTrick_V2.0_HDR.lua' }
+local V1 = { SDR = SDR, HDR = HDR }
+for _, kind in ipairs({ 'SDR', 'HDR' }) do
+    local probe = H.run(V2[kind], {}, scene, 1, 1 / 60)
+    clean(probe, 'V2 ' .. kind)
+    for _, gone in ipairs({ 'Sky Engine', 'Bloom Engine', 'Exposure Engine', 'Fog Engine', 'Sky Preset',
+        'ini_eye_preset_v2', 'Day Target Exposure', 'lighting_affects_bloom' }) do
+        if probe.controls[gone] then fail('V2 ' .. kind .. ' still shows ' .. gone) end
+    end
+    if not probe.controls['ST6IX Fog'] or probe.controls['ST6IX Fog'].count ~= 2 then
+        fail('V2 ' .. kind .. ' has no ST6IX FOG 1/2 selector')
+    end
+    local n = 0
+    for fogSystem = 1, 2 do for li = 1, 2 do for re = 1, 2 do for co = 1, 2 do
+        local shared = { ['Lighting Engine'] = li, ['Reflection Engine'] = re, ['Color Engine'] = co,
+            ['Tone Curve'] = 6, sunblinding_allow_control = li == 2, hdr_clarity_preset = 2 + li }
+        local a = H.run(V1[kind], with(shared, { ['Sky Engine'] = 2, ['Exposure Engine'] = 1,
+            ['Bloom Engine'] = 1, ['Fog Engine'] = fogSystem }), scene, 120, 1 / 60)
+        local b = H.run(V2[kind], with(shared, { ['ST6IX Fog'] = fogSystem }), scene, 120, 1 / 60)
+        clean(b, 'V2 ' .. kind)
+        local d = {}
+        for _, k in ipairs(H.diff(a, b)) do
+            if not k:find('^ui%.state:') then d[#d + 1] = k end
+        end
+        if #d > 0 then fail(string.format('V2 %s differs from V1.0 (fog %d, engines %d%d%d): %s', kind, fogSystem, li, re, co, table.concat(d, ', '))) end
+        n = n + 1
+    end end end end
+    print(string.format('V2 %s matches V1.0 with the same engine choices (%d configurations)', kind, n))
+end
 
 print(failures == 0 and '\nALL HAT-TRICK CHECKS PASSED' or ('\n' .. failures .. ' FAILURES'))
 os.exit(failures == 0 and 0 or 1)

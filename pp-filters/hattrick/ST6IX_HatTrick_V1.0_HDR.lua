@@ -19,6 +19,10 @@ local VERSION = 5.00
 -- 1-based Tone Curve index (1-3 V1.2 curves, 4-9 V1.5 curves).
 local E = { lighting = 1, sky = 1, fog = 1, reflections = 1, bloom = 2,
     exposure = 2, color = 1, tone = 6, sunblindManual = true }
+-- Areas this build fixes to one engine (none in the full build).
+local FIXED_ENGINES = {}
+-- Values of controls this build does not show, read in place of the UI.
+local FIXED_VALUES = {}
 
 -- Values both engines contribute to are captured here and written once,
 -- combined, at the end of the frame.
@@ -237,13 +241,22 @@ local HDR_FIXED_V15 = { photo_realistic = 0.9, sun_blinding = 0.5 }
 local function v15GetValue(name)
     local default = V15_RADIOS[name]
     if default then
-        local x = pure.script.ui.getValue(name)
+        local x = FIXED_VALUES[name]
+        if x == nil then x = pure.script.ui.getValue(name) end
         if type(x) ~= 'number' or x ~= x then x = default end
         return math.floor(x + 0.5) - 1
     end
     if name == 'Tonemapping' then return E.tone end
     if BUILD.hdr and HDR_FIXED_V15[name] ~= nil then return HDR_FIXED_V15[name] end
     if name == 'exposure_mode' then return E.exposure == 2 and 1 or 0 end
+    local fixedValue = FIXED_VALUES[name]
+    if fixedValue ~= nil then return fixedValue end
+    return pure.script.ui.getValue(name)
+end
+
+local function v12GetValue(name)
+    local fixedValue = FIXED_VALUES[name]
+    if fixedValue ~= nil then return fixedValue end
     return pure.script.ui.getValue(name)
 end
 
@@ -267,7 +280,7 @@ end
 -- ============================================================================
 local V12 = {}
 do
-local pure, ac = makeGatedApi(12, OUT12)
+local pure, ac = makeGatedApi(12, OUT12, v12GetValue)
 
 -- Neutral YEBIS white point. The scene temperature is expressed against it,
 -- so the Kelvin sliders shift the image instead of cancelling themselves out.
@@ -2787,6 +2800,9 @@ end
 -- USER INTERFACE AND FRAME LOOP
 -- ============================================================================
 
+-- Defaults of controls this build does not show (none in the full build).
+
+
 local function slider(name, default, minimum, maximum, tooltip)
     pure.script.ui.addSliderFloat(name, default, minimum, maximum, tooltip)
 end
@@ -3258,11 +3274,11 @@ end
 local lastExposureEngine = nil
 local function readEngines()
     E.lighting = uiChoice('Lighting Engine', 1, 2)
-    E.sky = uiChoice('Sky Engine', 1, 2)
+    E.sky = FIXED_ENGINES.sky or uiChoice('Sky Engine', 1, 2)
     E.fog = uiChoice('Fog Engine', 1, 2)
     E.reflections = uiChoice('Reflection Engine', 1, 2)
-    E.bloom = uiChoice('Bloom Engine', 2, 2)
-    E.exposure = uiChoice('Exposure Engine', 2, 3)
+    E.bloom = FIXED_ENGINES.bloom or uiChoice('Bloom Engine', 2, 2)
+    E.exposure = FIXED_ENGINES.exposure or uiChoice('Exposure Engine', 2, 3)
     E.color = uiChoice('Color Engine', 1, 2)
     E.tone = BUILD.hdr and 0 or uiChoice('Tone Curve', DEFAULT_TONE, 9)
     E.sunblindManual = uiCheck('sunblinding_allow_control', true)
