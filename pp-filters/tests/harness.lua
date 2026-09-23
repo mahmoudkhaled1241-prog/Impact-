@@ -182,9 +182,39 @@ function H.new(scriptPath)
         }, { __index = recorder('pp.') }),
     }
 
+    local rgbMeta = {}
+    local function mkrgb(r, g, b) return setmetatable({ __kind = 'rgb', r = r, g = g, b = b }, rgbMeta) end
+    local function comp(x, k) if type(x) == 'number' then return x end return x[k] end
+    rgbMeta.__mul = function(a, b) return mkrgb(comp(a,'r')*comp(b,'r'), comp(a,'g')*comp(b,'g'), comp(a,'b')*comp(b,'b')) end
+    rgbMeta.__add = function(a, b) return mkrgb(comp(a,'r')+comp(b,'r'), comp(a,'g')+comp(b,'g'), comp(a,'b')+comp(b,'b')) end
+    rgbMeta.__sub = function(a, b) return mkrgb(comp(a,'r')-comp(b,'r'), comp(a,'g')-comp(b,'g'), comp(a,'b')-comp(b,'b')) end
+    rgbMeta.__div = function(a, b) return mkrgb(comp(a,'r')/comp(b,'r'), comp(a,'g')/comp(b,'g'), comp(a,'b')/comp(b,'b')) end
+    S.logs = {}
+
+    -- Legacy Pure helpers used by ST6IX V1.5 code.
+    pure.shader = { isRunning = function() return true end }
+    pure.utils = {
+        CamFacesSun = function() return W.sunFacing or 0.3 end,
+        CamIsInTunnel = function() return (W.occlusion or 1) < 0.4 and 1 or 0 end,
+    }
+    pure.system = { isHDR = false }
+    pure.mod.day = function() return W.sun end
+    pure.mod.dayCurve = function(d, n) return n + (d - n) * W.sun end
+    pure.mod.nightCurve = function(n, d) return d + (n - d) * (1 - W.sun) end
+    pure.script.resetSettingsWithNewVersion = function() end
+    pure.pp.UseSpice = function() end
+
     local acRec = recorder('ac.')
     local ac = setmetatable({
-        TonemapFunction = { Linear = 0, Uchimura = 7, Lottes = 8, Sensitometric = 2 },
+        TonemapFunction = { Linear = 0, Uchimura = 7, Lottes = 8, Sensitometric = 2, ACES = 17 },
+        log = function(msg) S.logs[#S.logs + 1] = tostring(msg) end,
+        getPatchVersionCode = function() return 3000 end,
+        getSim = function() return { rainWetness = W.wetness, rainIntensity = W.rain } end,
+        SkyCloudsCover = function()
+            local cover = { texture = nil }
+            function cover:setTexture(t) self.texture = t; record('cover.setTexture', pack(t or '')) end
+            return cover
+        end,
         isInteriorView = function() return W.interior end,
         getCubemapBrightnessEstimationAverage = function() return W.cbeAvg end,
         getCubemapBrightnessEstimationMaximum = function() return W.cbeMax end,
@@ -194,10 +224,34 @@ function H.new(scriptPath)
 
     local env = setmetatable({
         pure = pure, ac = ac,
-        rgb = function(r, g, b) return { __kind = 'rgb', r = r, g = g, b = b } end,
+        rgb = function(r, g, b) return mkrgb(r, g, b) end,
+        hsv = function(h, s, v) return { h = h, s = s, v = v } end,
+        RGBToHSV_To = function(dst, c)
+            local mx, mn = math.max(c.r, c.g, c.b), math.min(c.r, c.g, c.b)
+            dst.v, dst.s, dst.h = mx, mx > 0 and (mx - mn) / mx or 0, 0
+        end,
+        HSVToRGB_To = function(dst, h, s, v) dst.r, dst.g, dst.b = v * (1 - s), v * (1 - s), v end,
+        COLORS = { AMBIENT = 1 },
+        Pure_getColor = function() return mkrgb(0.5, 0.55, 0.6) end,
+        __PURE__world__fog_get = function() return { color = mkrgb(0.7, 0.74, 0.8), density = 0.4 + W.fog, distance = 25000, blend = 0.9 } end,
+        LUT = { new = function(_, rows)
+            return { get = function(_, x)
+                local lo, hi = rows[1], rows[#rows]
+                for i = 1, #rows - 1 do
+                    if x >= rows[i][1] and x <= rows[i + 1][1] then lo, hi = rows[i], rows[i + 1]; break end
+                end
+                local t = hi[1] > lo[1] and (x - lo[1]) / (hi[1] - lo[1]) or 0
+                t = math.max(0, math.min(1, t))
+                local out = {}
+                for i = 2, #lo do out[i - 1] = lo[i] + (hi[i] - lo[i]) * t end
+                return out
+            end }
+        end },
         vec2 = function(x, y) return { __kind = 'vec2', x = x, y = y } end,
         math = setmetatable({
             lerp = function(a, b, t) return a + (b - a) * t end,
+            lerpInvSat = function(x, a, b) return math.max(0, math.min(1, (x - a) / (b - a))) end,
+            smootherstep = function(x) x = math.max(0, math.min(1, x)); return x * x * x * (x * (x * 6 - 15) + 10) end,
         }, { __index = math }),
     }, { __index = _G })
     env._G = env

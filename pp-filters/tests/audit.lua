@@ -1,9 +1,15 @@
--- Usage: luajit tests/audit.lua <script.lua>
+-- Usage: luajit tests/audit.lua <script.lua> [shard/shards]
+-- The optional shard argument (e.g. 2/4) audits every n-th control so large
+-- scripts can be audited by several processes in parallel.
 -- Reports script errors, dead controls and radio options that behave identically.
 
 package.path = arg[0]:gsub('[^/\\]+$', '') .. '?.lua;' .. package.path
 local H = require('harness')
 local script = assert(arg[1], 'script path required')
+local shard, shards = (arg[2] or '1/1'):match('^(%d+)/(%d+)$')
+shard, shards = tonumber(shard), tonumber(shards)
+assert(shard and shards and shard >= 1 and shard <= shards, 'shard must look like 2/4')
+local function mine(index) return (index - 1) % shards == shard - 1 end
 
 local FRAMES, DT = 160, 0.1
 
@@ -130,7 +136,8 @@ local function affects(name, value)
 end
 
 local dead, deadOptions, twins = 0, 0, 0
-for _, name in ipairs(order) do
+for index, name in ipairs(order) do
+    if not mine(index) then goto nextControl end
     local c = controls[name]
     local anyEffect = false
     for _, v in ipairs(probesFor(c)) do
@@ -146,18 +153,19 @@ for _, name in ipairs(order) do
         print(string.format('DEAD CONTROL %-34s (%s) never changes the output', name, c.kind))
         dead = dead + 1
     end
+    ::nextControl::
 end
 
-for _, name in ipairs(order) do
-    if not H.reads[name] then
+for index, name in ipairs(order) do
+    if mine(index) and not H.reads[name] then
         print('UNREAD       ' .. name .. ' is declared but never read')
     end
 end
 
 -- Radio options that are indistinguishable from each other in every scene.
-for _, name in ipairs(order) do
+for index, name in ipairs(order) do
     local c = controls[name]
-    if c.kind == 'radio' then
+    if c.kind == 'radio' and mine(index) then
         local runs = {}
         for opt = 1, c.count do
             runs[opt] = {}
