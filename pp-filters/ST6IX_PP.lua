@@ -1,8 +1,15 @@
--- ST6IX Gamma V1.9 unified photographic rendering system
--- Pure Gamma 3.50 / CSP dynamic tonemapping
+-- ST6IX V1.1 unified photographic rendering system
+-- Pure Gamma 3.50 and Pure LCS / CSP dynamic tonemapping, SDR and HDR displays
 -- Twelve control pages. Every slider is live in every overall mode.
 
-local VERSION = 1.90
+-- Release variants are generated from this file by build.lua, which rewrites
+-- the line below. hdr targets HDR displays; lcs targets Pure LCS.
+local BUILD = { name = 'ST6IX V1.1', hdr = false, lcs = false }
+
+local VERSION = 1.10
+local FOG_TABLE_GETTERS = BUILD.lcs
+    and { 'getPureLCSFogTable', 'getFogTable', 'getPureGammaFogTable' }
+    or { 'getPureGammaFogTable', 'getFogTable', 'getPureLCSFogTable' }
 -- Neutral YEBIS white point. The scene temperature is expressed against it,
 -- so the Kelvin sliders shift the image instead of cancelling themselves out.
 local NEUTRAL_WHITE_POINT = 6500
@@ -84,7 +91,8 @@ local GT7_PQ = { m1 = 0.1593017578125, m2 = 78.84375,
 local gt7Tonemap = {
     cacheKey = 7,
     values = { gtInputScale=2.5, gtPeak=2.5, gtMid=0.538, gtLinear=0.444, gtToe=1.28,
-        gtKA=0, gtKB=0, gtKC=0, gtBlend=0.6, gtFadeStart=0.98, gtFadeEnd=1.16, gtTargetI=1 },
+        gtKA=0, gtKB=0, gtKC=0, gtBlend=0.6, gtFadeStart=0.98, gtFadeEnd=1.16, gtTargetI=1,
+        gtOutScale=0.4, gtOutMax=1 },
     shader = [[
     #define ST6IX_GT_M1 0.1593017578125
     #define ST6IX_GT_M2 78.84375
@@ -146,13 +154,15 @@ local gt7Tonemap = {
 
     // Wide-gamut highlights can leave the Rec.709 range after conversion; they
     // are pulled toward their own luminance, keeping hue instead of clipping it.
+    // gtOutMax is 1 for SDR and the peak / paper-white headroom for HDR.
     float3 st6ixGtFitDisplay(float3 c) {
         float peak = max(c.r, max(c.g, c.b));
         float luma = dot(c, float3(0.2126, 0.7152, 0.0722));
-        if (peak > 1.0) {
-            c = luma >= 1.0 ? float3(1.0, 1.0, 1.0) : luma + (c - luma) * ((1.0 - luma) / (peak - luma));
+        if (peak > gtOutMax) {
+            c = luma >= gtOutMax ? float3(gtOutMax, gtOutMax, gtOutMax)
+                : luma + (c - luma) * ((gtOutMax - luma) / (peak - luma));
         }
-        return saturate(c);
+        return clamp(c, 0.0, gtOutMax);
     }
 
     float3 tonemapping(float3 color) {
@@ -163,17 +173,20 @@ local gt7Tonemap = {
         float chroma = 1.0 - smoothstep(gtFadeStart, gtFadeEnd, ucs.x / gtTargetI);
         float3 scaled = st6ixGtFromUcs(float3(skewedUcs.x, ucs.y * chroma, ucs.z * chroma));
         float3 blended = lerp(skewed, scaled, gtBlend);
-        return st6ixGtFitDisplay(max(mul(st6ixGt2020To709, min(blended, gtPeak) / gtPeak), 0.0));
+        return st6ixGtFitDisplay(max(mul(st6ixGt2020To709, min(blended, gtPeak) * gtOutScale), 0.0));
     }
 ]]
 }
 
 -- Shoulder constants and the peak's ICtCp intensity are solved on the CPU once
--- per frame so the shader only evaluates the curve.
-local function updateGt7Curve(v, exposure, peak, alpha, linear, toe, blend)
+-- per frame so the shader only evaluates the curve. `paper` is paper white in
+-- framebuffer units: equal to the peak for SDR, below it for HDR displays.
+local function updateGt7Curve(v, exposure, peak, alpha, linear, toe, blend, paper)
     local k = (linear - 1) / (alpha - 1)
     v.gtPeak = peak
-    v.gtInputScale = exposure * peak
+    v.gtInputScale = exposure * paper
+    v.gtOutScale = 1 / paper
+    v.gtOutMax = peak / paper
     v.gtLinear = linear
     v.gtToe = toe
     v.gtBlend = blend
@@ -451,7 +464,13 @@ function init_pure_script()
     pure.script.setVersion(VERSION)
 
     pure.script.ui.addPage('Daytime Control')
-    pure.script.ui.addText('ST6IX Gamma V1.9 - unified photographic rendering controls.')
+    pure.script.ui.addText(BUILD.name .. ' - unified photographic rendering controls.')
+    if BUILD.lcs then
+        pure.script.ui.addText('Pure LCS build: for the linear colour space edition of Pure.')
+    end
+    if BUILD.hdr then
+        pure.script.ui.addText('HDR display build: turn on HDR in Windows and in the CSP graphics settings.')
+    end
     pure.script.ui.addRadioButtons('Overall Mode', 2, 'Natural,Photorealistic,Manual')
     pure.script.ui.addText('Modes add a subtle finish; the sliders below always remain active.')
     pure.script.ui.addRadioButtons('Morning Preset', 1, 'Natural Morning,Bright Morning,Dark Morning,Cinematic Morning,Custom')
@@ -610,7 +629,12 @@ function init_pure_script()
     -- Pure choices are 1-based. A zero default prevents this page from being
     -- built correctly in Pure PP, so AgX is selection 1.
     pure.script.ui.addPage('Tone Mapping')
-    pure.script.ui.addRadioButtons('Tone Curve', 1, 'AgX,Uchimura,Lottes,GT7')
+    pure.script.ui.addRadioButtons('Tone Curve', BUILD.hdr and 4 or 1, 'AgX,Uchimura,Lottes,GT7')
+    if BUILD.hdr then
+        slider('HDR Peak Brightness', 1000, 400, 4000, 'Peak brightness of your HDR display in nits')
+        slider('HDR Paper White', 250, 80, 500, 'Brightness of paper white (UI and mid-tones) in nits')
+        pure.script.ui.addText('GT7 and Uchimura use the full HDR range; AgX and Lottes stay paper-white referred.')
+    end
     pure.script.ui.addCheckbox('Scene Aware Tone Mapping', true, 'Refine the selected curve using highlights, darkness and fog')
     slider('Tone Adaptation Strength', 0.45, 0.00, 1.00, 'Strength of scene-aware curve refinement')
     slider('Dynamic Highlight Rolloff', 0.55, 0.00, 1.00, 'Protect bright sky, sun and reflective highlights')
@@ -638,7 +662,9 @@ function init_pure_script()
     slider('Lottes Gain', 0.95, 0.40, 1.50, 'Lottes output gain')
     pure.script.ui.addText('GT7')
     slider('GT7 Exposure', 1.00, 0.50, 2.00, 'Input exposure before the GT7 curve')
-    slider('GT7 Highlight Range', 2.50, 1.00, 6.00, 'Peak white in GT7 framebuffer units; 2.5 is SDR paper white')
+    if not BUILD.hdr then
+        slider('GT7 Highlight Range', 2.50, 1.00, 6.00, 'Peak white in GT7 framebuffer units; 2.5 is SDR paper white')
+    end
     slider('GT7 Shoulder', 0.25, 0.05, 0.60, 'Softness of the highlight shoulder')
     slider('GT7 Linear Section', 0.444, 0.20, 0.80, 'Share of the range kept linear before the shoulder')
     slider('GT7 Toe Strength', 1.28, 1.00, 1.80, 'Depth of the shadow toe')
@@ -1068,10 +1094,15 @@ function update_pure_script(dt)
     relative('fog.cubemaps', number('Fog Cubemap Visibility',1,0,1))
     do
         local fogTuning = check('Enable Fog Fine Tuning', true)
+        -- Pure Gamma and Pure LCS name their live fog getter differently; use the
+        -- first one this Pure build provides.
         local fog = nil
-        if type(pure.world.getPureGammaFogTable) == 'function' then
-            local ok, fogTable = pcall(pure.world.getPureGammaFogTable)
-            if ok then fog = fogTable end
+        for _, getter in ipairs(FOG_TABLE_GETTERS) do
+            local fn = pure.world[getter]
+            if type(fn) == 'function' then
+                local ok, fogTable = pcall(fn)
+                if ok and type(fogTable) == 'table' then fog = fogTable; break end
+            end
         end
         if type(fog) == 'table' then
             -- With fine tuning off the live Pure fog passes straight through, so
@@ -1291,7 +1322,14 @@ function update_pure_script(dt)
     end
     lastLock = lock
 
-    local tonemapper = math.floor(number('Tone Curve',1,1,4))
+    local tonemapper = math.floor(number('Tone Curve',BUILD.hdr and 4 or 1,1,4))
+    -- HDR builds map paper white to 1.0 and let highlights run up to the
+    -- display peak; SDR builds keep both at 1 so nothing changes.
+    local hdrPaper, hdrPeak = 1, 1
+    if BUILD.hdr then
+        hdrPaper = number('HDR Paper White',250,80,500) / 100
+        hdrPeak = math.max(number('HDR Peak Brightness',1000,400,4000) / 100, hdrPaper * 1.05)
+    end
     local toneStrength = check('Scene Aware Tone Mapping', true)
         and number('Tone Adaptation Strength',0.45,0,1) or 0
     local toneHighlight = highlightSignal * number('Dynamic Highlight Rolloff',0.55,0,1) * toneStrength
@@ -1310,7 +1348,7 @@ function update_pure_script(dt)
     elseif tonemapper == 2 then
         pure.pp.setTonemapping(ac.TonemapFunction.Uchimura)
         pure.config.set('ppTonemapUchimura.maxDisplayBrightness', number('Uchimura Peak',1.05,0.5,3)
-            * (1 + toneHighlight * 0.20))
+            * (1 + toneHighlight * 0.20) * (hdrPeak / hdrPaper))
         pure.config.set('ppTonemapUchimura.contrast', number('Uchimura Contrast',1.45,0.6,2)
             * clamp(1 + toneFogContrast * 0.08 - toneShadow * 0.04, 0.94, 1.10))
         pure.config.set('ppTonemapUchimura.linearSectionStart', number('Uchimura Linear Start',0.18,0.01,0.6))
@@ -1322,16 +1360,20 @@ function update_pure_script(dt)
         pure.config.set('ppTonemapUchimura.gain', number('Uchimura Gain',0.9,0.4,1.5))
     elseif tonemapper == 4 then
         -- GT7 takes the same scene-aware signals as the other curves: highlights
-        -- widen the headroom, dark scenes lift the toe and fog deepens it.
+        -- widen the SDR headroom, dark scenes lift the toe and fog deepens it.
+        -- On HDR displays the peak is the monitor's real brightness instead.
+        local gt7Peak = BUILD.hdr and hdrPeak
+            or number('GT7 Highlight Range',2.5,1,6) * (1 + toneHighlight * 0.20)
         updateGt7Curve(gt7Tonemap.values,
             number('GT7 Exposure',1,0.5,2)
                 * clamp(1 + toneShadow * 0.10 - toneHighlight * 0.08, 0.90, 1.10),
-            number('GT7 Highlight Range',2.5,1,6) * (1 + toneHighlight * 0.20),
+            gt7Peak,
             number('GT7 Shoulder',0.25,0.05,0.6),
             number('GT7 Linear Section',0.444,0.2,0.8),
             number('GT7 Toe Strength',1.28,1,1.8)
                 * clamp(1 + toneFogContrast * 0.08 - toneShadow * 0.10, 0.90, 1.10),
-            number('GT7 Chroma Blend',0.6,0,1))
+            number('GT7 Chroma Blend',0.6,0,1),
+            BUILD.hdr and hdrPaper or gt7Peak)
         pure.pp.setCustomRGBTonemapping(gt7Tonemap)
     else
         pure.pp.setTonemapping(ac.TonemapFunction.Lottes)

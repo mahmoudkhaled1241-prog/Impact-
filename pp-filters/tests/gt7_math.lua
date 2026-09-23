@@ -44,15 +44,16 @@ local function tonemap(v, color)
     local scaled = fromUcs({ skewedUcs[1], ucs[2] * chroma, ucs[3] * chroma })
     local blended = { skewed[1] + (scaled[1] - skewed[1]) * v.gtBlend,
         skewed[2] + (scaled[2] - skewed[2]) * v.gtBlend, skewed[3] + (scaled[3] - skewed[3]) * v.gtBlend }
-    local c = map(mul(M2020to709, map(blended, function(x) return math.min(x, v.gtPeak) / v.gtPeak end)),
+    local c = map(mul(M2020to709, map(blended, function(x) return math.min(x, v.gtPeak) * v.gtOutScale end)),
         function(x) return math.max(x, 0) end)
     local peak = math.max(c[1], c[2], c[3])
     local l = 0.2126 * c[1] + 0.7152 * c[2] + 0.0722 * c[3]
-    if peak > 1 then
-        if l >= 1 then c = {1, 1, 1}
-        else c = map(c, function(x) return l + (x - l) * ((1 - l) / (peak - l)) end) end
+    local M = v.gtOutMax
+    if peak > M then
+        if l >= M then c = {M, M, M}
+        else c = map(c, function(x) return l + (x - l) * ((M - l) / (peak - l)) end) end
     end
-    return map(c, function(x) return math.max(0, math.min(1, x)) end)
+    return map(c, function(x) return math.max(0, math.min(M, x)) end)
 end
 
 local failures = 0
@@ -79,10 +80,19 @@ for i = 0, 400 do
     prev, maxOut = out, math.max(maxOut, out)
 end
 check(monotonic, 'brightness never reverses across a 0..20 ramp')
-check(maxOut <= 1 + 1e-6, 'output never exceeds display white', string.format('%.4f', maxOut))
-check(luma(tonemap(v, {1, 1, 1})) > 0.7 and luma(tonemap(v, {1, 1, 1})) < 1, 'scene white rolls off smoothly below clip',
-    string.format('%.3f', luma(tonemap(v, {1, 1, 1}))))
-check(luma(tonemap(v, {20, 20, 20})) > 0.99, 'very bright light reaches white')
+local M = v.gtOutMax
+local hdr = M > 1.001
+print(string.format('INFO %s build: output range 0..%.2f (paper white = 1.0)', hdr and 'HDR' or 'SDR', M))
+check(maxOut <= M + 1e-6, 'output never exceeds display peak', string.format('%.4f of %.2f', maxOut, M))
+local white = luma(tonemap(v, {1, 1, 1}))
+if hdr then
+    local spec = luma(tonemap(v, {3, 3, 3}))
+    check(math.abs(white - 1) < 0.02, 'scene white lands on paper white', string.format('%.3f', white))
+    check(spec > 1.2 and spec < M, 'specular highlights use the HDR headroom above paper white', string.format('%.3f of %.2f', spec, M))
+else
+    check(white > 0.7 and white < 1, 'scene white rolls off smoothly below clip', string.format('%.3f', white))
+end
+check(luma(tonemap(v, {200, 200, 200})) > M * 0.99, 'very bright light reaches display peak')
 
 local x = v.gtLinear * v.gtPeak
 local below = v.gtKA + v.gtKB * math.exp((x - 1e-6) * v.gtKC)
@@ -91,9 +101,9 @@ check(math.abs(below - x) < 1e-4, 'shoulder joins the linear section without a s
 local inRange = true
 for _, c in ipairs({ {4, 0.2, 0.1}, {0.05, 3, 0.2}, {0.1, 0.3, 6}, {0.8, 0.6, 0.02}, {12, 12, 0}, {0.02, 0.01, 0.4} }) do
     local o = tonemap(v, c)
-    for i = 1, 3 do if o[i] ~= o[i] or o[i] < 0 or o[i] > 1.0001 then inRange = false end end
+    for i = 1, 3 do if o[i] ~= o[i] or o[i] < 0 or o[i] > v.gtOutMax + 1e-4 then inRange = false end end
 end
-check(inRange, 'saturated colours stay finite and inside 0..1')
+check(inRange, 'saturated colours stay finite and inside the display range')
 local hot = {4, 0.2, 0.1}
 local hotOut = tonemap(v, hot)
 check(hotOut[1] > hotOut[2] and hotOut[2] > hotOut[3], 'out-of-gamut highlights keep their hue order when fitted',
@@ -105,7 +115,7 @@ check(sat(hotRed) < sat(midRed), 'bright saturated lights desaturate toward whit
 
 local soft = H.run(script, { ['Tone Curve'] = 4, ['Scene Aware Tone Mapping'] = false, ['GT7 Chroma Blend'] = 0 }, function() end, 5, 0.1)
 local vSkew = soft.tonemapTable.values
-local amber = {1.6, 0.9, 0.1}
+local amber = {1.6 * v.gtOutMax, 0.9 * v.gtOutMax, 0.1 * v.gtOutMax}
 local function hueRatio(c) return (c[2] - c[3]) / math.max(c[1] - c[3], 1e-6) end
 local skewHue, blendHue, inHue = hueRatio(tonemap(vSkew, amber)), hueRatio(tonemap(v, amber)), hueRatio(amber)
 check(math.abs(blendHue - inHue) < math.abs(skewHue - inHue), 'Chroma Blend keeps bright colours closer to their true hue',
