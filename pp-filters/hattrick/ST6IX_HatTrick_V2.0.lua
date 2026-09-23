@@ -27,7 +27,7 @@ local FIXED_VALUES = {}
 -- combined, at the end of the frame.
 local OUT12, OUT15 = {}, {}
 -- Scene signals one engine computes and the other or the final pass reuses.
-local SIGNALS = { highlight = 0, darkness = 0, fog = 0, recovery = 0 }
+local SIGNALS = { highlight = 0, darkness = 0, fog = 0, recovery = 0, daySky = 1, v15SkyLevel = 1 }
 
 local TONE_CURVES = 'AgX,Uchimura,Lottes,Neon Noir,ST6IX Dusk,Hyperchrome,Retrograde,BABAYAGA,ST6IX Lottes'
 local DEFAULT_TONE = 6
@@ -62,7 +62,8 @@ local CONFIG_AREA_PREFIX = {
 local SUNBLIND_SHARED = { ['shaders.sunblinding.blinding'] = true, ['shaders.sunblinding.iris'] = true,
     ['shaders.sunblinding.star_opacity'] = true, ['shaders.sunblinding.cover'] = true }
 -- Captured instead of written: both engines contribute to these.
-local COMPOSED_CONFIG = { ['pp.saturation'] = true, ['pp.contrast'] = true, ['light.sun.saturation'] = true }
+local COMPOSED_CONFIG = { ['pp.saturation'] = true, ['pp.contrast'] = true, ['light.sun.saturation'] = true,
+    ['light.sky.level'] = true }
 local COMPOSED_YEBIS = { vignetteStrength = true, lensDistortionEnabled = true,
     lensDistortionRoundness = true, lensDistortionSmoothness = true }
 
@@ -735,6 +736,7 @@ V12.update = function(dt)
         + number('Night Sky Saturation',1,0.4,1.4) * nightWeight
     local baseDaySky = math.lerp(1, number('Day Sky Level',1.02,0.6,1.5)
         * math.lerp(1, morningPreset.sky, morningMix), day)
+    SIGNALS.daySky = baseDaySky
     local weatherSky = 1 - skyWeatherResponse
         * clamp(weatherSeverity * 0.10 + worldFog * 0.08 + rainIntensity * 0.05, 0, 0.18)
     local skyLevelTarget = baseDaySky * timeSkyBrightness
@@ -1930,6 +1932,7 @@ V15.update = function(dt)
         csp_bounce = pure.script.ui.getValue("csp_lights_bounce")
         csp_emissive = pure.script.ui.getValue("csp_lights_emissive")
     end
+    SIGNALS.v15SkyLevel = sky_level
     
     -- Small trims complement Pure's own weather lighting; no exposure changes.
     if realism > 0 and LIGHTING_PRESETS[lighting_preset] then
@@ -2226,6 +2229,7 @@ V15.update = function(dt)
         night_clouds_bright = pure.script.ui.getValue("Nighttime Clouds Brightness")
         night_clouds_contrast = pure.script.ui.getValue("Nighttime Clouds Contrast")
         day_sky_level = pure.script.ui.getValue("Daytime Sky Level")
+            * pure.script.ui.getValue("sky_light_level") / 1.125
         dusk_sky_level = pure.script.ui.getValue("Duskdawn Sky Level")
         day_sky_sat = pure.script.ui.getValue("Daytime Sky Saturation")
     end
@@ -3387,6 +3391,19 @@ local function compose()
     local sunSaturation = (E.lighting == 1 and numberOr(OUT12['config:light.sun.saturation'], 1) or 1)
         * (E.sky == 2 and numberOr(OUT15['config:light.sun.saturation'], 1) or 1)
     pure.config.set('light.sun.saturation', sunSaturation, true)
+    -- Sky level: the sky engine sets the base and the lighting engine trims it
+    -- with its own sky level (V1.2 Day Sky Level or V1.5 Sky Level).
+    local skyLevel
+    if E.sky == 1 then
+        skyLevel = numberOr(OUT12['config:light.sky.level'], 1)
+        -- V1.2's sky already includes the V1.2 lighting's Day Sky Level.
+        if E.lighting == 2 then skyLevel = skyLevel / math.max(0.05, numberOr(SIGNALS.daySky, 1)) end
+    else
+        skyLevel = numberOr(OUT15['config:light.sky.level'], 1)
+        if E.lighting == 1 then skyLevel = skyLevel * numberOr(SIGNALS.daySky, 1) end
+    end
+    if E.lighting == 2 then skyLevel = skyLevel * numberOr(SIGNALS.v15SkyLevel, 1) end
+    pure.config.set('light.sky.level', skyLevel, true)
     -- Vignette: the finishing-profile base scaled by the V1.2 strength, lens
     -- profile and field-of-view response (V1.2 strength 0.01 is neutral).
     pure.yebis.set('vignetteStrength', numberOr(OUT15['yebis:vignetteStrength'], 0.025)

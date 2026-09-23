@@ -199,8 +199,9 @@ function H.new(scriptPath)
     }
     pure.system = { isHDR = false }
     pure.mod.day = function() return W.sun end
-    pure.mod.dayCurve = function(d, n) return n + (d - n) * W.sun end
-    pure.mod.nightCurve = function(n, d) return d + (n - d) * (1 - W.sun) end
+    -- Day and night weights leave room for twilight, as Pure's curves do.
+    pure.mod.dayCurve = function(d, n) return n + (d - n) * W.sun * (1 - (W.twilight or 0)) end
+    pure.mod.nightCurve = function(n, d) return d + (n - d) * (1 - W.sun) * (1 - (W.twilight or 0)) end
     pure.script.resetSettingsWithNewVersion = function() end
     pure.pp.UseSpice = function() end
 
@@ -211,8 +212,12 @@ function H.new(scriptPath)
         getPatchVersionCode = function() return 3000 end,
         getSim = function() return { rainWetness = W.wetness, rainIntensity = W.rain } end,
         SkyCloudsCover = function()
-            local cover = { texture = nil }
-            function cover:setTexture(t) self.texture = t; record('cover.setTexture', pack(t or '')) end
+            local fields = {}
+            local cover = setmetatable({}, {
+                __index = fields,
+                __newindex = function(_, k, v) fields[k] = v; record('cover.' .. k, pack(v)) end,
+            })
+            fields.setTexture = function(_, t) record('cover.setTexture', pack(t or '')) end
             return cover
         end,
         isInteriorView = function() return W.interior end,

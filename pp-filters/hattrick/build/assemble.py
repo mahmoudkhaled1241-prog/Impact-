@@ -66,6 +66,10 @@ v12_update = replace_once(v12_update,
     "    SIGNALS.darkness = darknessSignal\n"
     "    SIGNALS.fog = math.max(worldFog, mist)\n")
 v12_update = replace_once(v12_update,
+    "        * math.lerp(1, morningPreset.sky, morningMix), day)\n",
+    "        * math.lerp(1, morningPreset.sky, morningMix), day)\n"
+    "    SIGNALS.daySky = baseDaySky\n")
+v12_update = replace_once(v12_update,
     "        + tunnelEVBoost\n",
     "        + tunnelEVBoost\n        + sceneEV()\n")
 if HDR:
@@ -191,6 +195,18 @@ end
 
 v15_update = '\n'.join(span(v15, 1107, 2130, '-- ====', 'end'))
 v15_update = replace_once(v15_update, 'function update_pure_script(dt)', 'V15.update = function(dt)')
+# V1.5 read its lighting "sky_level" but never applied it; it now trims the
+# sky level (see compose), as V1.2's Day Sky Level does.
+v15_update = replace_once(v15_update,
+    '        csp_emissive = pure.script.ui.getValue("csp_lights_emissive")\n    end\n',
+    '        csp_emissive = pure.script.ui.getValue("csp_lights_emissive")\n    end\n'
+    '    SIGNALS.v15SkyLevel = sky_level\n')
+# Manual sky: Sky Light Level (never applied in V1.5) scales Daytime Sky Level;
+# 1.125 is its default, so the default look is unchanged.
+v15_update = replace_once(v15_update,
+    '        day_sky_level = pure.script.ui.getValue("Daytime Sky Level")\n',
+    '        day_sky_level = pure.script.ui.getValue("Daytime Sky Level")\n'
+    '            * pure.script.ui.getValue("sky_light_level") / 1.125\n')
 v15_update = replace_once(v15_update,
     '        hdr_highlight_recovery = pure.script.ui.getValue("hdr_highlight_recovery")\n    end\n',
     '        hdr_highlight_recovery = pure.script.ui.getValue("hdr_highlight_recovery")\n    end\n'

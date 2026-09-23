@@ -86,6 +86,8 @@ local COMPOSED = {
     ['yebis:vignetteFovDependency'] = true, -- invalid YEBIS name, dropped on purpose
     ['ui.state:Status: Tonemap'] = true,     -- now shows the Tone Curve index
 }
+-- V1.5 never applied its lighting Sky Level; the merge does (see below).
+local SKY15 = { ['config:light.sky.level'] = true }
 local function parity(label, merged, mv, ref, rv, skip, frames)
     local M = H.run(merged, mv, scene, frames or 240, 1 / 60)
     local R = H.run(ref, rv, scene, frames or 240, 1 / 60)
@@ -147,8 +149,26 @@ local PRESET_SETS = { {},
     { night_preset = 3, ini_eye_preset_v2 = 6, hdr_clarity_preset = 4, st6ix_profile = 3, ['Skydome Preset'] = 2 },
     { ['FOG Type'] = 1, ['Tunnel Blinding Presets'] = 1, lighting_preset = 1, sky_preset = 1 } }
 for i, p in ipairs(PRESET_SETS) do
-    parity('V1.5 engines, preset set ' .. i, SDR, with(ALL15, p), REF15, with(REF15_DEFAULTS, p), toneKey)
+    parity('V1.5 engines, preset set ' .. i, SDR, with(ALL15, p), REF15, with(REF15_DEFAULTS, p),
+        function(k) return toneKey(k) or SKY15[k] end)
 end
+-- With the lighting Sky Level and Sky Light Level at their defaults the V1.5
+-- sky level is unchanged; each of them now moves it.
+do
+    local base = with(ALL15, { lighting_preset = 7, sky_preset = 10 })
+    local ref = with(REF15_DEFAULTS, { lighting_preset = 7, sky_preset = 10 })
+    parity('V1.5 manual sky and lighting, sky level at defaults', SDR, base, REF15, ref, toneKey)
+    local function sky(v) return H.run(SDR, with(base, v), scene, 60, 1 / 60).last['config:light.sky.level'][1] end
+    local s0 = sky({})
+    if not (sky({ sky_level = 1.5 }) > s0 * 1.4) then fail('V1.5 Sky Level does not trim the sky level') end
+    if not (sky({ sky_light_level = 1.8 }) > s0 * 1.4) then fail('Sky Light Level does not scale the sky level') end
+    local withV15Sky = function(v) return H.run(SDR, with(ALL12, with({ ['Sky Engine'] = 2 }, v)), scene, 60, 1 / 60).last['config:light.sky.level'][1] end
+    if not (withV15Sky({ ['Day Sky Level'] = 1.4 }) > withV15Sky({ ['Day Sky Level'] = 0.8 }) * 1.2) then
+        fail('V1.2 Day Sky Level does not reach the V1.5 sky')
+    end
+    print('sky level trims checked')
+end
+
 -- V1.5 curves: each Tone Curve id runs the V1.5 branch its name describes.
 for merged, original in pairs({ [4] = 0, [5] = 2, [7] = 3, [8] = 4, [9] = 5 }) do
     parity(string.format('Tone Curve %d = V1.5 tonemapper branch %d', merged, original), SDR,

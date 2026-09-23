@@ -25,7 +25,7 @@ local FIXED_VALUES = {}
 -- combined, at the end of the frame.
 local OUT12, OUT15 = {}, {}
 -- Scene signals one engine computes and the other or the final pass reuses.
-local SIGNALS = { highlight = 0, darkness = 0, fog = 0, recovery = 0 }
+local SIGNALS = { highlight = 0, darkness = 0, fog = 0, recovery = 0, daySky = 1, v15SkyLevel = 1 }
 
 local TONE_CURVES = 'AgX,Uchimura,Lottes,Neon Noir,ST6IX Dusk,Hyperchrome,Retrograde,BABAYAGA,ST6IX Lottes'
 local DEFAULT_TONE = 6
@@ -60,7 +60,8 @@ local CONFIG_AREA_PREFIX = {
 local SUNBLIND_SHARED = { ['shaders.sunblinding.blinding'] = true, ['shaders.sunblinding.iris'] = true,
     ['shaders.sunblinding.star_opacity'] = true, ['shaders.sunblinding.cover'] = true }
 -- Captured instead of written: both engines contribute to these.
-local COMPOSED_CONFIG = { ['pp.saturation'] = true, ['pp.contrast'] = true, ['light.sun.saturation'] = true }
+local COMPOSED_CONFIG = { ['pp.saturation'] = true, ['pp.contrast'] = true, ['light.sun.saturation'] = true,
+    ['light.sky.level'] = true }
 local COMPOSED_YEBIS = { vignetteStrength = true, lensDistortionEnabled = true,
     lensDistortionRoundness = true, lensDistortionSmoothness = true }
 

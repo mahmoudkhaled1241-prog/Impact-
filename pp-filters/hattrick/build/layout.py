@@ -528,6 +528,19 @@ local function compose()
     local sunSaturation = (E.lighting == 1 and numberOr(OUT12['config:light.sun.saturation'], 1) or 1)
         * (E.sky == 2 and numberOr(OUT15['config:light.sun.saturation'], 1) or 1)
     pure.config.set('light.sun.saturation', sunSaturation, true)
+    -- Sky level: the sky engine sets the base and the lighting engine trims it
+    -- with its own sky level (V1.2 Day Sky Level or V1.5 Sky Level).
+    local skyLevel
+    if E.sky == 1 then
+        skyLevel = numberOr(OUT12['config:light.sky.level'], 1)
+        -- V1.2's sky already includes the V1.2 lighting's Day Sky Level.
+        if E.lighting == 2 then skyLevel = skyLevel / math.max(0.05, numberOr(SIGNALS.daySky, 1)) end
+    else
+        skyLevel = numberOr(OUT15['config:light.sky.level'], 1)
+        if E.lighting == 1 then skyLevel = skyLevel * numberOr(SIGNALS.daySky, 1) end
+    end
+    if E.lighting == 2 then skyLevel = skyLevel * numberOr(SIGNALS.v15SkyLevel, 1) end
+    pure.config.set('light.sky.level', skyLevel, true)
     -- Vignette: the finishing-profile base scaled by the V1.2 strength, lens
     -- profile and field-of-view response (V1.2 strength 0.01 is neutral).
     pure.yebis.set('vignetteStrength', numberOr(OUT15['yebis:vignetteStrength'], 0.025)
