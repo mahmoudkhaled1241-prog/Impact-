@@ -23,8 +23,10 @@ do
     local missing = {}
     for _, name in ipairs(a.order) do
         local x, y = a.controls[name], b.controls[name]
-        if not y or x.kind ~= y.kind or x.default ~= y.default or x.min ~= y.min
-            or x.max ~= y.max or x.count ~= y.count then
+        -- Radios may gain options at the end; existing indexes keep their meaning.
+        local radioOk = x.kind ~= 'radio' or (y and y.count >= x.count)
+        local rangeOk = x.kind == 'radio' or (y and x.min == y.min and x.max == y.max)
+        if not y or x.kind ~= y.kind or x.default ~= y.default or not rangeOk or not radioOk then
             missing[#missing + 1] = name
         end
     end
@@ -146,6 +148,62 @@ do
     T.env.pure.world.getMist = nil
     local okOld = pcall(T.env.init_pure_script) and pcall(T.env.update_pure_script, DT)
     print('INFO V1.1 on the same build ' .. (okOld and 'runs' or 'crashes'))
+end
+
+-- 11. Colour grading: neutral is invisible, profiles follow day/night, sliders always live.
+do
+    local neutral = H.run(candidate, {}, day, 40, DT)
+    local extras = 0
+    for k in pairs(neutral.accum) do
+        if k == 'pp:pp.luma_saturation' or k == 'pp:pp.black_level' or k == 'yebis:sepia' then extras = extras + 1 end
+    end
+    check(extras == 0, 'Neutral grade writes no vibrance, fade or sepia')
+
+    local vivid = H.run(candidate, { ['Color Profile'] = 3 }, day, 40, DT)
+    check(last(vivid, 'config:pp.saturation') > last(neutral, 'config:pp.saturation'), 'Vivid profile raises saturation by day')
+    local dayOnlyAtNight = H.run(candidate, { ['Color Profile'] = 3 }, night, 40, DT)
+    local neutralNight = H.run(candidate, {}, night, 40, DT)
+    check(math.abs(last(dayOnlyAtNight, 'config:pp.saturation') - last(neutralNight, 'config:pp.saturation')) < 1e-9,
+        'day profile stays out of full night')
+    local moon = H.run(candidate, { ['Night Color Profile'] = 3 }, night, 40, DT)
+    check(last(moon, 'yebis:colorTemperature') > last(neutralNight, 'yebis:colorTemperature'),
+        'Moonlight Blue cools the night image')
+
+    local manual = H.run(candidate, { ['Grade Saturation'] = 1.2, ['Grade Temperature'] = -400 }, day, 40, DT)
+    check(last(manual, 'config:pp.saturation') > last(neutral, 'config:pp.saturation')
+        and last(manual, 'yebis:colorTemperature') < last(neutral, 'yebis:colorTemperature'),
+        'manual grade sliders are live on the Neutral profile')
+
+    local halfFilm = H.run(candidate, { ['Color Profile'] = 7, ['Grade Strength'] = 0.5 }, day, 40, DT)
+    local fullFilm = H.run(candidate, { ['Color Profile'] = 7 }, day, 40, DT)
+    check(last(halfFilm, 'yebis:sepia') < last(fullFilm, 'yebis:sepia'), 'Grade Strength scales the profile')
+
+    local S = H.new(candidate)
+    for k, v in pairs(H.defaultWorld()) do S.world[k] = v end
+    S.env.init_pure_script()
+    S.values['Color Profile'] = 7
+    for _ = 1, 5 do S.env.update_pure_script(DT) end
+    S.values['Color Profile'] = 1
+    S.accum, S.last = {}, {}
+    S.env.update_pure_script(DT)
+    local released = last(S, 'yebis:sepia') == 0 and last(S, 'pp:pp.black_level') == 0
+        and last(S, 'pp:pp.luma_saturation') == 1
+    S.accum, S.last = {}, {}
+    S.env.update_pure_script(DT)
+    check(released and S.last['yebis:sepia'] == nil, 'switching back to Neutral releases the grade once, then stops writing')
+end
+
+-- 12. GT7 is a real, separate tone curve.
+do
+    local gt7 = H.run(candidate, { ['Tone Curve'] = 4 }, day, 5, DT)
+    local agx = H.run(candidate, { ['Tone Curve'] = 1 }, day, 5, DT)
+    check(gt7.tonemapTable and gt7.tonemapTable.shader:find('st6ixGtCurve') ~= nil, 'GT7 option installs the GT7 shader')
+    check(agx.tonemapTable and agx.tonemapTable.shader:find('st6ixAgx') ~= nil, 'AgX option still installs AgX')
+    local wide = H.run(candidate, { ['Tone Curve'] = 4, ['GT7 Highlight Range'] = 5 }, day, 5, DT)
+    check(wide.tonemapTable.values.gtPeak > gt7.tonemapTable.values.gtPeak
+        and math.abs(wide.tonemapTable.values.gtInputScale / wide.tonemapTable.values.gtPeak
+            - gt7.tonemapTable.values.gtInputScale / gt7.tonemapTable.values.gtPeak) < 1e-9,
+        'GT7 Highlight Range adds headroom without shifting mid-tones')
 end
 
 print(failures == 0 and '\nALL SEMANTIC CHECKS PASSED' or ('\n' .. failures .. ' SEMANTIC CHECKS FAILED'))

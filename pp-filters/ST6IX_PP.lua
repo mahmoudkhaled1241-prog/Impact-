@@ -1,8 +1,8 @@
--- ST6IX Gamma V1.8 unified photographic rendering system
+-- ST6IX Gamma V1.9 unified photographic rendering system
 -- Pure Gamma 3.50 / CSP dynamic tonemapping
--- Eleven control pages. Every slider is live in every overall mode.
+-- Twelve control pages. Every slider is live in every overall mode.
 
-local VERSION = 1.80
+local VERSION = 1.90
 -- Neutral YEBIS white point. The scene temperature is expressed against it,
 -- so the Kelvin sliders shift the image instead of cancelling themselves out.
 local NEUTRAL_WHITE_POINT = 6500
@@ -73,6 +73,116 @@ local agxTonemap = {
     }
 ]]
 }
+
+-- GT7-style tone mapping after Polyphony Digital's published method: a
+-- toe/linear/shoulder curve per channel, blended with a hue-preserving version
+-- rebuilt in ICtCp, with chroma faded out as highlights approach peak white.
+-- Framebuffer units follow GT7: 1.0 = 100 nits, SDR paper white = 2.5.
+local GT7_PQ = { m1 = 0.1593017578125, m2 = 78.84375,
+    c1 = 0.8359375, c2 = 18.8515625, c3 = 18.6875 }
+
+local gt7Tonemap = {
+    cacheKey = 7,
+    values = { gtInputScale=2.5, gtPeak=2.5, gtMid=0.538, gtLinear=0.444, gtToe=1.28,
+        gtKA=0, gtKB=0, gtKC=0, gtBlend=0.6, gtFadeStart=0.98, gtFadeEnd=1.16, gtTargetI=1 },
+    shader = [[
+    #define ST6IX_GT_M1 0.1593017578125
+    #define ST6IX_GT_M2 78.84375
+    #define ST6IX_GT_C1 0.8359375
+    #define ST6IX_GT_C2 18.8515625
+    #define ST6IX_GT_C3 18.6875
+
+    static const float3x3 st6ixGt709To2020 = float3x3(
+        0.6274040000, 0.3292820000, 0.0433136000,
+        0.0690970000, 0.9195400000, 0.0113612000,
+        0.0163916000, 0.0880132000, 0.8955950000);
+    static const float3x3 st6ixGt2020To709 = float3x3(
+        1.6604902958, -0.5876391058, -0.0728515982,
+       -0.1245499701,  1.1328999220, -0.0083479642,
+       -0.0181511189, -0.1005787239,  1.1187298782);
+    static const float3x3 st6ixGt2020ToLms = float3x3(
+        0.4121093750, 0.5239257812, 0.0639648438,
+        0.1667480469, 0.7204589844, 0.1127929688,
+        0.0241699219, 0.0754394531, 0.9003906250);
+    static const float3x3 st6ixGtLmsTo2020 = float3x3(
+        3.4366066943, -2.5064521187,  0.0698454243,
+       -0.7913295556,  1.9836004518, -0.1922708962,
+       -0.0259498997, -0.0989137147,  1.1248636144);
+    static const float3x3 st6ixGtLmsToIctcp = float3x3(
+        0.5000000000,  0.5000000000,  0.0000000000,
+        1.6137695312, -3.3234863281,  1.7097167969,
+        4.3781738281, -4.2456054688, -0.1325683594);
+    static const float3x3 st6ixGtIctcpToLms = float3x3(
+        1.0000000000,  0.0086090370,  0.1110296250,
+        1.0000000000, -0.0086090370, -0.1110296250,
+        1.0000000000,  0.5600313357, -0.3206271750);
+
+    float3 st6ixGtPq(float3 n) {
+        n = pow(max(n, 0.0), ST6IX_GT_M1);
+        return pow((ST6IX_GT_C1 + ST6IX_GT_C2 * n) / (1.0 + ST6IX_GT_C3 * n), ST6IX_GT_M2);
+    }
+
+    float3 st6ixGtPqInverse(float3 p) {
+        p = pow(max(p, 0.0), 1.0 / ST6IX_GT_M2);
+        return pow(max(p - ST6IX_GT_C1, 0.0) / (ST6IX_GT_C2 - ST6IX_GT_C3 * p), 1.0 / ST6IX_GT_M1);
+    }
+
+    float3 st6ixGtToUcs(float3 rgb) {
+        return mul(st6ixGtLmsToIctcp, st6ixGtPq(mul(st6ixGt2020ToLms, rgb) * 0.01));
+    }
+
+    float3 st6ixGtFromUcs(float3 ucs) {
+        return mul(st6ixGtLmsTo2020, st6ixGtPqInverse(mul(st6ixGtIctcpToLms, ucs)) * 100.0);
+    }
+
+    float st6ixGtCurve(float x) {
+        if (x < 0.0) return 0.0;
+        if (x < gtLinear * gtPeak) {
+            float toe = gtMid * pow(x / gtMid, gtToe);
+            return lerp(toe, x, smoothstep(0.0, gtMid, x));
+        }
+        return gtKA + gtKB * exp(x * gtKC);
+    }
+
+    // Wide-gamut highlights can leave the Rec.709 range after conversion; they
+    // are pulled toward their own luminance, keeping hue instead of clipping it.
+    float3 st6ixGtFitDisplay(float3 c) {
+        float peak = max(c.r, max(c.g, c.b));
+        float luma = dot(c, float3(0.2126, 0.7152, 0.0722));
+        if (peak > 1.0) {
+            c = luma >= 1.0 ? float3(1.0, 1.0, 1.0) : luma + (c - luma) * ((1.0 - luma) / (peak - luma));
+        }
+        return saturate(c);
+    }
+
+    float3 tonemapping(float3 color) {
+        float3 rgb = mul(st6ixGt709To2020, max(color, 0.0)) * gtInputScale;
+        float3 ucs = st6ixGtToUcs(rgb);
+        float3 skewed = float3(st6ixGtCurve(rgb.r), st6ixGtCurve(rgb.g), st6ixGtCurve(rgb.b));
+        float3 skewedUcs = st6ixGtToUcs(skewed);
+        float chroma = 1.0 - smoothstep(gtFadeStart, gtFadeEnd, ucs.x / gtTargetI);
+        float3 scaled = st6ixGtFromUcs(float3(skewedUcs.x, ucs.y * chroma, ucs.z * chroma));
+        float3 blended = lerp(skewed, scaled, gtBlend);
+        return st6ixGtFitDisplay(max(mul(st6ixGt2020To709, min(blended, gtPeak) / gtPeak), 0.0));
+    }
+]]
+}
+
+-- Shoulder constants and the peak's ICtCp intensity are solved on the CPU once
+-- per frame so the shader only evaluates the curve.
+local function updateGt7Curve(v, exposure, peak, alpha, linear, toe, blend)
+    local k = (linear - 1) / (alpha - 1)
+    v.gtPeak = peak
+    v.gtInputScale = exposure * peak
+    v.gtLinear = linear
+    v.gtToe = toe
+    v.gtBlend = blend
+    v.gtKA = peak * linear + peak * k
+    v.gtKB = -peak * k * math.exp(linear / k)
+    v.gtKC = -1 / (k * peak)
+    local n = (peak * 0.01) ^ GT7_PQ.m1
+    v.gtTargetI = ((GT7_PQ.c1 + GT7_PQ.c2 * n) / (1 + GT7_PQ.c3 * n)) ^ GT7_PQ.m2
+end
 
 local profiles = {
     [1] = { light=1.00, contrast=0.99, bloom=0.86, glare=0.82,
@@ -157,6 +267,36 @@ local SKY_PRESETS = {
 -- sampling; the look itself stays with the Bloom and Glare pages.
 local RENDER_QUALITY = { [1] = 2, [2] = 3, [3] = 4, [4] = 5 }
 
+-- Colour profiles are a grade layered after the look: saturation and contrast
+-- multipliers, a Kelvin shift (+ is cooler), a hue tint, vibrance, a black
+-- fade and sepia. The first entry of each list is the neutral manual base.
+local DAY_COLOR_PROFILES = {
+    [1] = {sat=1.00, contrast=1.00, temp=0,    tint=0,      vibrance=0,     fade=0,     sepia=0},
+    [2] = {sat=1.02, contrast=1.02, temp=-80,  tint=0,      vibrance=0.04,  fade=0,     sepia=0},
+    [3] = {sat=1.12, contrast=1.05, temp=-120, tint=0,      vibrance=0.12,  fade=0,     sepia=0},
+    [4] = {sat=0.92, contrast=1.08, temp=150,  tint=0.004,  vibrance=-0.05, fade=0.012, sepia=0.03},
+    [5] = {sat=1.06, contrast=1.03, temp=-400, tint=-0.002, vibrance=0.06,  fade=0,     sepia=0.02},
+    [6] = {sat=0.94, contrast=1.02, temp=450,  tint=0.003,  vibrance=-0.02, fade=0.005, sepia=0},
+    [7] = {sat=0.95, contrast=0.97, temp=-150, tint=0,      vibrance=0,     fade=0.025, sepia=0.06},
+    [8] = {sat=1.05, contrast=1.04, temp=80,   tint=0,      vibrance=0.08,  fade=0,     sepia=0},
+    [9] = {sat=0.85, contrast=0.95, temp=0,    tint=0,      vibrance=-0.10, fade=0.010, sepia=0},
+}
+
+local NIGHT_COLOR_PROFILES = {
+    [1] = {sat=1.00, contrast=1.00, temp=0,    tint=0,      vibrance=0,     fade=0,     sepia=0},
+    [2] = {sat=0.97, contrast=1.02, temp=150,  tint=0,      vibrance=0,     fade=0,     sepia=0},
+    [3] = {sat=0.90, contrast=1.03, temp=700,  tint=0.004,  vibrance=-0.05, fade=0.005, sepia=0},
+    [4] = {sat=1.04, contrast=1.04, temp=-500, tint=-0.003, vibrance=0.05,  fade=0,     sepia=0.03},
+    [5] = {sat=1.14, contrast=1.06, temp=250,  tint=0.006,  vibrance=0.15,  fade=0,     sepia=0},
+    [6] = {sat=0.90, contrast=1.08, temp=350,  tint=0.004,  vibrance=-0.04, fade=0.015, sepia=0},
+    [7] = {sat=0.55, contrast=1.12, temp=200,  tint=0,      vibrance=-0.20, fade=0.020, sepia=0},
+}
+
+local GRADE_KEYS = { 'sat', 'contrast', 'temp', 'tint', 'vibrance', 'fade', 'sepia' }
+local GRADE_NEUTRAL = {sat=1, contrast=1, temp=0, tint=0, vibrance=0, fade=0, sepia=0}
+local grade = {sat=1, contrast=1, temp=0, tint=0, vibrance=0, fade=0, sepia=0}
+local gradeExtrasWritten = false
+
 local function clamp(x, lo, hi)
     return math.max(lo, math.min(hi, x))
 end
@@ -210,6 +350,44 @@ end
 
 local function configTry(key, value)
     pcall(pure.config.set, key, value, true)
+end
+
+local function ppTry(key, value)
+    pcall(pure.pp.set, key, value, true)
+end
+
+-- Blends the night and day profiles by daylight, fades them toward neutral with
+-- Grade Strength, then adds the manual Grade sliders, which are always live.
+local function updateGrade(day)
+    local dayProfile = DAY_COLOR_PROFILES[math.floor(number('Color Profile',1,1,9))]
+        or DAY_COLOR_PROFILES[1]
+    local nightProfile = NIGHT_COLOR_PROFILES[math.floor(number('Night Color Profile',1,1,7))]
+        or NIGHT_COLOR_PROFILES[1]
+    local strength = number('Grade Strength',1,0,1)
+    for _, key in ipairs(GRADE_KEYS) do
+        grade[key] = math.lerp(GRADE_NEUTRAL[key],
+            math.lerp(nightProfile[key], dayProfile[key], day), strength)
+    end
+    grade.sat = grade.sat * number('Grade Saturation',1,0.7,1.3)
+    grade.contrast = grade.contrast * number('Grade Contrast',1,0.85,1.15)
+    grade.temp = grade.temp + number('Grade Temperature',0,-800,800)
+    grade.tint = grade.tint + number('Grade Tint',0,-0.02,0.02)
+    grade.vibrance = grade.vibrance + number('Grade Vibrance',0,-0.3,0.3)
+    grade.fade = grade.fade + number('Grade Fade',0,0,0.05)
+    grade.sepia = grade.sepia + number('Grade Sepia',0,0,0.3)
+    return grade
+end
+
+-- Vibrance, fade and sepia have no ST6IX owner, so they are only written while
+-- a grade uses them, and released to neutral once when it stops.
+local function applyGradeExtras(g)
+    local active = g.vibrance ~= 0 or g.fade ~= 0 or g.sepia ~= 0
+    if active or gradeExtrasWritten then
+        ppTry('pp.luma_saturation', 1 + g.vibrance)
+        ppTry('pp.black_level', g.fade)
+        yebisTry('sepia', g.sepia)
+    end
+    gradeExtrasWritten = active
 end
 
 local function angleDelta(a, b)
@@ -268,11 +446,12 @@ function init_pure_script()
     lastStarOutput = nil
     lastStarBase = nil
     dofWasEnabled = nil
+    gradeExtrasWritten = false
 
     pure.script.setVersion(VERSION)
 
     pure.script.ui.addPage('Daytime Control')
-    pure.script.ui.addText('ST6IX Gamma V1.8 - unified photographic rendering controls.')
+    pure.script.ui.addText('ST6IX Gamma V1.9 - unified photographic rendering controls.')
     pure.script.ui.addRadioButtons('Overall Mode', 2, 'Natural,Photorealistic,Manual')
     pure.script.ui.addText('Modes add a subtle finish; the sliders below always remain active.')
     pure.script.ui.addRadioButtons('Morning Preset', 1, 'Natural Morning,Bright Morning,Dark Morning,Cinematic Morning,Custom')
@@ -431,7 +610,7 @@ function init_pure_script()
     -- Pure choices are 1-based. A zero default prevents this page from being
     -- built correctly in Pure PP, so AgX is selection 1.
     pure.script.ui.addPage('Tone Mapping')
-    pure.script.ui.addRadioButtons('Tone Curve', 1, 'AgX,Uchimura,Lottes')
+    pure.script.ui.addRadioButtons('Tone Curve', 1, 'AgX,Uchimura,Lottes,GT7')
     pure.script.ui.addCheckbox('Scene Aware Tone Mapping', true, 'Refine the selected curve using highlights, darkness and fog')
     slider('Tone Adaptation Strength', 0.45, 0.00, 1.00, 'Strength of scene-aware curve refinement')
     slider('Dynamic Highlight Rolloff', 0.55, 0.00, 1.00, 'Protect bright sky, sun and reflective highlights')
@@ -457,6 +636,29 @@ function init_pure_script()
     slider('Lottes Mid In', 0.25, 0.05, 0.80, 'Input middle gray')
     slider('Lottes Mid Out', 0.18, 0.05, 0.80, 'Output middle gray')
     slider('Lottes Gain', 0.95, 0.40, 1.50, 'Lottes output gain')
+    pure.script.ui.addText('GT7')
+    slider('GT7 Exposure', 1.00, 0.50, 2.00, 'Input exposure before the GT7 curve')
+    slider('GT7 Highlight Range', 2.50, 1.00, 6.00, 'Peak white in GT7 framebuffer units; 2.5 is SDR paper white')
+    slider('GT7 Shoulder', 0.25, 0.05, 0.60, 'Softness of the highlight shoulder')
+    slider('GT7 Linear Section', 0.444, 0.20, 0.80, 'Share of the range kept linear before the shoulder')
+    slider('GT7 Toe Strength', 1.28, 1.00, 1.80, 'Depth of the shadow toe')
+    slider('GT7 Chroma Blend', 0.60, 0.00, 1.00, 'Hue-preserving share; higher keeps bright colours truer')
+
+    pure.script.ui.addPage('Color Grading')
+    pure.script.ui.addText('Colour profiles grade the final image. Neutral keeps the ST6IX look untouched.')
+    pure.script.ui.addRadioButtons('Color Profile', 1,
+        'Neutral,Natural,Vivid,Cinematic,Warm Summer,Cool Winter,Film,GT Broadcast,Raw')
+    pure.script.ui.addRadioButtons('Night Color Profile', 1,
+        'Neutral,Natural Night,Moonlight Blue,Sodium City,Neon,Cinematic Night,Noir')
+    slider('Grade Strength', 1.00, 0.00, 1.00, 'Blend of the selected day and night profiles')
+    pure.script.ui.addText('Manual grade, always active on top of the profiles')
+    slider('Grade Saturation', 1.00, 0.70, 1.30, 'Final colour intensity')
+    slider('Grade Contrast', 1.00, 0.85, 1.15, 'Final contrast')
+    slider('Grade Temperature', 0, -800, 800, 'Kelvin shift; negative is warmer, positive is cooler')
+    slider('Grade Tint', 0.000, -0.020, 0.020, 'Subtle hue tint')
+    slider('Grade Vibrance', 0.00, -0.30, 0.30, 'Saturate muted colours more than strong ones')
+    slider('Grade Fade', 0.000, 0.000, 0.050, 'Lift the blacks for a softer film finish')
+    slider('Grade Sepia', 0.00, 0.00, 0.30, 'Warm monochrome toning')
 
     pure.script.ui.addPage('Lens Effects')
     pure.script.ui.addRadioButtons('Lens Profile', 1, 'Clean,Cinematic,Vintage,Telephoto,Custom')
@@ -834,8 +1036,12 @@ function update_pure_script(dt)
     colorSat = colorSat * math.lerp(1,
         number('Rain Saturation Retention',0.8,0.4,1), wetWeatherSignal)
     contrast = contrast * (1 + wetWeatherSignal * number('Wet Black Depth',0.25,0,1) * 0.08)
-    pure.config.set('pp.saturation', colorSat, true)
-    pure.config.set('pp.contrast', contrast, true)
+    -- The colour grade composes into the same single writes, so it can never
+    -- fight the ST6IX colour controls; a Neutral grade multiplies by exactly 1.
+    local colorGrade = updateGrade(day)
+    pure.config.set('pp.saturation', colorSat * colorGrade.sat, true)
+    pure.config.set('pp.contrast', contrast * colorGrade.contrast, true)
+    applyGradeExtras(colorGrade)
     local dayTemperature = number('Day Color Temperature',6400,4800,8000)
         + morningPreset.temperature * morningMix
     local nightTemperature = number('Night Color Temperature',6100,4000,8000)
@@ -855,9 +1061,9 @@ function update_pure_script(dt)
     lastWhiteBalanceLock = wbLock
     -- The scene temperature is measured against a fixed neutral white point.
     -- Writing the same value to both would cancel the shift in YEBIS.
-    pure.yebis.set('colorTemperature', whiteBalance)
+    pure.yebis.set('colorTemperature', clamp(whiteBalance + colorGrade.temp, 3500, 9500))
     pure.yebis.set('whiteBalance', NEUTRAL_WHITE_POINT)
-    pure.yebis.set('hue', number('White Balance Tint',0,-0.03,0.03))
+    pure.yebis.set('hue', number('White Balance Tint',0,-0.03,0.03) + colorGrade.tint)
 
     relative('fog.cubemaps', number('Fog Cubemap Visibility',1,0,1))
     do
@@ -1085,7 +1291,7 @@ function update_pure_script(dt)
     end
     lastLock = lock
 
-    local tonemapper = math.floor(number('Tone Curve',1,1,3))
+    local tonemapper = math.floor(number('Tone Curve',1,1,4))
     local toneStrength = check('Scene Aware Tone Mapping', true)
         and number('Tone Adaptation Strength',0.45,0,1) or 0
     local toneHighlight = highlightSignal * number('Dynamic Highlight Rolloff',0.55,0,1) * toneStrength
@@ -1114,6 +1320,19 @@ function update_pure_script(dt)
             * clamp(1 - toneShadow * 0.10, 0.88, 1))
         pure.config.set('ppTonemapUchimura.pedestal', 0)
         pure.config.set('ppTonemapUchimura.gain', number('Uchimura Gain',0.9,0.4,1.5))
+    elseif tonemapper == 4 then
+        -- GT7 takes the same scene-aware signals as the other curves: highlights
+        -- widen the headroom, dark scenes lift the toe and fog deepens it.
+        updateGt7Curve(gt7Tonemap.values,
+            number('GT7 Exposure',1,0.5,2)
+                * clamp(1 + toneShadow * 0.10 - toneHighlight * 0.08, 0.90, 1.10),
+            number('GT7 Highlight Range',2.5,1,6) * (1 + toneHighlight * 0.20),
+            number('GT7 Shoulder',0.25,0.05,0.6),
+            number('GT7 Linear Section',0.444,0.2,0.8),
+            number('GT7 Toe Strength',1.28,1,1.8)
+                * clamp(1 + toneFogContrast * 0.08 - toneShadow * 0.10, 0.90, 1.10),
+            number('GT7 Chroma Blend',0.6,0,1))
+        pure.pp.setCustomRGBTonemapping(gt7Tonemap)
     else
         pure.pp.setTonemapping(ac.TonemapFunction.Lottes)
         pure.config.set('ppTonemapLottes.contrast', number('Lottes Contrast',0.82,0.4,1.5)

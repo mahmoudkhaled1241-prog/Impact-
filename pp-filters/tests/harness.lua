@@ -167,9 +167,11 @@ function H.new(scriptPath)
         }, { __index = recorder('exposure.') }),
         light = recorder('light.'),
         pp = setmetatable({
+            set = function(k, v) record('pp:' .. k, pack(v)) end,
             getGammaModulator = function() return 1 end,
             getGodraysModulator = function() return W.godrayMod or 1 end,
             setCustomRGBTonemapping = function(t)
+                S.tonemapTable = t
                 local a = pack(t.shader and #t.shader or 0)
                 local keys = {}
                 for k in pairs(t.values) do keys[#keys + 1] = k end
