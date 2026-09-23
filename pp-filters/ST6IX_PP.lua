@@ -1,9 +1,15 @@
--- ST6IX Gamma V1.7 unified photographic rendering system
+-- ST6IX Gamma V1.8 unified photographic rendering system
 -- Pure Gamma 3.50 / CSP dynamic tonemapping
 -- Eleven control pages. Every slider is live in every overall mode.
 
-local VERSION = 1.70
+local VERSION = 1.80
+-- Neutral YEBIS white point. The scene temperature is expressed against it,
+-- so the Kelvin sliders shift the image instead of cancelling themselves out.
+local NEUTRAL_WHITE_POINT = 6500
 local smoothState = {}
+local lastStarOutput = nil
+local lastStarBase = nil
+local dofWasEnabled = nil
 local lockedExposure = nil
 local lastLock = false
 local lockedWhiteBalance = nil
@@ -78,10 +84,11 @@ local profiles = {
 }
 
 -- Presets are restrained multipliers layered over the user's page sliders.
--- The fifth morning/night entry and fourth reflection entry are neutral Custom modes.
+-- The fifth morning/night entry and fourth reflection entry are neutral Custom modes;
+-- the Natural/Normal entries carry a gentle character so they differ from Custom.
 local MORNING_PRESETS = {
-    [1] = {daylight=1.00, sun=1.00, ambient=1.00, sky=1.00, advanced=1.00,
-            saturation=1.00, contrast=1.00, temperature=0, bounce=1.00, emissive=1.00},
+    [1] = {daylight=1.00, sun=1.00, ambient=1.03, sky=1.02, advanced=1.02,
+            saturation=1.00, contrast=1.00, temperature=-60, bounce=1.01, emissive=1.00},
     [2] = {daylight=1.08, sun=1.02, ambient=1.05, sky=1.06, advanced=1.05,
             saturation=1.01, contrast=0.99, temperature=-150, bounce=1.02, emissive=1.02},
     [3] = {daylight=0.88, sun=0.90, ambient=0.90, sky=0.92, advanced=0.92,
@@ -93,9 +100,9 @@ local MORNING_PRESETS = {
 }
 
 local NIGHT_PRESETS = {
-    [1] = {nlp=1.00, density=1.00, ambient=1.00, moon=1.00, moonAppearance=1.00,
-            stars=1.00, starBrightness=1.00, starSaturation=1.00, starExponent=1.00,
-            saturation=1.00, contrast=1.00, temperature=0, bounce=1.00, emissive=1.00, exposure=0.00},
+    [1] = {nlp=1.00, density=1.00, ambient=1.04, moon=1.05, moonAppearance=1.02,
+            stars=1.00, starBrightness=1.02, starSaturation=1.00, starExponent=1.00,
+            saturation=1.00, contrast=1.00, temperature=80, bounce=1.02, emissive=1.00, exposure=0.00},
     [2] = {nlp=1.10, density=0.95, ambient=1.18, moon=1.12, moonAppearance=1.05,
             stars=0.92, starBrightness=0.92, starSaturation=0.95, starExponent=1.05,
             saturation=1.02, contrast=0.98, temperature=100, bounce=1.05, emissive=1.03, exposure=0.18},
@@ -111,8 +118,8 @@ local NIGHT_PRESETS = {
 }
 
 local REFLECTION_PRESETS = {
-    [1] = {level=1.00, saturation=1.00, emissive=1.00, vao=1.00,
-            trackExponent=1.00, dynamicExponent=1.00, weatherVAO=1.00},
+    [1] = {level=1.03, saturation=0.99, emissive=1.10, vao=1.02,
+            trackExponent=1.00, dynamicExponent=1.01, weatherVAO=1.05},
     [2] = {level=1.22, saturation=1.06, emissive=3.20, vao=1.08,
             trackExponent=1.03, dynamicExponent=1.02, weatherVAO=1.18},
     [3] = {level=1.35, saturation=1.10, emissive=5.00, vao=1.12,
@@ -137,7 +144,7 @@ local GLARE_STYLES = {
 -- Sky presets stay close to Pure's neutral result and are blended with the
 -- time-specific controls below. Custom is a neutral pass-through preset.
 local SKY_PRESETS = {
-    [1] = {sky=1.00, saturation=1.00, clouds=1.00, contrast=1.00, softness=1.00, celestial=1.00},
+    [1] = {sky=1.00, saturation=1.03, clouds=1.00, contrast=1.03, softness=1.00, celestial=1.00},
     [2] = {sky=1.08, saturation=1.10, clouds=0.96, contrast=1.06, softness=1.04, celestial=1.10},
     [3] = {sky=0.90, saturation=0.78, clouds=1.18, contrast=0.72, softness=1.22, celestial=0.96},
     [4] = {sky=1.02, saturation=1.06, clouds=0.91, contrast=0.84, softness=1.16, celestial=1.04},
@@ -145,6 +152,10 @@ local SKY_PRESETS = {
     [6] = {sky=0.72, saturation=0.68, clouds=0.62, contrast=1.28, softness=0.82, celestial=1.00},
     [7] = {sky=1.00, saturation=1.00, clouds=1.00, contrast=1.00, softness=1.00, celestial=1.00},
 }
+
+-- YEBIS glare sampling quality. Higher levels only refine bloom and star
+-- sampling; the look itself stays with the Bloom and Glare pages.
+local RENDER_QUALITY = { [1] = 2, [2] = 3, [3] = 4, [4] = 5 }
 
 local function clamp(x, lo, hi)
     return math.max(lo, math.min(hi, x))
@@ -178,6 +189,27 @@ local function finite(value, fallback)
         return fallback
     end
     return value
+end
+
+-- Sensor reads tolerate Pure/CSP builds that lack a getter, so one missing
+-- function cannot stop the whole filter.
+local function read(fn, fallback)
+    if type(fn) ~= 'function' then return fallback end
+    local ok, value = pcall(fn)
+    if not ok then return fallback end
+    return finite(value, fallback)
+end
+
+local function call(fn, ...)
+    if type(fn) == 'function' then pcall(fn, ...) end
+end
+
+local function yebisTry(key, value)
+    pcall(pure.yebis.set, key, value)
+end
+
+local function configTry(key, value)
+    pcall(pure.config.set, key, value, true)
 end
 
 local function angleDelta(a, b)
@@ -233,11 +265,14 @@ function init_pure_script()
     starOutput.brightness = 0
     starOutput.saturation = 0.9
     starOutput.exponent = 1.0
+    lastStarOutput = nil
+    lastStarBase = nil
+    dofWasEnabled = nil
 
     pure.script.setVersion(VERSION)
 
     pure.script.ui.addPage('Daytime Control')
-    pure.script.ui.addText('ST6IX Gamma V1.7 - unified photographic rendering controls.')
+    pure.script.ui.addText('ST6IX Gamma V1.8 - unified photographic rendering controls.')
     pure.script.ui.addRadioButtons('Overall Mode', 2, 'Natural,Photorealistic,Manual')
     pure.script.ui.addText('Modes add a subtle finish; the sliders below always remain active.')
     pure.script.ui.addRadioButtons('Morning Preset', 1, 'Natural Morning,Bright Morning,Dark Morning,Cinematic Morning,Custom')
@@ -261,6 +296,12 @@ function init_pure_script()
     slider('Lambert Gamma', 1.70, 1.00, 2.40, 'Low-angle material-lighting response')
     slider('Day CSP Light Bounce', 1.00, 0.50, 2.50, 'Dynamic-light bounce in daylight')
     slider('Day CSP Light Emissive', 1.35, 0.50, 3.00, 'Dynamic-light emissive visibility in daylight')
+    slider('Day Display Brightness', 1.00, 0.50, 2.50, 'Dashboard and in-car screen brightness in daylight')
+    pure.script.ui.addText('Ambient light model')
+    slider('Ambient V2 Sun', 1.00, 0.50, 1.60, 'Sunlight share of the V2 ambient model')
+    slider('Ambient V2 Sky', 1.00, 0.50, 1.60, 'Sky share of the V2 ambient model')
+    slider('Ambient V2 Clouds', 1.00, 0.50, 1.60, 'Cloud share of the V2 ambient model')
+    slider('Weather Ambient Balance', 0.50, 0.00, 1.00, 'Move ambient light from sun and sky toward clouds as cover grows')
 
     pure.script.ui.addPage('Nighttime Controls')
     pure.script.ui.addRadioButtons('Night Preset', 1, 'Natural Night,Bright Night,Dark Night,Cinematic Night,Custom')
@@ -278,6 +319,7 @@ function init_pure_script()
     slider('Night Color Temperature', 6100, 4000, 8000, 'YEBIS nighttime color temperature in kelvin')
     slider('Night CSP Light Bounce', 1.10, 0.50, 2.50, 'Dynamic-light bounce at night')
     slider('Night CSP Light Emissive', 1.05, 0.50, 3.00, 'Dynamic-light emissive intensity at night')
+    slider('Night Display Brightness', 1.00, 0.50, 2.50, 'Dashboard and in-car screen brightness at night')
     pure.script.ui.addCheckbox('Adaptive Celestial Rendering', true, 'Coordinate moon and stars with elevation, clouds, fog and city light')
     slider('Celestial Weather Extinction', 0.65, 0.00, 1.00, 'Cloud and fog reduction of moon and stars')
     slider('Moon Elevation Response', 0.35, 0.00, 1.00, 'Reduce moon response close to the horizon')
@@ -326,6 +368,8 @@ function init_pure_script()
     slider('Moon Apparent Size', 1.00, 0.50, 1.60, 'Apparent moon size at night')
 
     pure.script.ui.addPage('Bloom')
+    pure.script.ui.addRadioButtons('Render Quality', 3, 'Performance,Balanced,High,Ultra')
+    pure.script.ui.addText('Render Quality refines bloom and glare sampling without changing the look.')
     pure.script.ui.addCheckbox('Bloom Enabled', true, 'Enable YEBIS bloom')
     slider('Bloom Strength', 0.24, 0.00, 0.80, 'Bloom luminance; deliberately restrained')
     slider('Bloom Threshold', 0.52, 0.15, 1.20, 'Higher values restrict bloom to brighter sources')
@@ -345,6 +389,8 @@ function init_pure_script()
     slider('Sun Glare Response', 0.35, 0.00, 1.00, 'Broad soft glare while facing the sun')
     slider('Headlight Glare Response', 0.40, 0.00, 1.00, 'Tighter night-light glare response')
     slider('Emissive Color Protection', 0.45, 0.00, 1.00, 'Keep signs and colored lights from blooming to white')
+    slider('Sun Blinding', 0.35, 0.00, 1.00, 'Veiling glare when looking straight into the sun')
+    slider('Sun Blinding Iris', 0.15, 0.00, 1.00, 'Iris contraction around a bright sun disk')
     slider('Glare Master', 1.00, 0.00, 2.00, 'Overall glare luminance')
     slider('Star Strength', 0.11, 0.00, 0.50, 'Star glare luminance')
     slider('Star Length', 0.065, 0.00, 0.30, 'Star glare length')
@@ -420,16 +466,21 @@ function init_pure_script()
     slider('Godrays FOV Response', 0.50, 0.00, 1.00, 'Scale ray length with camera field of view')
     slider('Godrays Sun Facing Response', 0.60, 0.00, 1.00, 'Increase rays smoothly while looking toward the sun')
     slider('Godrays Glare Ratio', 0.12, 0.00, 1.00, 'Godray contribution to visible glare')
+    slider('Moon Godrays Strength', 0.00, 0.00, 1.00, 'Soft light shafts from a visible moon at night')
     slider('Vignette Strength', 0.010, 0.00, 0.20, 'Edge darkening')
     slider('Vignette FOV Dependence', 0.25, 0.00, 1.00, 'Vignette response to field of view')
-    pure.script.ui.addCheckbox('Chromatic Aberration', false, 'Enable restrained chromatic aberration')
+    pure.script.ui.addCheckbox('Chromatic Aberration', false, 'Enable chromatic aberration; lens profiles add their character when enabled')
     sliderInt('Chromatic Samples', 5, 2, 12, 'Chromatic aberration sample count')
     slider('Chromatic Lateral', 0.0010, 0.0000, 0.0100, 'Lateral color displacement')
     slider('Chromatic Uniform', 0.0003, 0.0000, 0.0050, 'Uniform color displacement')
-    pure.script.ui.addCheckbox('Lens Distortion', false, 'Enable geometric lens distortion')
+    pure.script.ui.addCheckbox('Lens Distortion', false, 'Enable geometric lens distortion; lens profiles add their character when enabled')
     slider('Lens Roundness', 0.05, 0.00, 1.00, 'Lens distortion roundness')
     slider('Lens Smoothness', 1.00, 0.10, 2.00, 'Lens distortion smoothness')
     slider('Filmic Contrast', 0.35, 0.00, 1.00, 'YEBIS filmic contrast')
+    pure.script.ui.addCheckbox('Depth of Field', false, 'Photographic depth of field for replays and screenshots')
+    slider('DOF Focus Distance', 8.0, 0.5, 100.0, 'Focus distance in metres')
+    slider('DOF Aperture', 2.8, 1.2, 22.0, 'Lens f-number; lower values give a shallower focus')
+    sliderInt('DOF Quality', 3, 1, 5, 'Depth of field sampling quality')
 
     pure.script.ui.addPage('Reflections')
     pure.script.ui.addRadioButtons('Reflection Preset', 1, 'Normal,Cinematic,Photography,Custom')
@@ -445,6 +496,7 @@ function init_pure_script()
     slider('Reflection Level', 1.05, 0.50, 1.80, 'Pure reflection brightness multiplier')
     slider('Reflection Saturation', 1.00, 0.60, 1.40, 'Pure reflection color multiplier')
     slider('Reflection Emissive Boost', 1.10, 0.00, 5.00, 'Emissive contribution to reflections')
+    slider('Fresnel Strength', 0.00, 0.00, 1.00, 'Stronger reflections at grazing angles; wet roads add to it automatically')
     slider('VAO Amount', 1.00, 0.50, 1.50, 'Vertex ambient occlusion amount')
     slider('VAO Track Exponent', 1.00, 0.50, 1.50, 'Track VAO exponent multiplier')
     slider('VAO Dynamic Exponent', 1.00, 0.50, 1.50, 'Dynamic-object VAO exponent multiplier')
@@ -496,23 +548,23 @@ function update_pure_script(dt)
 
     -- Shared scene measurements. Every automatic system below uses the same
     -- smoothed signals so exposure, glare and reflections move together.
-    local fov = clamp(finite(pure.camera.getFOV(), 50), 10, 140)
+    local fov = clamp(read(pure.camera.getFOV, 50), 10, 140)
     local cameraOcclusion = smooth('cameraOcclusion',
-        clamp(finite(pure.camera.getOcclusion(), 1), 0, 1), dt, 0.45)
-    local overcast = smooth('overcast', clamp(finite(pure.world.getOvercast(), 0), 0, 1), dt, 1.0)
+        clamp(read(pure.camera.getOcclusion, 1), 0, 1), dt, 0.45)
+    local overcast = smooth('overcast', clamp(read(pure.world.getOvercast, 0), 0, 1), dt, 1.0)
     local cloudCoverage = smooth('cloudCoverage',
-        clamp(finite(pure.world.getCloudCoverage(), 0), 0, 1), dt, 1.0)
-    local badness = smooth('badness', clamp(finite(pure.world.getBadness(), 0), 0, 1), dt, 1.0)
-    local worldFog = smooth('worldFog', clamp(finite(pure.world.getFog(), 0), 0, 1), dt, 1.0)
-    local humidity = smooth('humidity', clamp(finite(pure.world.getHumidity(), 0), 0, 1), dt, 1.5)
-    local mist = smooth('mist', clamp(finite(pure.world.getMist(), 0), 0, 1), dt, 1.5)
-    local smog = smooth('smog', clamp(finite(pure.world.getSmog(), 0), 0, 1), dt, 1.5)
-    local cloudShadow = smooth('cloudShadow', clamp(finite(pure.world.getCloudShadow(), 0), 0, 1), dt, 0.8)
+        clamp(read(pure.world.getCloudCoverage, 0), 0, 1), dt, 1.0)
+    local badness = smooth('badness', clamp(read(pure.world.getBadness, 0), 0, 1), dt, 1.0)
+    local worldFog = smooth('worldFog', clamp(read(pure.world.getFog, 0), 0, 1), dt, 1.0)
+    local humidity = smooth('humidity', clamp(read(pure.world.getHumidity, 0), 0, 1), dt, 1.5)
+    local mist = smooth('mist', clamp(read(pure.world.getMist, 0), 0, 1), dt, 1.5)
+    local smog = smooth('smog', clamp(read(pure.world.getSmog, 0), 0, 1), dt, 1.5)
+    local cloudShadow = smooth('cloudShadow', clamp(read(pure.world.getCloudShadow, 0), 0, 1), dt, 0.8)
     local rainIntensity = smooth('rainIntensity',
-        clamp(finite(pure.world.getRainFX_Intensity(), 0), 0, 1), dt, 1.0)
-    local wetness = smooth('wetness', clamp(finite(pure.world.getRainFX_Wetness(), 0), 0, 1), dt, 1.2)
+        clamp(read(pure.world.getRainFX_Intensity, 0), 0, 1), dt, 1.0)
+    local wetness = smooth('wetness', clamp(read(pure.world.getRainFX_Wetness, 0), 0, 1), dt, 1.2)
     local standingWater = smooth('standingWater',
-        clamp(finite(pure.world.getRainFX_Water(), 0), 0, 1), dt, 1.2)
+        clamp(read(pure.world.getRainFX_Water, 0), 0, 1), dt, 1.2)
     local wetSurface = math.max(wetness, standingWater)
     local weatherSeverity = math.max(overcast, cloudCoverage * 0.85, badness,
         worldFog * 0.85, rainIntensity * 0.90)
@@ -560,15 +612,15 @@ function update_pure_script(dt)
     local highlightSignal = smooth('highlightSignal',
         clamp((cbeMaximum - cbeAverage) / math.max(cbeAverage, 0.001) / 2.5, 0, 1), dt, 0.35)
 
-    local sunHeading = finite(pure.stellar.getSunHeading(), 0)
-    local sunElevation = finite(pure.stellar.getSunElevation(), 0)
-    local moonElevation = finite(pure.stellar.getMoonElevation(), -20)
+    local sunHeading = read(pure.stellar.getSunHeading, 0)
+    local sunElevation = read(pure.stellar.getSunElevation, 0)
+    local moonElevation = read(pure.stellar.getMoonElevation, -20)
     -- Bell-shaped twilight weight: strongest while the sun crosses the horizon,
     -- fading into the separate daylight and nighttime values on either side.
     local twilight = smooth('twilight',
         1 - clamp(math.abs(sunElevation + 3) / 12, 0, 1), dt, 0.80)
-    local cameraHeading = finite(pure.camera.getHeading(), 180)
-    local cameraElevation = finite(pure.camera.getElevation(), 0)
+    local cameraHeading = read(pure.camera.getHeading, 180)
+    local cameraElevation = read(pure.camera.getElevation, 0)
     local horizontalFacing = 1 - clamp(angleDelta(cameraHeading, sunHeading) / math.max(fov * 0.75, 18), 0, 1)
     local verticalFacing = 1 - clamp(math.abs(cameraElevation - sunElevation) / math.max(fov * 0.55, 12), 0, 1)
     local sunFacing = smooth('sunFacing', horizontalFacing * verticalFacing * day, dt, 0.25)
@@ -618,8 +670,8 @@ function update_pure_script(dt)
 
     local minExposure = number('Minimum Exposure',0.015,0.005,0.15)
     local maxExposure = math.max(minExposure + 0.001, number('Maximum Exposure',0.7,0.15,1.5))
-    local calculatedExposure = finite(pure.exposure.getCalculatedValue(),
-        finite(pure.exposure.getValue(), minExposure))
+    local calculatedExposure = read(pure.exposure.getCalculatedValue,
+        read(pure.exposure.getValue, minExposure))
     local exposureRange = math.max(maxExposure - minExposure, 0.001)
     local exposureLevel = clamp((calculatedExposure - minExposure) / exposureRange, 0, 1)
 
@@ -692,6 +744,17 @@ function update_pure_script(dt)
     relative('sun.sun_moon_size', smooth('celestialSize', clamp(celestialSize, 0.50, 1.70), dt, skyTransitionSeconds))
     relative('light.advanced_ambient_light', math.lerp(1, number('Day Advanced Ambient',1.02,0.5,1.6)
         * math.lerp(1, morningPreset.advanced, morningMix), day))
+    -- Under cloud cover the sky dome dims and the cloud layer becomes the main
+    -- ambient source; the balance slider controls how far that shift goes.
+    do
+        local ambientBalance = number('Weather Ambient Balance',0.5,0,1)
+        configTry('light.advanced_ambient_lightV2_sun', number('Ambient V2 Sun',1,0.5,1.6)
+            * (1 - ambientBalance * math.max(overcast, cloudShadow) * 0.30))
+        configTry('light.advanced_ambient_lightV2_sky', number('Ambient V2 Sky',1,0.5,1.6)
+            * (1 - ambientBalance * cloudCoverage * 0.18))
+        configTry('light.advanced_ambient_lightV2_clouds', number('Ambient V2 Clouds',1,0.5,1.6)
+            * (1 + ambientBalance * cloudCoverage * 0.40))
+    end
     pure.light.setSpectrumAdaption(number('Spectrum Adaptation',1,0,1.5))
     pure.light.setLambertGamma(number('Lambert Gamma',1.7,1,2.4))
     pure.light.adaptLambertGamma(true)
@@ -717,7 +780,14 @@ function update_pure_script(dt)
     -- Pure's live star brightness is commonly around 100 and already includes
     -- its night curve, fog attenuation and exposure adaptation. Treat the UI
     -- values as multipliers instead of replacing that output with a 0..3 value.
-    local pureStarsBrightness = math.max(0, finite(pure.stellar.getStarsBrightness(), 100 * night))
+    local pureStarsBrightness = math.max(0, read(pure.stellar.getStarsBrightness, 100 * night))
+    -- If Pure hands back the value written last frame, keep the previous base so
+    -- the star multipliers cannot compound into a fade-out or blow-up.
+    if lastStarOutput and lastStarBase
+        and math.abs(pureStarsBrightness - lastStarOutput) <= 1e-4 * math.max(1, lastStarOutput) then
+        pureStarsBrightness = lastStarBase
+    end
+    lastStarBase = pureStarsBrightness
     local starsAppearance = number('Stars Appearance',1,0,3) * nightPreset.stars
     local starsBrightness = number('Stars Brightness',1,0,3) * nightPreset.starBrightness
     local starsSaturation = number('Stars Saturation',0.9,0,2) * nightPreset.starSaturation
@@ -734,6 +804,7 @@ function update_pure_script(dt)
     starOutput.brightness = pureStarsBrightness * starsBrightness * deepSky * starCelestialFactor
     starOutput.saturation = starsSaturation
     starOutput.exponent = starsExponent
+    lastStarOutput = starOutput.brightness
     pure.stellar.setStarsBrightness(starOutput.brightness)
     pure.stellar.setStarsSaturation(starsSaturation)
     pure.stellar.setStarsExponent(starsExponent)
@@ -746,6 +817,8 @@ function update_pure_script(dt)
     local nightEmissive = number('Night CSP Light Emissive',1.05,0.5,3) * nightPreset.emissive
     relative('csp_lights.bounce', math.lerp(nightBounce, dayBounce, day))
     relative('csp_lights.emissive', math.lerp(nightEmissive, dayEmissive, day))
+    configTry('csp_lights.displays', math.lerp(number('Night Display Brightness',1,0.5,2.5),
+        number('Day Display Brightness',1,0.5,2.5), day))
 
     local daySaturation = number('Day Color Saturation',0.99,0.75,1.25)
         * math.lerp(1, morningPreset.saturation, morningMix)
@@ -780,49 +853,64 @@ function update_pure_script(dt)
     if wbLock and not lastWhiteBalanceLock then lockedWhiteBalance = whiteBalance end
     if wbLock then whiteBalance = lockedWhiteBalance or whiteBalance else lockedWhiteBalance = nil end
     lastWhiteBalanceLock = wbLock
+    -- The scene temperature is measured against a fixed neutral white point.
+    -- Writing the same value to both would cancel the shift in YEBIS.
     pure.yebis.set('colorTemperature', whiteBalance)
-    pure.yebis.set('whiteBalance', whiteBalance)
+    pure.yebis.set('whiteBalance', NEUTRAL_WHITE_POINT)
     pure.yebis.set('hue', number('White Balance Tint',0,-0.03,0.03))
 
     relative('fog.cubemaps', number('Fog Cubemap Visibility',1,0,1))
-    if check('Enable Fog Fine Tuning', true) then
-        local fog = pure.world.getPureGammaFogTable()
+    do
+        local fogTuning = check('Enable Fog Fine Tuning', true)
+        local fog = nil
+        if type(pure.world.getPureGammaFogTable) == 'function' then
+            local ok, fogTable = pcall(pure.world.getPureGammaFogTable)
+            if ok then fog = fogTable end
+        end
         if type(fog) == 'table' then
-            ac.setFogDistance((fog.distance or 60000) * number('Fog Distance',1,0.25,2.5))
-            ac.setFogBlend((fog.blend or 0.9) * number('Fog Blend',1,0.5,1.5))
-            ac.setFogDensity((fog.density or 1) * number('Fog Density',1,0,2)
+            -- With fine tuning off the live Pure fog passes straight through, so
+            -- switching it off restores Pure instead of freezing the last values.
+            local function fogScale(name, fallback, lo, hi)
+                return fogTuning and number(name, fallback, lo, hi) or 1
+            end
+            ac.setFogDistance((fog.distance or 60000) * fogScale('Fog Distance',1,0.25,2.5))
+            ac.setFogBlend((fog.blend or 0.9) * fogScale('Fog Blend',1,0.5,1.5))
+            ac.setFogDensity((fog.density or 1) * fogScale('Fog Density',1,0,2)
                 * (effectPreview == 5 and (1 + effectPreviewStrength * 0.75) or 1))
-            ac.setFogExponent((fog.exponent or 1) * number('Fog Exponent',1,0.5,2))
-            ac.setFogHeight((fog.height or 100000) * number('Fog Height',1,0.25,2))
-            local fogColorPreset = math.floor(number('Fog Color Preset',1,1,6))
-            local fogColorStrength = number('Adaptive Fog Color Strength',0.55,0,1)
-                * (1 - cockpit * 0.65)
+            ac.setFogExponent((fog.exponent or 1) * fogScale('Fog Exponent',1,0.5,2))
+            ac.setFogHeight((fog.height or 100000) * fogScale('Fog Height',1,0.25,2))
             local baseFogColor = fog.color or rgb(0.72, 0.76, 0.82)
-            local lowSunFog = clamp((16 - math.abs(sunElevation)) / 16, 0, 1) * day
-            local adaptiveFogColor = rgb(
-                0.72 + lowSunFog * 0.13 - weatherSeverity * 0.13 - night * 0.22,
-                0.77 - lowSunFog * 0.03 - weatherSeverity * 0.11 - night * 0.25,
-                0.83 - lowSunFog * 0.16 - weatherSeverity * 0.12 - night * 0.24)
-            local fogPresetColor = adaptiveFogColor
-            if fogColorPreset == 2 then fogPresetColor = rgb(0.74, 0.76, 0.78)
-            elseif fogColorPreset == 3 then fogPresetColor = rgb(0.66, 0.76, 0.88)
-            elseif fogColorPreset == 4 then fogPresetColor = rgb(0.90, 0.72, 0.56)
-            elseif fogColorPreset == 5 then fogPresetColor = rgb(0.53, 0.59, 0.65)
-            elseif fogColorPreset == 6 then fogPresetColor = rgb(0.38, 0.44, 0.55) end
-            local finalFogColor = mixColor(baseFogColor, fogPresetColor, fogColorStrength)
-            if check('Custom Fog Color', false) then
-                local customFog = rgb(
-                    number('Fog Color Red',0.72,0,1),
-                    number('Fog Color Green',0.78,0,1),
-                    number('Fog Color Blue',0.85,0,1))
-                local fogColorMix = number('Fog Color Mix',0.65,0,1) * (1 - cockpit * 0.65)
-                finalFogColor = mixColor(baseFogColor, customFog, fogColorMix)
+            local finalFogColor = baseFogColor
+            if fogTuning then
+                local fogColorPreset = math.floor(number('Fog Color Preset',1,1,6))
+                local fogColorStrength = number('Adaptive Fog Color Strength',0.55,0,1)
+                    * (1 - cockpit * 0.65)
+                local lowSunFog = clamp((16 - math.abs(sunElevation)) / 16, 0, 1) * day
+                local adaptiveFogColor = rgb(
+                    0.72 + lowSunFog * 0.13 - weatherSeverity * 0.13 - night * 0.22,
+                    0.77 - lowSunFog * 0.03 - weatherSeverity * 0.11 - night * 0.25,
+                    0.83 - lowSunFog * 0.16 - weatherSeverity * 0.12 - night * 0.24)
+                local fogPresetColor = adaptiveFogColor
+                if fogColorPreset == 2 then fogPresetColor = rgb(0.74, 0.76, 0.78)
+                elseif fogColorPreset == 3 then fogPresetColor = rgb(0.66, 0.76, 0.88)
+                elseif fogColorPreset == 4 then fogPresetColor = rgb(0.90, 0.72, 0.56)
+                elseif fogColorPreset == 5 then fogPresetColor = rgb(0.53, 0.59, 0.65)
+                elseif fogColorPreset == 6 then fogPresetColor = rgb(0.38, 0.44, 0.55) end
+                finalFogColor = mixColor(baseFogColor, fogPresetColor, fogColorStrength)
+                if check('Custom Fog Color', false) then
+                    local customFog = rgb(
+                        number('Fog Color Red',0.72,0,1),
+                        number('Fog Color Green',0.78,0,1),
+                        number('Fog Color Blue',0.85,0,1))
+                    local fogColorMix = number('Fog Color Mix',0.65,0,1) * (1 - cockpit * 0.65)
+                    finalFogColor = mixColor(baseFogColor, customFog, fogColorMix)
+                end
             end
             ac.setFogColor(finalFogColor)
-            ac.setFogBacklitMultiplier(math.max(0, (fog.backlit or 0) * number('Fog Backlight',1,0,2)))
+            ac.setFogBacklitMultiplier(math.max(0, (fog.backlit or 0) * fogScale('Fog Backlight',1,0,2)))
             if type(fog.horizont) == 'table' then
                 ac.setHorizonFogMultiplier(
-                    (fog.horizont.multiplier or 0) * number('Horizon Fog',1,0,2),
+                    (fog.horizont.multiplier or 0) * fogScale('Horizon Fog',1,0,2),
                     fog.horizont.exponent or 1,
                     fog.horizont.height or 0)
             end
@@ -841,7 +929,10 @@ function update_pure_script(dt)
     local styleStar = math.lerp(1, glareStyle.star, glareStyleStrength)
     local styleLength = math.lerp(1, glareStyle.length, glareStyleStrength)
     local styleSoftness = math.lerp(1, glareStyle.softness, glareStyleStrength)
-    local styleStreaks = math.lerp(number('Star Streaks',4,2,8), glareStyle.streaks, glareStyleStrength)
+    -- Styles offset the manual streak count rather than replacing it, so the
+    -- Star Streaks slider stays live under every style.
+    local styleStreaks = clamp(number('Star Streaks',4,2,8)
+        + (glareStyle.streaks - 4) * glareStyleStrength, 2, 8)
     local styleGhost = clamp(number('Ghost Strength',0,0,0.5)
         + glareStyle.ghost * glareStyleStrength, 0, 0.5)
     local lensProfile = math.floor(number('Lens Profile',1,1,5))
@@ -875,14 +966,18 @@ function update_pure_script(dt)
     local sourceAwareGlare = check('Source Aware Glare', true)
     local sunGlareSignal = 0
     local headlightGlareSignal = 0
+    local nightLightSignal = night * clamp(highlightSignal * 0.70 + exposureLevel * 0.30, 0, 1)
     if sourceAwareGlare then
         sunGlareSignal = sunFacing * day * number('Sun Glare Response',0.35,0,1)
             * (1 - weatherSeverity * 0.45)
-        headlightGlareSignal = night * clamp(highlightSignal * 0.70 + exposureLevel * 0.30, 0, 1)
+        headlightGlareSignal = nightLightSignal
             * number('Headlight Glare Response',0.40,0,1)
             * (1 + wetWeatherSignal * number('Wet Headlight Bloom',0.35,0,1) * 0.80)
     end
     local emissiveProtection = number('Emissive Color Protection',0.45,0,1)
+    -- Colour protection follows the night-light signal on its own when
+    -- Source Aware Glare is off, so the slider is never dead.
+    local protectionSignal = sourceAwareGlare and headlightGlareSignal or nightLightSignal * 0.40
     local reactiveGain = 1
     if reactiveGlare then
         reactiveGain = clamp(1 + reactiveStrength * (
@@ -905,13 +1000,17 @@ function update_pure_script(dt)
     pure.yebis.set('glareThreshold', number('Bloom Threshold',0.52,0.15,1.2)
         * styleThreshold
         * (1 + highlightSignal * highlightProtection * 0.18
-        + headlightGlareSignal * emissiveProtection * 0.22))
+        + protectionSignal * emissiveProtection * 0.22))
     pure.yebis.set('glareBloomGaussianRadiusScale', number('Bloom Radius',0.44,0.15,1.2)
         * styleRadius
         * clamp(1 + sunGlareSignal * 0.24 - headlightGlareSignal * 0.10, 0.85, 1.25))
     pure.yebis.set('glareBloomLevels', math.floor(number('Bloom Levels',4,1,8)+0.5))
     pure.yebis.set('glareBloomLuminanceGamma', number('Bloom Gamma',1.05,0.8,1.6))
-    pure.yebis.set('glareBloomFilterThreshold', number('Bloom Filter Threshold',0.001,0.0001,0.01))
+    do
+        local bloomFilterThreshold = number('Bloom Filter Threshold',0.001,0.0001,0.01)
+        pure.yebis.set('glareBloomFilterThreshold', bloomFilterThreshold)
+        call(ac.setGlareBloomFilterThreshold, bloomFilterThreshold)
+    end
     pure.yebis.set('glareShapeStarLuminance', glareStrength
         * clamp(1 + headlightGlareSignal * 0.24 - sunGlareSignal * 0.08, 0.85, 1.35))
     pure.yebis.set('glareShapeStarLength', number('Star Length',0.065,0,0.3)
@@ -920,11 +1019,28 @@ function update_pure_script(dt)
     pure.yebis.set('glareShapeStarStreaks', math.floor(styleStreaks+0.5))
     pure.yebis.set('glareStarSoftness', number('Star Softness',0.85,0.2,1.5)
         * lensSoftnessMultiplier * styleSoftness)
-    pure.yebis.set('glareStarFilterThreshold', number('Star Filter Threshold',0.0015,0.0001,0.01))
+    do
+        local starFilterThreshold = number('Star Filter Threshold',0.0015,0.0001,0.01)
+        pure.yebis.set('glareStarFilterThreshold', starFilterThreshold)
+        call(ac.setGlareStarFilterThreshold, starFilterThreshold)
+    end
     pure.yebis.set('glareShapeGhostLuminance', glareOn and styleGhost or 0)
     pure.yebis.set('glareShapeAfterimageLuminance', glareOn and number('Afterimage Strength',0,0,0.4) or 0)
     pure.yebis.set('glareShapeAfterimageLength', number('Afterimage Length',0.2,0,1))
     pure.yebis.set('glareAnamorphic', check('Anamorphic Glare', false))
+    yebisTry('glareQuality', RENDER_QUALITY[math.floor(number('Render Quality',3,1,4))] or 4)
+
+    -- Pure's sun-blinding overlay supplies only the veil and iris response. Its
+    -- star sprite stays off so it never doubles the YEBIS star glare above, and
+    -- the veil yields to Sun Glare Response when that is already active.
+    do
+        local blindingShare = 1 - clamp(sunGlareSignal * 1.2, 0, 0.5)
+        configTry('shaders.sunblinding.blinding', number('Sun Blinding',0.35,0,1) * 0.30
+            * (1 - weatherSeverity * 0.6) * blindingShare)
+        configTry('shaders.sunblinding.iris', number('Sun Blinding Iris',0.15,0,1) * 0.60)
+        configTry('shaders.sunblinding.star_opacity', 0)
+        configTry('shaders.sunblinding.cover', 0)
+    end
 
     local darkSpeed = number('Dark Adaptation Speed',1.5,0.25,8)
     local brightSpeed = number('Bright Adaptation Speed',6,0.5,12)
@@ -1014,27 +1130,38 @@ function update_pure_script(dt)
     if math.abs(gamma - 1) < 0.0001 then gamma = 0.9999 end
     ac.setPpTonemapGamma(gamma)
 
-    local adaptiveGodrays = check('Adaptive Godrays', true)
-    local godraysStrength = number('Godrays Strength',0.35,0,1)
-    local godraysFovResponse = number('Godrays FOV Response',0.50,0,1)
-    local godraysFacingResponse = number('Godrays Sun Facing Response',0.60,0,1)
-    local godraysGlareRatio = number('Godrays Glare Ratio',0.12,0,1)
-    local godraysModulator = clamp(finite(pure.pp.getGodraysModulator(), 1), 0, 1)
-    if adaptiveGodrays and godraysStrength > 0 then
+    do
+        local adaptiveGodrays = check('Adaptive Godrays', true)
+        local godraysStrength = number('Godrays Strength',0.35,0,1)
+        local godraysFovResponse = number('Godrays FOV Response',0.50,0,1)
+        local godraysFacingResponse = number('Godrays Sun Facing Response',0.60,0,1)
+        local godraysGlareRatio = number('Godrays Glare Ratio',0.12,0,1)
+        local godraysModulator = clamp(read(pure.pp.getGodraysModulator, 1), 0, 1)
         local fovScale = math.lerp(1, clamp(fov / 50, 0.55, 1.70), godraysFovResponse)
-        local facingScale = 1 + godraysFacingResponse * (sunFacing * 0.35 - 0.15)
-        local rayLength = math.max(0.001,
-            6.0 * godraysStrength * godraysModulator * day * fovScale * facingScale)
-        pure.yebis.set('godraysEnabled', true)
-        pure.yebis.set('godraysLength', rayLength)
-        pure.yebis.set('godraysAngleAttenuation', math.lerp(18, 10, sunFacing))
-        pure.yebis.set('godraysGlareRatio', godraysGlareRatio * godraysStrength * godraysModulator)
-        pure.yebis.set('godraysDepthMaskThreshold', 0.99998)
-        pure.yebis.set('godraysUseSunLightColor', true)
-    else
-        pure.yebis.set('godraysEnabled', false)
-        pure.yebis.set('godraysLength', 0.001)
-        pure.yebis.set('godraysGlareRatio', 0)
+        local sunRays = 0
+        local sunRayGlare = 0
+        local sunRaysOn = adaptiveGodrays and godraysStrength > 0
+        if sunRaysOn then
+            local facingScale = 1 + godraysFacingResponse * (sunFacing * 0.35 - 0.15)
+            sunRays = 6.0 * godraysStrength * godraysModulator * day * fovScale * facingScale
+            sunRayGlare = godraysGlareRatio * godraysStrength * godraysModulator
+        end
+        -- Moon shafts need the moon above the horizon and fade with cloud and fog.
+        local moonGodrays = number('Moon Godrays Strength',0,0,1)
+        local moonRays = moonGodrays * 3.0 * night * fovScale
+            * clamp((moonElevation - 2) / 20, 0, 1) * (1 - celestialWeather * 0.75)
+        if sunRaysOn or moonRays > 0 then
+            pure.yebis.set('godraysEnabled', true)
+            pure.yebis.set('godraysLength', math.max(0.001, sunRays + moonRays))
+            pure.yebis.set('godraysAngleAttenuation', math.lerp(18, 10, sunFacing))
+            pure.yebis.set('godraysGlareRatio', sunRayGlare + moonRays * 0.012)
+            pure.yebis.set('godraysDepthMaskThreshold', 0.99998)
+            pure.yebis.set('godraysUseSunLightColor', true)
+        else
+            pure.yebis.set('godraysEnabled', false)
+            pure.yebis.set('godraysLength', 0.001)
+            pure.yebis.set('godraysGlareRatio', 0)
+        end
     end
 
     local fovVignette = math.lerp(1, clamp(50 / fov, 0.70, 1.35),
@@ -1042,7 +1169,10 @@ function update_pure_script(dt)
     pure.yebis.set('vignetteStrength', number('Vignette Strength',0.01,0,0.2)
         * profile.vignette * lensVignetteMultiplier * fovVignette)
     pure.yebis.set('vignetteFOVDependence', number('Vignette FOV Dependence',0.25,0,1))
-    local ca = check('Chromatic Aberration', false) or lensCAAddition > 0
+    yebisTry('vignetteFovDependency', number('Vignette FOV Dependence',0.25,0,1))
+    -- The checkboxes are the master switches; lens profiles only add character
+    -- on top of an enabled effect.
+    local ca = check('Chromatic Aberration', false)
     local lateral = ca and (number('Chromatic Lateral',0.001,0,0.01) + lensCAAddition) or 0
     local uniform = ca and (number('Chromatic Uniform',0.0003,0,0.005)
         + lensCAAddition * 0.25) or 0
@@ -1051,12 +1181,29 @@ function update_pure_script(dt)
     pure.yebis.set('chromaticAberrationSamples', math.floor(number('Chromatic Samples',5,2,12)+0.5))
     pure.yebis.set('chromaticAberrationLateralDisplacement', vec2(lateral, lateral*0.5))
     pure.yebis.set('chromaticAberrationUniformDisplacement', vec2(uniform, uniform))
-    local distortion = check('Lens Distortion', false) or lensDistortionAddition > 0
+    local distortion = check('Lens Distortion', false)
     pure.yebis.set('lensDistortionEnabled', distortion)
     pure.yebis.set('lensDistortionRoundness', clamp(number('Lens Roundness',0.05,0,1)
         + lensDistortionAddition, 0, 1))
     pure.yebis.set('lensDistortionSmoothness', number('Lens Smoothness',1,0.1,2))
     pure.yebis.set('filmicContrast', number('Filmic Contrast',0.35,0,1))
+
+    do
+        local dofOn = check('Depth of Field', false)
+        if dofOn then
+            yebisTry('dofEnabled', true)
+            yebisTry('dofActive', true)
+            yebisTry('dofFocusDistance', number('DOF Focus Distance',8,0.5,100))
+            yebisTry('dofApertureFNumber', number('DOF Aperture',2.8,1.2,22))
+            yebisTry('dofImageSensorHeight', 0.024)
+            yebisTry('dofQuality', math.floor(number('DOF Quality',3,1,5) + 0.5))
+        elseif dofWasEnabled then
+            -- Released once on switch-off so other DOF sources are not overridden.
+            yebisTry('dofEnabled', false)
+            yebisTry('dofActive', false)
+        end
+        dofWasEnabled = dofOn
+    end
 
     local adaptiveReflections = check('Adaptive Reflections', true)
     local reflectionWeatherResponse = number('Reflection Weather Response',0.30,0,1)
@@ -1076,13 +1223,30 @@ function update_pure_script(dt)
             night * 0.18 + wetSurface * 0.14), 1, 1.35)
         reflectionVaoAuto = clamp(1 + reflectionWeatherResponse * (
             overcast * 0.08 + wetSurface * 0.10), 1, 1.18)
+    end
+    -- The polarizer works in every mode; Adaptive Reflections only adds the
+    -- heavy-weather reduction.
+    do
         local presetCpl = reflectionPresetIndex == 3 and 1.25
             or (reflectionPresetIndex == 2 and 0.90 or 1.00)
+        local cplWeather = adaptiveReflections and (1 - weatherSeverity * 0.55) or 1
         local cpl = clamp(reflectionCPLStrength * presetCpl
-            * (1 - weatherSeverity * 0.55) * math.lerp(0.45, 1, day), 0, 1)
-        pure.camera.setCPL(cpl, 0, 0, 1)
-    else
-        pure.camera.setCPL()
+            * cplWeather * math.lerp(0.45, 1, day), 0, 1)
+        if adaptiveReflections or cpl > 0 then
+            pure.camera.setCPL(cpl, 0, 0, 1)
+        else
+            pure.camera.setCPL()
+        end
+    end
+
+    -- Fresnel gamma below 1 strengthens grazing-angle reflections. Wet roads add
+    -- to the manual amount, so a drying track settles back on its own.
+    do
+        local fresnelAmount = number('Fresnel Strength',0,0,1)
+        if wetWeatherRendering then
+            fresnelAmount = fresnelAmount + wetSurface * number('Wet Reflection Gain',0.45,0,1) * 0.35
+        end
+        call(ac.setFresnelGamma, math.lerp(1, 0.6, clamp(fresnelAmount, 0, 1)))
     end
 
     if wetWeatherRendering then
