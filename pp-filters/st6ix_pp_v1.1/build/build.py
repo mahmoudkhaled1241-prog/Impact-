@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Build ST6IX V1.3 (SDR and HDR) from ST6IX V1.2.
+"""Build ST6IX PP V1.1 (SDR and HDR) from the ST6IX V1.2 engine.
 
-V1.3 is V1.2 unchanged underneath, plus the Skydomes and HDR & Clarity tabs
-and film grain from ST6IX V1.5, restyled pages, renamed tone curves, and
-Render Quality fixed at High (no radio button).
+ST6IX PP V1.1 is the V1.2 engine unchanged underneath, plus the Skydomes tab
+and film grain from ST6IX V1.5 (and its HDR & Clarity tab in the HDR
+version), restyled pages, renamed tone curves, and Render Quality fixed at
+High (no radio button).
 
-Usage: python3 build.py            -> ../ST6IX_PP_V1.3.lua, ../ST6IX_PP_V1.3_HDR.lua
+Usage: python3 build.py            -> ../ST6IX_PP_V1.1.lua, ../ST6IX_PP_V1.1_HDR.lua
 """
 import os, re
 
@@ -73,6 +74,9 @@ NEW_CONTROLS = {
     'Film Grain Strength': "slider('Film Grain Strength', 1.00, 0.00, 10.00, 'Film grain intensity; slightly finer in daylight')",
 }
 
+CLARITY_CONTROLS = ['Clarity Preset', 'Sharpness', 'Clarity', 'Micro Contrast', 'Brightness Boost',
+                    'Color Vibrance', 'Highlight Recovery']
+
 HDR_TONE = ['Scene Aware HDR', 'HDR Adaptation Strength', 'HDR Highlight Protection', 'HDR Shadow Lift',
             'HDR Fog Contrast', 'HDR Brightness', 'HDR Contrast', 'HDR Saturation']
 
@@ -84,29 +88,6 @@ def layout(hdr):
     h = lambda title, note=None: P.append(('h', title, note))
     c = lambda *names: P.append(('c',) + names)
     t = lambda text: P.append(('t', text))
-
-    page('🎯Guide')
-    h('🏁 ST6IX V1.3%s · PHOTOGRAPHIC PP FILTER' % (' HDR' if hdr else ''),
-      'Every slider is live in every mode. Pick a look, then fine-tune.')
-    if hdr:
-        t('📺 HDR: Windows HDR on | CSP: DXGI flip model + HDR support | AC windowed/borderless')
-    h('🎯 SIGNATURE LOOKS', 'Set each tab as shown, or mix and match.')
-    t('🌅 CLEAR MORNING - Daytime→ Bright Morning | Sky→ Natural')
-    t('   Glare→ Gentle' + ('' if hdr else ' | Tonemap→ Silver Screen'))
-    t('🏁 RACE BROADCAST - Daytime→ Photorealistic | Glare→ GT Broadcast')
-    t('   HDR&Clarity→ Full HDR' + ('' if hdr else ' | Tonemap→ Grand Tour'))
-    t('🌇 GOLDEN HOUR - Daytime→ Cinematic Morning | Sky→ Golden Hour')
-    t('   Glare→ Golden Hour | Reflections→ Cinematic')
-    t('🌧️ WET NIGHT - Night→ Cinematic Night | Glare→ Wet Night')
-    t('   Reflections→ Cinematic' + ('' if hdr else ' | Tonemap→ Neon Punch'))
-    t('🌌 COSMIC NIGHT - Night→ Dark Night | Skydomes→ ST6IX Nebula')
-    t('   Glare→ Cinematic | HDR&Clarity→ Subtle HDR')
-    t('📸 PHOTO MODE - LensFX→ Cinematic + Depth of Field | Film Grain on')
-    t('   Exposure→ Photography | Lock Exposure for the shot')
-    h('💡 TIPS')
-    t('Full HDR☀️ suits most daytime, Subtle HDR🌤️ keeps nights clean.')
-    t('Cinematic Sharp🎥 is made for replays and screenshots.')
-    t('Diagnostics tab: live readings when something looks off.')
 
     page('☀️Daytime')
     h('🎬 OVERALL LOOK', 'Modes add a subtle finish; every slider stays live.')
@@ -227,16 +208,17 @@ def layout(hdr):
         h('⚡ NEON PUNCH', 'Lottes curve: bold contrast and colour')
         c('Lottes Contrast', 'Lottes Gamma', 'Lottes HDR Max', 'Lottes Mid In', 'Lottes Mid Out', 'Lottes Gain')
 
-    page('🔍HDR&Clarity')
-    h('🔍 HDR & CLARITY', 'HDR-grade sharpness, clarity and colour depth')
-    c('Clarity Preset')
-    t('↳ Presets set the sliders below; choose Manual⚙️ to set them yourself.')
-    h('🔪 SHARPNESS')
-    c('Sharpness')
-    h('💎 CLARITY & LOCAL CONTRAST')
-    c('Clarity', 'Micro Contrast')
-    h('✨ HDR ENHANCEMENT')
-    c('Brightness Boost', 'Color Vibrance', 'Highlight Recovery')
+    if hdr:
+        page('🔍HDR&Clarity')
+        h('🔍 HDR & CLARITY', 'HDR-grade sharpness, clarity and colour depth')
+        c('Clarity Preset')
+        t('↳ Presets set the sliders below; choose Manual⚙️ to set them yourself.')
+        h('🔪 SHARPNESS')
+        c('Sharpness')
+        h('💎 CLARITY & LOCAL CONTRAST')
+        c('Clarity', 'Micro Contrast')
+        h('✨ HDR ENHANCEMENT')
+        c('Brightness Boost', 'Color Vibrance', 'Highlight Recovery')
 
     page('📹LensFX')
     h('📹 LENS PROFILE', 'Physical lens character')
@@ -310,13 +292,15 @@ def build_ui(src_controls, hdr):
                     decl = m.group(1) + lua_str(RADIO_LABELS[name]) + ')'
                 lines.append('    ' + decl)
     missing = [n for n in src_controls if n not in used and n != 'Render Quality']
+    if hdr:
+        missing += [n for n in CLARITY_CONTROLS if n not in used]
     assert not missing, ('controls not placed', missing)
     return '\n'.join(lines)
 
 
-FX_TOP = '''
+CLARITY_TOP = '''
 -- ============================================================================
--- ST6IX EXTRA FX (from ST6IX V1.5): skydomes, HDR & clarity, film grain
+-- HDR & CLARITY (HDR version)
 -- ============================================================================
 -- Clarity Preset: 1 Off, 2 Subtle HDR, 3 Full HDR, 4 Ultra HDR,
 -- 5 Cinematic Sharp, 6 Manual (sliders).
@@ -327,21 +311,6 @@ local CLARITY_PRESETS = {
     [4] = { sharpness = 0.25, clarity = 0.30, micro = 0.14, brightness = 1.04, vibrance = 0.08, recovery = 0.24 },
     [5] = { sharpness = 0.20, clarity = 0.20, micro = 0.12, brightness = 1.01, vibrance = 0.04, recovery = 0.16 },
 }
-
--- Skydome Preset: 1 Off, 2-6 ST6IX textures (brightness and exponent tuned per texture).
-local SKYDOME_PATH = 'system/cfg/ppfilters/pure_scripts/textures/'
-local SKYDOMES = {
-    [2] = { texture = 'ST6IX Nebula.dds', brightness = 10, exponent = 1.5, height = 1.00 },
-    [3] = { texture = 'ST6IX MADARA.dds', brightness = 8, exponent = 1.8, height = 1.20 },
-    [4] = { texture = 'ST6IX blackhole.dds', brightness = 12, exponent = 2.0, height = 1.00 },
-    [5] = { texture = 'ST6IX black-matter.dds', brightness = 11, exponent = 1.9, height = 1.10 },
-    [6] = { texture = 'Black matter Colored.dds', brightness = 9, exponent = 1.7, height = 0.95 },
-}
-if type(ac.SkyCloudsCover) == 'function' then
-    cover = cover or ac.SkyCloudsCover()
-    if type(ac.addWeatherCloudCover) == 'function' then ac.addWeatherCloudCover(cover) end
-end
-local activeSkydome = nil
 
 -- Reads the HDR & Clarity tab once per frame.
 local function clarityFinish()
@@ -360,7 +329,7 @@ local function clarityFinish()
     return f
 end
 
-local function applyExtraFX(finish, day, night, cockpit)
+local function applyClarity(finish, night, cockpit)
     -- Sharpening, eased at night and in the cockpit to keep noise down.
     local sharpen = finish.sharpness > 0.01
     pure.pp.set('spice.Sharpen.active', sharpen)
@@ -371,7 +340,29 @@ local function applyExtraFX(finish, day, night, cockpit)
     pure.pp.set('spice.Saturation.active', vibrance)
     pure.pp.set('spice.Saturation.strength', vibrance and 1 + finish.vibrance * 0.6 or 1)
     pure.config.set('pp.brightness', finish.brightness, true)
+end
+'''
 
+FX_TOP = '''
+-- ============================================================================
+-- ST6IX EXTRA FX: skydomes and film grain
+-- ============================================================================
+-- Skydome Preset: 1 Off, 2-6 ST6IX textures (brightness and exponent tuned per texture).
+local SKYDOME_PATH = 'system/cfg/ppfilters/pure_scripts/textures/'
+local SKYDOMES = {
+    [2] = { texture = 'ST6IX Nebula.dds', brightness = 10, exponent = 1.5, height = 1.00 },
+    [3] = { texture = 'ST6IX MADARA.dds', brightness = 8, exponent = 1.8, height = 1.20 },
+    [4] = { texture = 'ST6IX blackhole.dds', brightness = 12, exponent = 2.0, height = 1.00 },
+    [5] = { texture = 'ST6IX black-matter.dds', brightness = 11, exponent = 1.9, height = 1.10 },
+    [6] = { texture = 'Black matter Colored.dds', brightness = 9, exponent = 1.7, height = 0.95 },
+}
+if type(ac.SkyCloudsCover) == 'function' then
+    cover = cover or ac.SkyCloudsCover()
+    if type(ac.addWeatherCloudCover) == 'function' then ac.addWeatherCloudCover(cover) end
+end
+local activeSkydome = nil
+
+local function applyExtraFX(day)
     -- Film grain, slightly finer in daylight.
     local grain = check('Film Grain', false)
     pure.pp.set('spice.SensorNoise.active', grain)
@@ -418,22 +409,23 @@ def build(src_name, hdr):
     controls = index_controls(text)
     first_line = text.split('\n', 1)[0]
     head_end = text.index('\nlocal VERSION = 1.80\n')
-    text = ('-- ST6IX V1.3%s: photographic post-processing for Assetto Corsa\n'
+    text = ('-- ST6IX PP V1.1%s: photographic post-processing for Assetto Corsa\n'
             '-- Pure Gamma 3.50 / %s\n'
-            '-- The ST6IX V1.2 engine with skydomes, HDR & clarity and film grain from\n'
-            '-- ST6IX V1.5. Every slider is live in every overall mode.\n'
+            '-- Weather-adaptive lighting, sky, fog, bloom, glare, exposure and\n'
+            '-- reflections, with ST6IX skydomes and film grain%s.\n'
+            '-- Every slider is live in every overall mode.\n'
             % (' HDR' if hdr else '', 'CSP HDR output (DXGI flip model + HDR support)' if hdr
-               else 'CSP dynamic tonemapping')) + text[head_end:]
+               else 'CSP dynamic tonemapping', ', plus HDR & clarity' if hdr else '')) + text[head_end:]
     if hdr:
         text = text.replace('\n-- CSP performs the final HDR display mapping, so YEBIS runs a linear tone\n'
                             '-- function here and the scene-aware HDR response works through exposure and colour.\n', '\n')
     # Pure rebuilds saved settings when the version changes (new control set).
-    text = replace_once(text, 'local VERSION = 1.80\n', 'local VERSION = 1.90\n')
+    text = replace_once(text, 'local VERSION = 1.80\n', 'local VERSION = 1.10 -- ST6IX PP V1.1\n')
 
     # Extra FX need number()/check(); insert after the helper that defines sliderInt.
     anchor = 'local function sliderInt(name, default, minimum, maximum, tooltip)\n' \
              '    pure.script.ui.addSliderInteger(name, default, minimum, maximum, tooltip)\nend\n'
-    text = replace_once(text, anchor, anchor + HEADER_FN + FX_TOP)
+    text = replace_once(text, anchor, anchor + HEADER_FN + (CLARITY_TOP if hdr else '') + FX_TOP)
 
     # UI: everything between setVersion and the end of the diagnostics states.
     a = text.index('    pure.script.setVersion(VERSION)\n') + len('    pure.script.setVersion(VERSION)\n')
@@ -446,27 +438,29 @@ def build(src_name, hdr):
                         "    if type(pure.pp.UseSpice) == 'function' then pcall(pure.pp.UseSpice) end\n"
                         "    activeSkydome = nil\nend\n")
 
-    # Update: HDR & Clarity finish, highlight recovery, extra FX.
-    text = replace_once(text, "    local profile = profiles[mode] or profiles[2]\n",
-                        "    local profile = profiles[mode] or profiles[2]\n    local finish = clarityFinish()\n")
-    text = replace_once(text, "    pure.config.set('pp.saturation', colorSat",
-                        "    pure.config.set('pp.saturation', colorSat * finish.saturation")
-    text = replace_once(text, "    pure.config.set('pp.contrast', contrast",
-                        "    pure.config.set('pp.contrast', contrast * finish.contrast")
-    text = replace_once(text, "    pure.exposure.cbe.setMultiplier(2^ev)\n",
-                        "    ev = ev - highlightSignal * finish.recovery * 0.6\n"
-                        "    pure.exposure.cbe.setMultiplier(2^ev)\n")
+    if hdr:
+        # HDR & Clarity finish and highlight recovery (HDR version only).
+        text = replace_once(text, "    local profile = profiles[mode] or profiles[2]\n",
+                            "    local profile = profiles[mode] or profiles[2]\n    local finish = clarityFinish()\n")
+        text = replace_once(text, "    pure.config.set('pp.saturation', colorSat",
+                            "    pure.config.set('pp.saturation', colorSat * finish.saturation")
+        text = replace_once(text, "    pure.config.set('pp.contrast', contrast",
+                            "    pure.config.set('pp.contrast', contrast * finish.contrast")
+        text = replace_once(text, "    pure.exposure.cbe.setMultiplier(2^ev)\n",
+                            "    ev = ev - highlightSignal * finish.recovery * 0.6\n"
+                            "    pure.exposure.cbe.setMultiplier(2^ev)\n")
     # Render Quality has no radio button any more; it stays at High.
     text = replace_once(text, "    yebisTry('glareQuality', RENDER_QUALITY[math.floor(number('Render Quality',3,1,4))] or 4)\n",
                         "    yebisTry('glareQuality', RENDER_QUALITY[3])\n")
     text = replace_once(text, "    if diagnosticsEnabled then\n        pure.script.ui.setValue('Live Exposure'",
-                        "    applyExtraFX(finish, day, night, cockpit)\n\n"
+                        ("    applyClarity(finish, night, cockpit)\n" if hdr else "")
+                        + "    applyExtraFX(day)\n\n"
                         "    if diagnosticsEnabled then\n        pure.script.ui.setValue('Live Exposure'")
     return text
 
 
-for src, hdr, out in [('src_ST6IX_V1.2.lua', False, 'ST6IX_PP_V1.3.lua'),
-                      ('src_ST6IX_V1.2_HDR.lua', True, 'ST6IX_PP_V1.3_HDR.lua')]:
+for src, hdr, out in [('src_ST6IX_V1.2.lua', False, 'ST6IX_PP_V1.1.lua'),
+                      ('src_ST6IX_V1.2_HDR.lua', True, 'ST6IX_PP_V1.1_HDR.lua')]:
     path = os.path.join(OUT, out)
     open(path, 'w', encoding='utf-8').write(build(src, hdr))
     print('written', path)

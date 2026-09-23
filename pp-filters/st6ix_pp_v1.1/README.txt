@@ -1,13 +1,12 @@
-ST6IX V1.3
+ST6IX PP V1.1
 Photographic post-processing for Assetto Corsa
 
-The ST6IX V1.2 engine (weather-adaptive lighting, sky, fog, bloom, glare,
-exposure and reflections) with ST6IX skydomes, HDR & Clarity and film grain,
-in a fully restyled menu.
+Weather-adaptive lighting, sky, fog, bloom, glare, exposure and reflections,
+with ST6IX skydomes and film grain. The HDR version adds HDR & Clarity.
 
 WHICH VERSION TO USE
-  ST6IX_PP_V1.3       normal (SDR) monitor
-  ST6IX_PP_V1.3_HDR   HDR monitor with CSP HDR output
+  ST6IX_PP_V1.1       normal (SDR) monitor
+  ST6IX_PP_V1.1_HDR   HDR monitor with CSP HDR output
 
 REQUIREMENTS
 - Custom Shaders Patch (CSP)
@@ -21,16 +20,15 @@ REQUIREMENTS
 INSTALLATION
 1. Copy the "assettocorsa" folder from this package into your Assetto Corsa
    root folder and allow it to merge. It adds:
-     system/cfg/ppfilters/ST6IX_PP_V1.3.ini
-     system/cfg/ppfilters/ST6IX_PP_V1.3_HDR.ini
-     system/cfg/ppfilters/pure_scripts/ST6IX_PP_V1.3.lua
-     system/cfg/ppfilters/pure_scripts/ST6IX_PP_V1.3_HDR.lua
+     system/cfg/ppfilters/ST6IX_PP_V1.1.ini
+     system/cfg/ppfilters/ST6IX_PP_V1.1_HDR.ini
+     system/cfg/ppfilters/pure_scripts/ST6IX_PP_V1.1.lua
+     system/cfg/ppfilters/pure_scripts/ST6IX_PP_V1.1_HDR.lua
 2. Pick the filter for your display in Content Manager or the CSP menu. The
    .ini and .lua share a name so the script loads automatically. Do not rename
    one without the other.
 
 THE TABS
-  🎯Guide         signature looks and tips
   ☀️Daytime       overall look, morning looks, sunlight, ambient, colour,
                   white balance, car lights and screens
   🌙Night         night looks, light pollution, moon and stars, colour
@@ -43,8 +41,8 @@ THE TABS
                   lens artifacts
   📷Exposure      tunnels, smart exposure, auto exposure, compensation
   🎨Tonemap       tone curves and scene-aware tone (HDR: HDR Tonemap)
-  🔍HDR&Clarity   sharpness, clarity, micro contrast, brightness boost,
-                  vibrance, highlight recovery
+  🔍HDR&Clarity   HDR version: sharpness, clarity, micro contrast,
+                  brightness boost, vibrance, highlight recovery
   📹LensFX        lens profiles, god rays, vignette, chromatic aberration,
                   lens distortion, film grain, film contrast, depth of field
   ✨Reflections   reflection looks, wet weather, detail, ambient occlusion
@@ -55,15 +53,15 @@ TONE CURVES
   🏁 Grand Tour      broadcast (Uchimura, the Gran Turismo tonemapper)
   ⚡ Neon Punch      bold contrast and colour (Lottes)
 
-HDR & CLARITY PRESETS
+HDR & CLARITY PRESETS (HDR version)
   Off, Subtle HDR🌤️, Full HDR☀️, Ultra HDR🔥, Cinematic Sharp🎥, Manual⚙️
   Presets set sharpness, clarity, micro contrast, brightness boost, vibrance
   and highlight recovery; Manual lets you set each one. Sharpening eases off
   at night and in the cockpit to keep noise down.
 
 NOTES
-- With Skydomes Off, HDR & Clarity Off and Film Grain off, the picture is
-  exactly ST6IX V1.2.
+- With Skydomes Off, Film Grain off (and HDR & Clarity Off in the HDR
+  version) the picture is the pure ST6IX engine look.
 - Bloom and glare sampling runs at High quality.
 
 HDR SETUP (HDR version, once)
@@ -74,7 +72,7 @@ HDR SETUP (HDR version, once)
    - HDR support with YEBIS: keep "Force linear function for YEBIS" and
      "Final tonemapping" on (their defaults)
 3. Assetto Corsa video settings: windowed or borderless, not fullscreen.
-4. Select the "ST6IX_PP_V1.3_HDR" filter.
+4. Select the "ST6IX_PP_V1.1_HDR" filter.
 CSP performs the final HDR tone mapping for your display, so the HDR version
 runs YEBIS linear with neutral gamma. The HDR Tonemap tab shapes the scene
 before that: Scene Aware HDR, Highlight Protection, Shadow Lift, Fog Contrast,
@@ -83,5 +81,5 @@ the menus are too bright or too dim overall, adjust "Final brightness",
 "Final gamma" and "UI brightness" in the CSP DXGI settings.
 
 FOR DEVELOPERS
-Rebuild with python3 build/build.py. Checks: luajit ../tests/v13_check.lua
-and luajit ../tests/audit.lua ST6IX_PP_V1.3.lua
+Rebuild with python3 build/build.py. Checks: luajit ../tests/st6ix_pp_v11_check.lua
+and luajit ../tests/audit.lua ST6IX_PP_V1.1.lua
