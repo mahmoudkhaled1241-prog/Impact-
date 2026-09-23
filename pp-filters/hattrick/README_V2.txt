@@ -74,6 +74,11 @@ WHAT CHANGED COMPARED WITH V1.2 AND V1.5
 - Vignette: the V1.5 finishing base is scaled by the V1.2 Vignette Strength,
   lens profile and field-of-view response (V1.2 strength 0.01 = unchanged).
 - Dashcam lens distortion overrides the regular lens distortion while on.
+- Sky level: the sky engine sets the base and the lighting engine trims it.
+  V1.2 Day Sky Level now works with either sky, V1.5 Daytime "Sky Level"
+  (and its lighting presets) now applies, and in manual sky mode V1.5 Sky
+  Light Level scales Daytime Sky Level. V1.5 read the last two but never
+  applied them.
 
 HDR SETUP (HDR version, once)
 1. Windows: Settings > System > Display > turn on "Use HDR".
